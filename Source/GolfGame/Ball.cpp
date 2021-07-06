@@ -15,12 +15,11 @@ ABall::ABall()
 	BallCollision->SetSphereRadius(5.0f);
 	BallCollision->SetSimulatePhysics(true);
 	BallCollision->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	// What is this?
+	
 	BallCollision->SetCollisionProfileName("SetLineTraceChannel");
 	//BallCollision->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
 	// Set Damping
 	BallCollision->SetAngularDamping(30.0f);
-
 	RootComponent = BallCollision;
 
 	// Create BallMesh
@@ -28,7 +27,6 @@ ABall::ABall()
 	BallMesh->SetupAttachment(BallCollision);
 	BallMesh->SetCollisionProfileName("NoCollision");
 	//BallMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SM_BALL.Succeeded())
 	{
@@ -55,10 +53,11 @@ ABall::ABall()
 	JumpPower = 0;
 
 
-
-
-
-
+	// Set CurrentHoleName
+	CurrentHoleNumber = 0;
+	CurrentHoleName = FString(TEXT("Hole")) + FString::FromInt(CurrentHoleNumber);
+	
+	
 }
 
 // Called when the game starts or when spawned
@@ -74,30 +73,18 @@ void ABall::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Check Ball is Moving
-	if (this->GetVelocity().Size())
-	{
-		bIsMoving = true;
-	}
-	else
-	{
-		bIsMoving = false;
-	}
+	CheckBallisMoiving();
 
 	// Get Current Ball Location
 	CurrentBallLocation = this->GetActorLocation();
 
+	// Line trace
+	UseLineTrace();
 	
-	// Test Line trace
-	FHitResult OutHit;
-	Startpoint = CurrentBallLocation;
-	Endpoint = CurrentBallLocation * FVector(1.0f, 1.0f, -5.0f);
-	FCollisionQueryParams CollisionParams;
-	
-	
-	//bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
-	bool isHit = GetWorld()->LineTraceMultiByChannel(OutHits, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
 
-	numof=OutHits.Num();
+	// 공이 멈추고 && 불가능한 지역에 있을때 
+	// 적절한 위치에 리스폰 
+
 }
 
 // Called to bind functionality to input
@@ -124,14 +111,8 @@ void ABall::OnPressBallHit()
 {
 	if (bCanHitBall && !bIsMoving)
 	{
-
-		
-
 		bIsChargingHit = true;
 		Print("Press H");
-
-	
-
 	}
 }
 
@@ -147,9 +128,6 @@ void ABall::OnRealseBallHit()
 		bIsChargingHit = false;
 		
 		JumpPower = 0;
-
-		
-		
 	}
 }
 
@@ -176,3 +154,57 @@ void ABall::GettingPower(float AxisValue)
 	}
 }
 
+void ABall::CheckBallisMoiving()
+{
+	if (this->GetVelocity().Size())
+	{
+		bIsMoving = true;
+	}
+	else
+	{
+		bIsMoving = false;
+	}
+}
+
+void ABall::UseLineTrace()
+{
+	FVector Startpoint = CurrentBallLocation;
+	FVector Endpoint = CurrentBallLocation * FVector(1.0f, 1.0f, 0.0f);
+	FCollisionQueryParams CollisionParams;
+
+	bool isHit = GetWorld()->LineTraceMultiByChannel(OutHits, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
+	if (isHit && OutHits.Num() > 1)
+	{
+		Atemp = OutHits[1].GetActor();
+		Ptemp = OutHits[1].GetComponent();
+
+		CureentActorName = Atemp->GetActorLabel();
+		CurrentComponentName = Ptemp->GetFName();
+
+		// Check 현재 진행하는 홀인지 -> 이게 OB 일까?
+		if (CurrentHoleName != CureentActorName)
+		{
+			bCanHitBall = false;
+		}
+		else
+		{
+			bCanHitBall = true;
+
+			// Chekc Fairway, OB, Hazard etc..
+			if (CurrentComponentName == FName(TEXT("OB")))
+			{
+				bCanHitBall = false;
+
+			}
+			else if (CurrentComponentName == FName(TEXT("BUNKER")))
+			{
+
+			}
+			else if (CurrentComponentName == FName(TEXT("GREEN")))
+			{
+
+			}
+		}
+
+	}
+}

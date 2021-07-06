@@ -9,9 +9,15 @@ AHole::AHole()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Hole = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HOLE"));
-	RootComponent = Hole;
-	Hole->SetCollisionProfileName("SetLineTraceChannel");
+	ROUGH = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ROUGH"));
+	RootComponent = ROUGH;
+
+	OB = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OB"));
+	OB->SetupAttachment(RootComponent);
+	BUNKER = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BUNKER"));
+	BUNKER->SetupAttachment(RootComponent);
+	GREEN = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GREEN"));
+	GREEN->SetupAttachment(RootComponent); 
 
 
 

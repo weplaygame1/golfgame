@@ -12,13 +12,12 @@ ACourse::ACourse()
 	// Set Ground
 	Ground = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GROUND"));
 	RootComponent = Ground;
-	Ground->SetCollisionProfileName("SetLineTraceChannel");
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_GROUND(TEXT("/Game/StarterContent/Architecture/Floor_400x400.Floor_400x400"));
 	if (SM_GROUND.Succeeded())
 	{
 		Ground->SetStaticMesh(SM_GROUND.Object);
-		Ground->SetWorldScale3D(FVector(1000.0f, 1000.0f, 1.0f));
+		//Ground->SetWorldScale3D(FVector(1000.0f, 1000.0f, 1.0f));
 		Ground->SetWorldLocation(FVector(0.0f, 0.0f, 0.0f));
 	}
 	

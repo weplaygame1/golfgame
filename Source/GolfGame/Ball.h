@@ -5,6 +5,7 @@
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
 
+#include "Hole.h"
 
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
@@ -44,29 +45,29 @@ public:
 	UPROPERTY(EditAnywhere)
 	FVector CurrentBallLocation;
 
-	UPROPERTY(EditAnywhere)
 	TArray<FHitResult> OutHits;
+	AActor* Atemp;
+	UPrimitiveComponent* Ptemp;
 
 	UPROPERTY(EditAnywhere)
-		int32 numof;
+	FString CurrentHoleName;
+	UPROPERTY(EditAnywhere)
+	FName CurrentComponentName;
+	UPROPERTY(EditAnywhere)
+	FString CureentActorName;
+
 	
-	UPROPERTY(EditAnywhere)
-	FVector Startpoint;
-	UPROPERTY(EditAnywhere)
-	FVector Endpoint;
-	
-	UPROPERTY(EditAnywhere)
-		AActor* atemp;
-	UPROPERTY(EditAnywhere)
-		UPrimitiveComponent* ptemp;
+
 
 public:
+	UPROPERTY(EditAnywhere)
 	bool bCanHitBall;
+
 	bool bIsChargingHit;
 	bool bIsMoving;
 	float JumpPower;
 
-
+	int32 CurrentHoleNumber;
 
 	   
 
@@ -78,6 +79,8 @@ protected:
 	void ViewMove(float AxisValue);
 	void GettingPower(float AxisValue);
 
+	void CheckBallisMoiving();
+	void UseLineTrace();
 
 
 };

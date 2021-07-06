@@ -28,7 +28,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* Hole;
-
-
+	UStaticMeshComponent* ROUGH;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* OB;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* BUNKER;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* GREEN;
 };
