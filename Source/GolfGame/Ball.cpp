@@ -2,7 +2,6 @@
 
 
 #include "Ball.h"
-#include "Course.h"
 
 // Sets default values
 ABall::ABall()
@@ -77,6 +76,8 @@ void ABall::Tick(float DeltaTime)
 
 	// Get Current Ball Location
 	CurrentBallLocation = this->GetActorLocation();
+	CurrentForwrad = this->GetActorForwardVector();
+	CurrentForwrad1 = BallCamera->GetForwardVector();
 
 	// Line trace
 	UseLineTrace();
@@ -84,6 +85,11 @@ void ABall::Tick(float DeltaTime)
 
 	// 공이 멈추고 && 불가능한 지역에 있을때 
 	// 적절한 위치에 리스폰 
+
+
+
+
+
 
 }
 
@@ -99,11 +105,13 @@ void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	// GetPower : Press H
 	PlayerInputComponent->BindAxis("GetPower", this, &ABall::GettingPower);
 
-	// Rotate viewpoint : Press A or D
-	PlayerInputComponent->BindAxis("ViewMove", this, &ABall::ViewMove);
+	// Move Direction : Press A or D
+	PlayerInputComponent->BindAxis("MoveDirection", this, &ABall::MoveDirection);
+	// Move Angle : Press W or S
+	PlayerInputComponent->BindAxis("MoveAngle", this, &ABall::MoveAngle);
 
 	
-
+	
 	
 }
 
@@ -120,18 +128,25 @@ void ABall::OnRealseBallHit()
 {
 	if (bCanHitBall && !bIsMoving)
 	{
-		FVector temp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 0.0f)*JumpPower;
-		temp.Z = JumpPower;
+		FVector temp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
+		temp.Z = JumpAngle;
 
-		BallCollision->AddImpulse(temp * 50.0f);
+		CurrentForwrad = temp;
+
+		BallCollision->AddImpulse(temp * 50 * JumpPower);
 
 		bIsChargingHit = false;
-		
 		JumpPower = 0;
+		JumpAngle = 0;
+
+		
+
+
+
 	}
 }
 
-void ABall::ViewMove(float AxisValue)
+void ABall::MoveDirection(float AxisValue)
 {
 	if (AxisValue != 0 && !bIsMoving)
 	{
@@ -142,14 +157,41 @@ void ABall::ViewMove(float AxisValue)
 	}
 }
 
+void ABall::MoveAngle(float AxisValue)
+{
+	// 최대치를 1로 정하면 최대 각도 45도
+	if (AxisValue != 0 && !bIsMoving)
+	{
+		if (!bIsChargingHit)
+		{
+
+			if (JumpAngle <= 0.99 && AxisValue == 1)
+			{
+				JumpAngle += 0.01;
+
+				PrintWithFloat("Angle : ", JumpAngle);
+			}
+			else if (JumpAngle >= 0.01 && AxisValue == -1)
+			{
+				JumpAngle -= 0.01;
+
+				PrintWithFloat("Angle : ", JumpAngle);
+			}
+		}
+	}
+}
+
 void ABall::GettingPower(float AxisValue)
 {
 	if (AxisValue != 0 && !bIsMoving)
 	{
 		if (bCanHitBall)
 		{
-			JumpPower += 0.5;
-			PrintWithFloat("", JumpPower);
+			if (JumpPower <= 49.5)
+			{
+				JumpPower += 0.5;
+				PrintWithFloat("Power : ", JumpPower);
+			}
 		}
 	}
 }
@@ -177,23 +219,23 @@ void ABall::UseLineTrace()
 	{
 		Atemp = OutHits[1].GetActor();
 		Ptemp = OutHits[1].GetComponent();
-
+		
 		CureentActorName = Atemp->GetActorLabel();
 		CurrentComponentName = Ptemp->GetFName();
 
 		// Check 현재 진행하는 홀인지 -> 이게 OB 일까?
 		if (CurrentHoleName != CureentActorName)
 		{
-			bCanHitBall = false;
+			//bCanHitBall = false;
 		}
 		else
 		{
 			bCanHitBall = true;
 
 			// Chekc Fairway, OB, Hazard etc..
+			// 이런식보다는 스플라인을 사용해볼것
 			if (CurrentComponentName == FName(TEXT("OB")))
 			{
-				bCanHitBall = false;
 
 			}
 			else if (CurrentComponentName == FName(TEXT("BUNKER")))
@@ -201,6 +243,10 @@ void ABall::UseLineTrace()
 
 			}
 			else if (CurrentComponentName == FName(TEXT("GREEN")))
+			{
+
+			}
+			else if (CurrentComponentName == FName(TEXT("HOLECUP")))
 			{
 
 			}

@@ -35,4 +35,6 @@ public:
 	UStaticMeshComponent* BUNKER;
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* GREEN;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* HOLECUP;
 };

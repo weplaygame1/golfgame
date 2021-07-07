@@ -42,9 +42,26 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* BallCamera;
 
+
+
+
+
+	UPROPERTY(EditAnywhere)
+	FVector CurrentForwrad;
+	UPROPERTY(EditAnywhere)
+	FVector CurrentForwrad1;
+
+
+
+	UPROPERTY(EditAnywhere)
+		FVector gpavtemp;
+
+
+
+
 	UPROPERTY(EditAnywhere)
 	FVector CurrentBallLocation;
-
+	UPROPERTY(EditAnywhere)
 	TArray<FHitResult> OutHits;
 	AActor* Atemp;
 	UPrimitiveComponent* Ptemp;
@@ -57,7 +74,7 @@ public:
 	FString CureentActorName;
 
 	
-
+	
 
 public:
 	UPROPERTY(EditAnywhere)
@@ -66,6 +83,7 @@ public:
 	bool bIsChargingHit;
 	bool bIsMoving;
 	float JumpPower;
+	float JumpAngle;
 
 	int32 CurrentHoleNumber;
 
@@ -76,7 +94,8 @@ public:
 protected:
 	void OnPressBallHit();
 	void OnRealseBallHit();
-	void ViewMove(float AxisValue);
+	void MoveDirection(float AxisValue);
+	void MoveAngle(float AxisValue);
 	void GettingPower(float AxisValue);
 
 	void CheckBallisMoiving();

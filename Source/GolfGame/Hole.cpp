@@ -7,17 +7,19 @@
 AHole::AHole()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	ROUGH = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ROUGH"));
-	RootComponent = ROUGH;
-
 	OB = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OB"));
-	OB->SetupAttachment(RootComponent);
 	BUNKER = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BUNKER"));
-	BUNKER->SetupAttachment(RootComponent);
 	GREEN = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GREEN"));
-	GREEN->SetupAttachment(RootComponent); 
+	HOLECUP = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HOLECUP"));
+
+	RootComponent = ROUGH;
+	OB->SetupAttachment(RootComponent);
+	BUNKER->SetupAttachment(RootComponent);
+	GREEN->SetupAttachment(RootComponent);
+	HOLECUP->SetupAttachment(RootComponent);
 
 
 
