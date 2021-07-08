@@ -11,41 +11,49 @@ ABall::ABall()
 
 	// Create Collision
 	BallCollision = CreateDefaultSubobject<USphereComponent>(TEXT("BALLCOLLISION"));
-	BallCollision->SetSphereRadius(5.0f);
+	BallCollision->SetSphereRadius(5.f);
 	BallCollision->SetSimulatePhysics(true);
+	
 	BallCollision->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	
 	BallCollision->SetCollisionProfileName("SetLineTraceChannel");
-	//BallCollision->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+	BallCollision->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
 	// Set Damping
 	BallCollision->SetAngularDamping(30.0f);
 	RootComponent = BallCollision;
+	
+
 
 	// Create BallMesh
 	BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BALLMESH"));
-	BallMesh->SetupAttachment(BallCollision);
+	BallMesh->SetupAttachment(RootComponent);
 	BallMesh->SetCollisionProfileName("NoCollision");
-	//BallMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BallMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SM_BALL.Succeeded())
 	{
 		BallMesh->SetStaticMesh(SM_BALL.Object);
-		BallMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -5.0f));
+		BallMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -5.f));
 		BallMesh->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 	}
+	
 
 	// Create CameraSpringArm;
 	BallCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CAMERASPRINGARM"));
-	BallCameraSpringArm->SetupAttachment(BallCollision);
+	BallCameraSpringArm->SetupAttachment(RootComponent);
 	BallCameraSpringArm->TargetArmLength = 600.0F;
 	BallCameraSpringArm->bEnableCameraLag = true;
 	BallCameraSpringArm->bUsePawnControlRotation = true;
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
 	BallCameraSpringArm->SocketOffset = FVector(0.0F, 0.0F, 200.0F);
-	
+
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
+	
+
+
+
 
 	// Set Default Value
 	bCanHitBall = true;
@@ -71,26 +79,34 @@ void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 	// Check Ball is Moving
 	CheckBallisMoiving();
 
 	// Get Current Ball Location
 	CurrentBallLocation = this->GetActorLocation();
-	CurrentForwrad = this->GetActorForwardVector();
-	CurrentForwrad1 = BallCamera->GetForwardVector();
+	CurrentForwrad = BallCamera->GetForwardVector();
 
 	// Line trace
 	UseLineTrace();
 	
 
-	// 공이 멈추고 && 불가능한 지역에 있을때 
-	// 적절한 위치에 리스폰 
 
 
+	/*frtemp = BallCollision->GetRelativeRotation();
+	
+	if (CurrentBallLocation.Z > GetBallLocation.Z)
+	{
+		BallCollision->AddAngularImpulseInDegrees(bv*(10000000));
 
-
-
-
+		if (maxspeed < BallCollision->GetComponentVelocity().GetAbsMax())
+		{
+			maxspeed = BallCollision->GetComponentVelocity().GetAbsMax();
+		}
+		
+	}*/
+	
+	
 }
 
 // Called to bind functionality to input
@@ -121,6 +137,10 @@ void ABall::OnPressBallHit()
 	{
 		bIsChargingHit = true;
 		Print("Press H");
+
+
+		GetBallLocation = CurrentBallLocation;
+		maxspeed = 0;
 	}
 }
 
@@ -128,12 +148,32 @@ void ABall::OnRealseBallHit()
 {
 	if (bCanHitBall && !bIsMoving)
 	{
-		FVector temp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
-		temp.Z = JumpAngle;
 
-		CurrentForwrad = temp;
 
-		BallCollision->AddImpulse(temp * 50 * JumpPower);
+		fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
+		fvtemp.Z = 1;
+		fvtemp = fvtemp * 100 * JumpPower;
+		
+
+		av = fvtemp.GetSafeNormal();
+		bv = av.ToOrientationQuat().GetRightVector()*1000;
+		cv = FVector::CrossProduct(av, bv);
+
+		//BallCollision->AddAngularImpulseInDegrees(bv*10000000000000000, NAME_None, true);
+		BallCollision->SetAllPhysicsAngularVelocityInDegrees(bv);
+
+
+		BallCollision->AddAngularImpulseInDegrees(bv,NAME_None,true);
+
+		BallCollision->AddImpulse(fvtemp,NAME_None,true);
+		
+		
+		
+
+		//BallCollision->AddAngularImpulseInRadians(FVector(.0f,.0f,1000000.f), NAME_None, true);
+		//BallCollision->AddAngularImpulseInRadians(fvtemp*10000000000, NAME_None, false);
+		
+
 
 		bIsChargingHit = false;
 		JumpPower = 0;
@@ -165,7 +205,7 @@ void ABall::MoveAngle(float AxisValue)
 		if (!bIsChargingHit)
 		{
 
-			if (JumpAngle <= 0.99 && AxisValue == 1)
+			/*if (JumpAngle <= 0.99 && AxisValue == 1)
 			{
 				JumpAngle += 0.01;
 
@@ -176,7 +216,9 @@ void ABall::MoveAngle(float AxisValue)
 				JumpAngle -= 0.01;
 
 				PrintWithFloat("Angle : ", JumpAngle);
-			}
+
+			}*/
+			JumpAngle = 1;
 		}
 	}
 }
@@ -185,14 +227,15 @@ void ABall::GettingPower(float AxisValue)
 {
 	if (AxisValue != 0 && !bIsMoving)
 	{
-		if (bCanHitBall)
+		/*if (bCanHitBall)
 		{
-			if (JumpPower <= 49.5)
+			if (JumpPower <= 9.5)
 			{
 				JumpPower += 0.5;
 				PrintWithFloat("Power : ", JumpPower);
 			}
-		}
+		}*/
+		JumpPower = 10;
 	}
 }
 

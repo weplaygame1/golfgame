@@ -41,36 +41,51 @@ public:
 	USpringArmComponent* BallCameraSpringArm;
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* BallCamera;
+	
 
-
-
+	UPROPERTY(EditAnywhere)
+		FVector GetBallLocation;
 
 
 	UPROPERTY(EditAnywhere)
 	FVector CurrentForwrad;
-	UPROPERTY(EditAnywhere)
-	FVector CurrentForwrad1;
-
-
 
 	UPROPERTY(EditAnywhere)
-		FVector gpavtemp;
-
-
+	FRotator frtemp;
 
 
 	UPROPERTY(EditAnywhere)
+		FVector nowgpav;
+	UPROPERTY(EditAnywhere)
+		FVector nowsp;
+
+	UPROPERTY(EditAnywhere)
+		float maxspeed;
+	UPROPERTY(EditAnywhere)
+		float maxrotate;
+
+	//UPROPERTY(EditAnywhere)
+		FVector fvtemp;
+	//UPROPERTY(EditAnywhere)
+		FVector av;
+	//UPROPERTY(EditAnywhere)
+		FVector bv;
+	//UPROPERTY(EditAnywhere)
+		FVector cv;
+
+
+	//UPROPERTY(EditAnywhere)
 	FVector CurrentBallLocation;
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 	TArray<FHitResult> OutHits;
 	AActor* Atemp;
 	UPrimitiveComponent* Ptemp;
 
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 	FString CurrentHoleName;
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 	FName CurrentComponentName;
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 	FString CureentActorName;
 
 	
