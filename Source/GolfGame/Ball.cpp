@@ -9,34 +9,18 @@ ABall::ABall()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Create Collision
-	BallCollision = CreateDefaultSubobject<USphereComponent>(TEXT("BALLCOLLISION"));
-	BallCollision->SetSphereRadius(5.f);
-	BallCollision->SetSimulatePhysics(true);
-	
-	BallCollision->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	
-	BallCollision->SetCollisionProfileName("SetLineTraceChannel");
-	BallCollision->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
-	// Set Damping
-	BallCollision->SetAngularDamping(30.0f);
-	RootComponent = BallCollision;
-	
-
-
 	// Create BallMesh
 	BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BALLMESH"));
-	BallMesh->SetupAttachment(RootComponent);
-	BallMesh->SetCollisionProfileName("NoCollision");
-	BallMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BallMesh->SetSimulatePhysics(true);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SM_BALL.Succeeded())
 	{
 		BallMesh->SetStaticMesh(SM_BALL.Object);
-		BallMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -5.f));
 		BallMesh->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 	}
-	
+	RootComponent = BallMesh;
+
+
 
 	// Create CameraSpringArm;
 	BallCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CAMERASPRINGARM"));
@@ -45,14 +29,14 @@ ABall::ABall()
 	BallCameraSpringArm->bEnableCameraLag = true;
 	BallCameraSpringArm->bUsePawnControlRotation = true;
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
+	
+	
+	
 	BallCameraSpringArm->SocketOffset = FVector(0.0F, 0.0F, 200.0F);
-
+	
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
-	
-
-
 
 
 	// Set Default Value
@@ -93,18 +77,6 @@ void ABall::Tick(float DeltaTime)
 
 
 
-	/*frtemp = BallCollision->GetRelativeRotation();
-	
-	if (CurrentBallLocation.Z > GetBallLocation.Z)
-	{
-		BallCollision->AddAngularImpulseInDegrees(bv*(10000000));
-
-		if (maxspeed < BallCollision->GetComponentVelocity().GetAbsMax())
-		{
-			maxspeed = BallCollision->GetComponentVelocity().GetAbsMax();
-		}
-		
-	}*/
 	
 	
 }
@@ -140,7 +112,6 @@ void ABall::OnPressBallHit()
 
 
 		GetBallLocation = CurrentBallLocation;
-		maxspeed = 0;
 	}
 }
 
@@ -155,24 +126,21 @@ void ABall::OnRealseBallHit()
 		fvtemp = fvtemp * 100 * JumpPower;
 		
 
+		// 각 회전축이라는데 다시 체크해야할듯
 		av = fvtemp.GetSafeNormal();
-		bv = av.ToOrientationQuat().GetRightVector()*1000;
+		bv = av.ToOrientationQuat().GetRightVector();
 		cv = FVector::CrossProduct(av, bv);
 
-		//BallCollision->AddAngularImpulseInDegrees(bv*10000000000000000, NAME_None, true);
-		BallCollision->SetAllPhysicsAngularVelocityInDegrees(bv);
-
-
-		BallCollision->AddAngularImpulseInDegrees(bv,NAME_None,true);
-
-		BallCollision->AddImpulse(fvtemp,NAME_None,true);
 		
 		
 		
-
-		//BallCollision->AddAngularImpulseInRadians(FVector(.0f,.0f,1000000.f), NAME_None, true);
-		//BallCollision->AddAngularImpulseInRadians(fvtemp*10000000000, NAME_None, false);
+		BallMesh->AddAngularImpulseInDegrees(bv*100000000, NAME_None, true);
+		BallMesh->AddImpulse(fvtemp, NAME_None, true);
 		
+		// 공이 처음 땅에 착지하는순간에 angular damping 값을 설정해줘야할듯?
+		// 아니면 physics material를 만들어서 적용시켜줘야할듯
+
+
 
 
 		bIsChargingHit = false;

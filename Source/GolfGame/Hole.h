@@ -6,7 +6,6 @@
 #include "GolfGame.h"
 
 
-
 #include "GameFramework/Actor.h"
 #include "Hole.generated.h"
 
@@ -37,4 +36,10 @@ public:
 	UStaticMeshComponent* GREEN;
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* HOLECUP;
+
+
+	
+	
+
+
 };

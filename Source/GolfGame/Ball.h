@@ -5,7 +5,7 @@
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
 
-#include "Hole.h"
+
 
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
@@ -19,7 +19,6 @@ public:
 	// Sets default values for this pawn's properties
 	ABall();
 
-	USphereComponent* GetBallCollision() const { return BallCollision; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -36,44 +35,31 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* BallMesh;
 	UPROPERTY(EditAnywhere)
-	USphereComponent* BallCollision;
-	UPROPERTY(EditAnywhere)
 	USpringArmComponent* BallCameraSpringArm;
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* BallCamera;
 	
 
 	UPROPERTY(EditAnywhere)
-		FVector GetBallLocation;
-
+	FVector GetBallLocation;
 
 	UPROPERTY(EditAnywhere)
 	FVector CurrentForwrad;
 
-	UPROPERTY(EditAnywhere)
-	FRotator frtemp;
-
 
 	UPROPERTY(EditAnywhere)
-		FVector nowgpav;
-	UPROPERTY(EditAnywhere)
-		FVector nowsp;
-
-	UPROPERTY(EditAnywhere)
-		float maxspeed;
-	UPROPERTY(EditAnywhere)
-		float maxrotate;
-
-	//UPROPERTY(EditAnywhere)
 		FVector fvtemp;
-	//UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 		FVector av;
-	//UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 		FVector bv;
-	//UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 		FVector cv;
 
 
+
+
+	/* when use line trace */
 	//UPROPERTY(EditAnywhere)
 	FVector CurrentBallLocation;
 	//UPROPERTY(EditAnywhere)
@@ -81,6 +67,9 @@ public:
 	AActor* Atemp;
 	UPrimitiveComponent* Ptemp;
 
+
+
+	/* when check current hole name */
 	//UPROPERTY(EditAnywhere)
 	FString CurrentHoleName;
 	//UPROPERTY(EditAnywhere)
