@@ -9,17 +9,21 @@ AHole::AHole()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	ROUGH = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ROUGH"));
-	OB = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OB"));
-	BUNKER = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BUNKER"));
-	GREEN = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GREEN"));
-	HOLECUP = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HOLECUP"));
+	SPLINE = CreateDefaultSubobject<USplineComponent>(TEXT("SPLINE"));
+	SPLINE->bDrawDebug = true;
 
-	RootComponent = ROUGH;
-	OB->SetupAttachment(RootComponent);
-	BUNKER->SetupAttachment(RootComponent);
-	GREEN->SetupAttachment(RootComponent);
-	HOLECUP->SetupAttachment(RootComponent);
+	SPLINE->SetSimulatePhysics(true);
+
+	RootComponent = SPLINE;
+
+
+
+
+	//SPLINE->SetupAttachment(RootComponent);
+
+
+
+
 
 
 
@@ -29,6 +33,8 @@ AHole::AHole()
 void AHole::BeginPlay()
 {
 	Super::BeginPlay();
+
+	 
 	
 }
 
@@ -36,6 +42,9 @@ void AHole::BeginPlay()
 void AHole::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+
+	
 
 }
 

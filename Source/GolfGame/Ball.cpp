@@ -12,6 +12,7 @@ ABall::ABall()
 	// Create BallMesh
 	BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BALLMESH"));
 	BallMesh->SetSimulatePhysics(true);
+	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SM_BALL.Succeeded())
 	{
@@ -20,6 +21,11 @@ ABall::ABall()
 	}
 	RootComponent = BallMesh;
 
+	BallMesh->SetCollisionObjectType(ECC_Pawn);
+	//BallMesh->SetCollisionProfileName("SetLineTraceChannel");
+	BallMesh->bReturnMaterialOnMove = true;
+
+	BallMesh->SetAngularDamping(0.5);
 
 
 	// Create CameraSpringArm;
@@ -33,10 +39,16 @@ ABall::ABall()
 	
 	
 	BallCameraSpringArm->SocketOffset = FVector(0.0F, 0.0F, 200.0F);
+	BallCameraSpringArm->TargetOffset = FVector(0.0F, 0.0F, 50.0F);
 	
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
+
+
+	BallCollision = CreateDefaultSubobject<USphereComponent>(TEXT("BallCollision"));
+	BallCollision->SetupAttachment(RootComponent);
+	BallCollision->bReturnMaterialOnMove = true;
 
 
 	// Set Default Value
@@ -134,7 +146,7 @@ void ABall::OnRealseBallHit()
 		
 		
 		
-		BallMesh->AddAngularImpulseInDegrees(bv*100000000, NAME_None, true);
+		BallMesh->AddAngularImpulseInDegrees(bv*10000, NAME_None, true);
 		BallMesh->AddImpulse(fvtemp, NAME_None, true);
 		
 		// 공이 처음 땅에 착지하는순간에 angular damping 값을 설정해줘야할듯?
@@ -224,44 +236,44 @@ void ABall::UseLineTrace()
 	FVector Startpoint = CurrentBallLocation;
 	FVector Endpoint = CurrentBallLocation * FVector(1.0f, 1.0f, 0.0f);
 	FCollisionQueryParams CollisionParams;
+	CollisionParams.bReturnPhysicalMaterial = true;
+	CollisionParams.bTraceComplex = false;
 
-	bool isHit = GetWorld()->LineTraceMultiByChannel(OutHits, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
+	
+	/*bool isHit = GetWorld()->LineTraceMultiByChannel(OutHits, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
 	if (isHit && OutHits.Num() > 1)
 	{
+		
 		Atemp = OutHits[1].GetActor();
 		Ptemp = OutHits[1].GetComponent();
 		
 		CureentActorName = Atemp->GetActorLabel();
 		CurrentComponentName = Ptemp->GetFName();
 
-		// Check 현재 진행하는 홀인지 -> 이게 OB 일까?
 		if (CurrentHoleName != CureentActorName)
 		{
-			//bCanHitBall = false;
+			bCanHitBall = false;
 		}
-		else
-		{
-			bCanHitBall = true;
+	}*/
 
-			// Chekc Fairway, OB, Hazard etc..
-			// 이런식보다는 스플라인을 사용해볼것
-			if (CurrentComponentName == FName(TEXT("OB")))
-			{
+	//DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor::Orange, false, 2.0f);
 
-			}
-			else if (CurrentComponentName == FName(TEXT("BUNKER")))
-			{
+	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
+	if (isHit)
+	{
+		Atemp = OutHit.GetActor();
+		Ptemp = OutHit.GetComponent();
 
-			}
-			else if (CurrentComponentName == FName(TEXT("GREEN")))
-			{
+		CureentActorName = Atemp->GetActorLabel();
+		CurrentComponentName = Ptemp->GetFName();
 
-			}
-			else if (CurrentComponentName == FName(TEXT("HOLECUP")))
-			{
-
-			}
-		}
-
+		
+		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
+		itemp = static_cast<int>(epstemp);
+		
 	}
+	
+	//OutHit.PhysMaterial.Get()
+
+
 }

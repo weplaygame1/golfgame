@@ -4,7 +4,13 @@
 
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
+#include "Kismet/GameplayStatics.h"
 
+#include "DrawDebugHelpers.h"
+
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Containers/EnumAsByte.h"
+#include "Engine/EngineTypes.h"
 
 
 #include "GameFramework/Pawn.h"
@@ -38,6 +44,8 @@ public:
 	USpringArmComponent* BallCameraSpringArm;
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* BallCamera;
+	UPROPERTY(EditAnywhere)
+	USphereComponent* BallCollision;
 	
 
 	UPROPERTY(EditAnywhere)
@@ -47,15 +55,17 @@ public:
 	FVector CurrentForwrad;
 
 
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 		FVector fvtemp;
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 		FVector av;
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 		FVector bv;
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 		FVector cv;
 
+		UPROPERTY(EditAnywhere)
+			int32 itemp;
 
 
 
@@ -63,18 +73,20 @@ public:
 	//UPROPERTY(EditAnywhere)
 	FVector CurrentBallLocation;
 	//UPROPERTY(EditAnywhere)
-	TArray<FHitResult> OutHits;
+	FHitResult OutHit;
+
+	UPROPERTY(EditAnywhere)
 	AActor* Atemp;
 	UPrimitiveComponent* Ptemp;
-
+	TArray<FHitResult> OutHits;
 
 
 	/* when check current hole name */
-	//UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	FString CurrentHoleName;
-	//UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	FName CurrentComponentName;
-	//UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	FString CureentActorName;
 
 	

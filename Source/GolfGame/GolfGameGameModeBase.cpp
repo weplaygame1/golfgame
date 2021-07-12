@@ -7,4 +7,5 @@
 AGolfGameGameModeBase::AGolfGameGameModeBase()
 {
 	DefaultPawnClass = ABall::StaticClass();
+
 }

@@ -4,6 +4,7 @@
 
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
+#include "Components/SplineComponent.h"
 
 
 #include "GameFramework/Actor.h"
@@ -26,20 +27,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* ROUGH;
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* OB;
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* BUNKER;
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* GREEN;
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* HOLECUP;
 
-
-	
-	
+	UPROPERTY(EditAnywhere)
+	USplineComponent* SPLINE;
 
 
 };
