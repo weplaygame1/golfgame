@@ -12,7 +12,7 @@ ABall::ABall()
 	// Create BallMesh
 	BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BALLMESH"));
 	BallMesh->SetSimulatePhysics(true);
-	
+	BallMesh->SetNotifyRigidBodyCollision(true);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SM_BALL.Succeeded())
 	{
@@ -22,10 +22,9 @@ ABall::ABall()
 	RootComponent = BallMesh;
 
 	BallMesh->SetCollisionObjectType(ECC_Pawn);
-	//BallMesh->SetCollisionProfileName("SetLineTraceChannel");
-	BallMesh->bReturnMaterialOnMove = true;
+	BallMesh->SetCollisionProfileName("SetLineTraceChannel");
 
-	BallMesh->SetAngularDamping(0.5);
+	BallMesh->SetAngularDamping(30);
 
 
 	// Create CameraSpringArm;
@@ -46,9 +45,7 @@ ABall::ABall()
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
 
 
-	BallCollision = CreateDefaultSubobject<USphereComponent>(TEXT("BallCollision"));
-	BallCollision->SetupAttachment(RootComponent);
-	BallCollision->bReturnMaterialOnMove = true;
+	
 
 
 	// Set Default Value
@@ -60,7 +57,8 @@ ABall::ABall()
 	CurrentHoleNumber = 0;
 	CurrentHoleName = FString(TEXT("Hole")) + FString::FromInt(CurrentHoleNumber);
 	
-	
+
+
 }
 
 // Called when the game starts or when spawned
@@ -68,6 +66,7 @@ void ABall::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	bSucceedCurrentHole = false;
 }
 
 // Called every frame
@@ -84,9 +83,8 @@ void ABall::Tick(float DeltaTime)
 	CurrentForwrad = BallCamera->GetForwardVector();
 
 	// Line trace
-	UseLineTrace();
+	//UseLineTrace();
 	
-
 
 
 	
@@ -124,6 +122,9 @@ void ABall::OnPressBallHit()
 
 
 		GetBallLocation = CurrentBallLocation;
+
+		fcheck = 0;
+
 	}
 }
 
@@ -160,7 +161,6 @@ void ABall::OnRealseBallHit()
 		JumpAngle = 0;
 
 		
-
 
 
 	}
@@ -221,7 +221,8 @@ void ABall::GettingPower(float AxisValue)
 
 void ABall::CheckBallisMoiving()
 {
-	if (this->GetVelocity().Size())
+	
+	if (BallMesh->GetComponentVelocity().Size()>0)
 	{
 		bIsMoving = true;
 	}
@@ -234,46 +235,75 @@ void ABall::CheckBallisMoiving()
 void ABall::UseLineTrace()
 {
 	FVector Startpoint = CurrentBallLocation;
-	FVector Endpoint = CurrentBallLocation * FVector(1.0f, 1.0f, 0.0f);
+	FVector Endpoint = CurrentBallLocation * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -10.0f);
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.bReturnPhysicalMaterial = true;
 	CollisionParams.bTraceComplex = false;
-
 	
-	/*bool isHit = GetWorld()->LineTraceMultiByChannel(OutHits, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
-	if (isHit && OutHits.Num() > 1)
-	{
-		
-		Atemp = OutHits[1].GetActor();
-		Ptemp = OutHits[1].GetComponent();
-		
-		CureentActorName = Atemp->GetActorLabel();
-		CurrentComponentName = Ptemp->GetFName();
-
-		if (CurrentHoleName != CureentActorName)
-		{
-			bCanHitBall = false;
-		}
-	}*/
-
-	//DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor::Orange, false, 2.0f);
+	//DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor::Orange,false,10);
 
 	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
 	if (isHit)
 	{
-		Atemp = OutHit.GetActor();
-		Ptemp = OutHit.GetComponent();
+		CureentActorName = OutHit.GetActor()->GetActorLabel();
 
-		CureentActorName = Atemp->GetActorLabel();
-		CurrentComponentName = Ptemp->GetFName();
+		// 현재 내 설계방식이라면
+		// hole cup은 sphere collision으로 처리하여
+		// 아래 어떤 메테리얼인지 확인하기전에 공이 홀컵인지 아닌지 먼저 체크해줘야함
 
-		
+
 		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
-		itemp = static_cast<int>(epstemp);
+		
+		if (epstemp == 1) NowMaterial = TEXT("Green");
+		else if (epstemp == 2) NowMaterial = TEXT("Apron");
+		else if (epstemp == 3) NowMaterial = TEXT("Fairway");
+		else if (epstemp == 4) NowMaterial = TEXT("Rough");
+		else if (epstemp == 5) NowMaterial = TEXT("Bunker");
+		else if (epstemp == 6) NowMaterial = TEXT("Hazard");
+		else if (epstemp == 7) NowMaterial = TEXT("OB");
+		
+
+	}
+	
+
+}
+
+void ABall::NotifyHit(UPrimitiveComponent *MyComp, AActor *Other, UPrimitiveComponent *OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult &Hit)
+{
+	// 이러면 굳이 line trace를 사용할 이유가 없다
+
+	if (bIsMoving) {
+
+		// just debug
+		PrintWithFloat("Hit", fcheck++);
+
+		CureentActorName = Hit.GetActor()->GetActorLabel();
+		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(Hit);
+
+		if (epstemp == 1) NowMaterial = TEXT("Green");
+		else if (epstemp == 2) NowMaterial = TEXT("Apron");
+		else if (epstemp == 3) NowMaterial = TEXT("Fairway");
+		else if (epstemp == 4) NowMaterial = TEXT("Rough");
+		else if (epstemp == 5) NowMaterial = TEXT("Bunker");
+		else if (epstemp == 6) NowMaterial = TEXT("Hazard");
+		else if (epstemp == 7) NowMaterial = TEXT("OB");
+
+		temphl = HitLocation;
+		temphn = HitNormal;
+		tempni = NormalImpulse;
+		actemp = Other;
+		upctemp = OtherComp;
 		
 	}
 	
-	//OutHit.PhysMaterial.Get()
+}
 
+void ABall::NotifyActorBeginOverlap(AActor *OtherActor)
+{
+	Print("overlap");
+}
 
+void ABall::NotifyActorEndOverlap(AActor *OtherActor)
+{
+	Print("Endoverlap");
 }

@@ -8,9 +8,6 @@
 
 #include "DrawDebugHelpers.h"
 
-#include "PhysicalMaterials/PhysicalMaterial.h"
-#include "Containers/EnumAsByte.h"
-#include "Engine/EngineTypes.h"
 
 
 #include "GameFramework/Pawn.h"
@@ -37,21 +34,26 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void NotifyHit(UPrimitiveComponent *MyComp, AActor *Other, UPrimitiveComponent *OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult &Hit) override;
+	virtual void NotifyActorBeginOverlap(AActor *OtherActor) override; 
+	virtual void NotifyActorEndOverlap(AActor *OtherActor) override;
+
+
+
 public:
+	/* Constructor */
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* BallMesh;
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* BallCameraSpringArm;
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* BallCamera;
-	UPROPERTY(EditAnywhere)
-	USphereComponent* BallCollision;
 	
 
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 	FVector GetBallLocation;
 
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 	FVector CurrentForwrad;
 
 
@@ -64,32 +66,39 @@ public:
 	//UPROPERTY(EditAnywhere)
 		FVector cv;
 
-		UPROPERTY(EditAnywhere)
-			int32 itemp;
+	
 
 
 
 	/* when use line trace */
-	//UPROPERTY(EditAnywhere)
 	FVector CurrentBallLocation;
-	//UPROPERTY(EditAnywhere)
 	FHitResult OutHit;
 
 	UPROPERTY(EditAnywhere)
-	AActor* Atemp;
-	UPrimitiveComponent* Ptemp;
-	TArray<FHitResult> OutHits;
+	FString NowMaterial;
 
 
 	/* when check current hole name */
 	UPROPERTY(EditAnywhere)
 	FString CurrentHoleName;
-	UPROPERTY(EditAnywhere)
-	FName CurrentComponentName;
+
 	UPROPERTY(EditAnywhere)
 	FString CureentActorName;
 
-	
+
+	/* Test NotifyHit */
+	UPROPERTY(EditAnywhere)
+		FVector temphl;
+		UPROPERTY(EditAnywhere)
+			FVector temphn;
+
+		UPROPERTY(EditAnywhere)
+			FVector tempni;
+
+		UPROPERTY(EditAnywhere)
+			AActor* actemp;
+		UPROPERTY(EditAnywhere)
+			UPrimitiveComponent* upctemp;
 	
 
 public:
@@ -97,14 +106,18 @@ public:
 	bool bCanHitBall;
 
 	bool bIsChargingHit;
+	UPROPERTY(EditAnywhere)
 	bool bIsMoving;
 	float JumpPower;
 	float JumpAngle;
 
+	// 현재 진행중인 홀을 마쳤는가
+	bool bSucceedCurrentHole;
+
 	int32 CurrentHoleNumber;
 
-	   
 
+	float fcheck = 0;
 
 
 protected:
