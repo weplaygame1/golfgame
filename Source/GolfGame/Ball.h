@@ -8,7 +8,7 @@
 
 #include "DrawDebugHelpers.h"
 
-
+#include "GameFramework/Controller.h"
 
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
@@ -49,14 +49,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* BallCamera;
 	
-
-	//UPROPERTY(EditAnywhere)
-	FVector GetBallLocation;
-
-	//UPROPERTY(EditAnywhere)
-	FVector CurrentForwrad;
-
-
+	/* When AddImpulse to Ball */
 	//UPROPERTY(EditAnywhere)
 		FVector fvtemp;
 	//UPROPERTY(EditAnywhere)
@@ -66,12 +59,10 @@ public:
 	//UPROPERTY(EditAnywhere)
 		FVector cv;
 
-	
-
-
-
 	/* when use line trace */
 	FVector CurrentBallLocation;
+	FVector CurrentBallForwrad;
+
 	FHitResult OutHit;
 
 	UPROPERTY(EditAnywhere)
@@ -86,35 +77,25 @@ public:
 	FString CureentActorName;
 
 
-	/* Test NotifyHit */
-	UPROPERTY(EditAnywhere)
-		FVector temphl;
-		UPROPERTY(EditAnywhere)
-			FVector temphn;
-
-		UPROPERTY(EditAnywhere)
-			FVector tempni;
-
-		UPROPERTY(EditAnywhere)
-			AActor* actemp;
-		UPROPERTY(EditAnywhere)
-			UPrimitiveComponent* upctemp;
 	
 
 public:
 	UPROPERTY(EditAnywhere)
 	bool bCanHitBall;
-
 	bool bIsChargingHit;
+
 	UPROPERTY(EditAnywhere)
 	bool bIsMoving;
 	float JumpPower;
 	float JumpAngle;
 
 	// 현재 진행중인 홀을 마쳤는가
-	bool bSucceedCurrentHole;
+	bool bCheckHoleOut;
+	bool bCheckConcede;
 
 	int32 CurrentHoleNumber;
+
+	bool bCheckOnce;
 
 
 	float fcheck = 0;
