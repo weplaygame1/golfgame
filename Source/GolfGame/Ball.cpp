@@ -13,8 +13,6 @@ ABall::ABall()
 	BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BALLMESH"));
 	BallMesh->SetSimulatePhysics(true);
 	
-	//BallMesh->SetNotifyRigidBodyCollision(true);
-	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SM_BALL.Succeeded())
 	{
@@ -29,7 +27,6 @@ ABall::ABall()
 	// temp set angulardamping
 	BallMesh->SetAngularDamping(30);
 
-
 	// Create CameraSpringArm;
 	BallCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CAMERASPRINGARM"));
 	BallCameraSpringArm->SetupAttachment(RootComponent);
@@ -37,8 +34,6 @@ ABall::ABall()
 	BallCameraSpringArm->bEnableCameraLag = true;
 	BallCameraSpringArm->bUsePawnControlRotation = true;
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
-	
-	
 	
 	BallCameraSpringArm->SocketOffset = FVector(0.0F, 0.0F, 200.0F);
 	BallCameraSpringArm->TargetOffset = FVector(0.0F, 0.0F, 50.0F);
@@ -68,8 +63,13 @@ void ABall::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	BallMesh->OnComponentBeginOverlap.AddDynamic(this, &ABall::OnOverlapBegin);
+	BallMesh->OnComponentEndOverlap.AddDynamic(this, &ABall::OnOverlapEnd);
+
+
+
 	// Set Default Value
-	bCheckHoleOut = false; 
+	bCheckHoleCup = false;
 	bCheckConcede = false;
 
 	// 해저드나 오비일때도 리스폰하는 형식으로 즉 계속 타수++ 
@@ -99,26 +99,41 @@ void ABall::Tick(float DeltaTime)
 		Print("Check");
 		bCheckOnce = false;
 
-		// 홀 아웃인지 아닌지 체크후
-		if (bCheckHoleOut) 
+		// 홀 아웃인지 체크
+		if (bCheckConcede || bCheckHoleCup)
 		{
-			// 홀아웃이면 공 삭제하고 새로 만들고 다시 빙의
-			// 이걸 함수로 따로 빼면
-			// 함수 파라미터로 홀 숫자를 주고 
-			// 해당 인덱스의 위치로 공을 스폰해주면 될듯
+			if (bCheckHoleCup)
+			{
+				// 홀인
+			}
+			else
+			{
+				// 컨시드
+				// 타수하나 줄임
+			}
 
+			// 그 후 다음 홀로 넘어가는 스텝
+			
+			
+			
 			AController* controller = GetController();
 			controller->UnPossess();
 			
 			ABall* CurrentBall = this;
-			ABall* NewBall = GetWorld()->SpawnActor<ABall>(ABall::StaticClass(), FVector(3000, 3000, 20),FRotator(0,0,0));
+			ABall* NewBall = GetWorld()->SpawnActor<ABall>(ABall::StaticClass(), FVector(1000, 18000, 20),FRotator(0,0,0));
 			
 			controller->Possess(NewBall);
 			CurrentBall->Destroy();
+
+			// 굳이 새로 스폰안해주고 이동해도 될듯, 이러면 추가로 카메라 수정해야함
+			// 다음홀로 넘어갈때 기존 체크해주던 
+			// *모든 변수를 초기화* 
 		}
 		else
 		{
-			// Line trace
+			// 더블파이면 다음홀로 넘어감
+
+			// 어느 지형에 있는지 체크
 			UseLineTrace();
 		}
 	}
@@ -153,6 +168,7 @@ void ABall::OnPressBallHit()
 		bIsChargingHit = true;
 		Print("Press H");
 
+		//공을 치는 순간 타수를 하나 줄여줌
 	}
 }
 
@@ -160,35 +176,24 @@ void ABall::OnRealseBallHit()
 {
 	if (bCanHitBall && !bIsMoving)
 	{
-
-
 		fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
 		fvtemp.Z = 1;
 		fvtemp = fvtemp * 100 * JumpPower;
-		
 
 		// 각 회전축이라는데 다시 체크해야할듯
 		av = fvtemp.GetSafeNormal();
 		bv = av.ToOrientationQuat().GetRightVector();
 		cv = FVector::CrossProduct(av, bv);
-
-		
 		
 		BallMesh->AddAngularImpulseInDegrees(bv*10000, NAME_None, true);
 		BallMesh->AddImpulse(fvtemp, NAME_None, true);
-
 		
 		// 공이 처음 땅에 착지하는순간에 angular damping 값을 설정해줘야할듯?
 		// 아니면 physics material를 만들어서 적용시켜줘야할듯
 
-
-
-
 		bIsChargingHit = false;
 		JumpPower = 0;
 		JumpAngle = 0;
-
-		
 
 	}
 }
@@ -274,16 +279,39 @@ void ABall::UseLineTrace()
 	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
 	if (isHit)
 	{
-		CureentActorName = OutHit.GetActor()->GetActorLabel();
 		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
 		
-		if (epstemp == 1) NowMaterial = TEXT("Green");
-		else if (epstemp == 2) NowMaterial = TEXT("Apron");
-		else if (epstemp == 3) NowMaterial = TEXT("Fairway");
-		else if (epstemp == 4) NowMaterial = TEXT("Rough");
-		else if (epstemp == 5) NowMaterial = TEXT("Bunker");
-		else if (epstemp == 6) NowMaterial = TEXT("Hazard");
-		else if (epstemp == 7) NowMaterial = TEXT("OB");
+		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
+		if (epstemp == 1) 
+		{
+			NowMaterial = TEXT("Green");
+		}
+		else if (epstemp == 2)
+		{
+			NowMaterial = TEXT("Apron");
+		}
+		else if (epstemp == 3) 
+		{
+			NowMaterial = TEXT("Fairway");
+		}
+		else if (epstemp == 4)
+		{
+			NowMaterial = TEXT("Rough");
+		}
+		else if (epstemp == 5)
+		{
+			NowMaterial = TEXT("Bunker");
+		}
+		// 이 녀석들은 공을 옮겨야함, 추가로 타수를 줄여줌
+		else if (epstemp == 6)
+		{
+			NowMaterial = TEXT("Hazard");
+		}
+		else if (epstemp == 7)
+		{
+			NowMaterial = TEXT("OB");
+		}
+		
 		
 
 	}
@@ -291,36 +319,30 @@ void ABall::UseLineTrace()
 
 }
 
-void ABall::NotifyHit(UPrimitiveComponent *MyComp, AActor *Other, UPrimitiveComponent *OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult &Hit)
+void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// 이러면 굳이 line trace를 사용할 이유가 없다
-	if (bIsMoving) {
+	Print("OverLap");
 
-		// just debug
-		PrintWithFloat("Hit", fcheck++);
-
-		CureentActorName = Hit.GetActor()->GetActorLabel();
-		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(Hit);
-
-		if (epstemp == 1) NowMaterial = TEXT("Green");
-		else if (epstemp == 2) NowMaterial = TEXT("Apron");
-		else if (epstemp == 3) NowMaterial = TEXT("Fairway");
-		else if (epstemp == 4) NowMaterial = TEXT("Rough");
-		else if (epstemp == 5) NowMaterial = TEXT("Bunker");
-		else if (epstemp == 6) NowMaterial = TEXT("Hazard");
-		else if (epstemp == 7) NowMaterial = TEXT("OB");
+	if (OtherComp->GetName() == TEXT("CONCEDE"))
+	{
+		bCheckConcede = true;
 	}
-	
+	if (OtherComp->GetName() == TEXT("HOLECUP"))
+	{
+		bCheckConcede = true;
+	}
 }
 
-void ABall::NotifyActorBeginOverlap(AActor *OtherActor)
+void ABall::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Print("overlap");
-	bCheckHoleOut = true;
-}
+	Print("EndLap");
 
-void ABall::NotifyActorEndOverlap(AActor *OtherActor)
-{
-	Print("Endoverlap");
-	bCheckHoleOut = false;
+	if (OtherComp->GetName() == TEXT("CONCEDE"))
+	{
+		bCheckConcede = false;
+	}
+	if (OtherComp->GetName() == TEXT("HOLECUP"))
+	{
+		bCheckConcede = false;
+	}
 }

@@ -4,12 +4,10 @@
 
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
-#include "Kismet/GameplayStatics.h"
 
 #include "DrawDebugHelpers.h"
 
 #include "GameFramework/Controller.h"
-
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
 
@@ -33,11 +31,11 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	virtual void NotifyHit(UPrimitiveComponent *MyComp, AActor *Other, UPrimitiveComponent *OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult &Hit) override;
-	virtual void NotifyActorBeginOverlap(AActor *OtherActor) override; 
-	virtual void NotifyActorEndOverlap(AActor *OtherActor) override;
-
+	
+	UFUNCTION()
+	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
 public:
@@ -73,9 +71,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	FString CurrentHoleName;
 
-	UPROPERTY(EditAnywhere)
-	FString CureentActorName;
-
+	
 
 	
 
@@ -90,7 +86,7 @@ public:
 	float JumpAngle;
 
 	// 현재 진행중인 홀을 마쳤는가
-	bool bCheckHoleOut;
+	bool bCheckHoleCup;
 	bool bCheckConcede;
 
 	int32 CurrentHoleNumber;

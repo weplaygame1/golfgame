@@ -34,5 +34,8 @@ public:
 	UCapsuleComponent* HoleCup;
 	UPROPERTY(EditAnywhere)
 	USphereComponent* Concede;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* Flag;
+
 
 };
