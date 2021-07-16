@@ -2,7 +2,7 @@
 
 
 #include "HoleCup.h"
-#include "Components/LineBatchComponent.h"
+
 // Sets default values
 AHoleCup::AHoleCup()
 {

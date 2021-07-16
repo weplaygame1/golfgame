@@ -4,6 +4,11 @@
 
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
+
+#include "Ball.h"
+#include "MyPlayerState.h"
+
+
 #include "GameFramework/GameModeBase.h"
 #include "GolfGameGameModeBase.generated.h"
 

@@ -46,15 +46,9 @@ ABall::ABall()
 	
 	
 
-	// Set Default Value
-	bCanHitBall = true;
-	bCheckOnce = true;
-	JumpPower = 0;
+	
 
 
-	// Set CurrentHoleName
-	CurrentHoleNumber = 0;
-	CurrentHoleName = FString(TEXT("Hole")) + FString::FromInt(CurrentHoleNumber);
 	
 }
 
@@ -65,12 +59,15 @@ void ABall::BeginPlay()
 	
 	BallMesh->OnComponentBeginOverlap.AddDynamic(this, &ABall::OnOverlapBegin);
 	BallMesh->OnComponentEndOverlap.AddDynamic(this, &ABall::OnOverlapEnd);
-
+	
 
 
 	// Set Default Value
 	bCheckHoleCup = false;
 	bCheckConcede = false;
+	bCanHitBall = true;
+	bCheckOnce = true;
+	JumpPower = 0;
 
 	// 해저드나 오비일때도 리스폰하는 형식으로 즉 계속 타수++ 
 	// 이러면 홀아웃으로인한 스폰을때는 타수의 기본값에 -1 더해줘야할듯
@@ -78,7 +75,9 @@ void ABall::BeginPlay()
 	// 리스폰하는순간 다른 actor 이므로 기존의 값 다 지워짐
 	// 즉 ball에 저장하는게 아닌 다른곳에 저장시켜야함
 	
-	
+	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
+
+
 }
 
 // Called every frame
@@ -113,9 +112,7 @@ void ABall::Tick(float DeltaTime)
 			}
 
 			// 그 후 다음 홀로 넘어가는 스텝
-			
-			
-			
+			// 공의 위치만 이동 ? or 리스폰 ?
 			AController* controller = GetController();
 			controller->UnPossess();
 			
@@ -127,7 +124,7 @@ void ABall::Tick(float DeltaTime)
 
 			// 굳이 새로 스폰안해주고 이동해도 될듯, 이러면 추가로 카메라 수정해야함
 			// 다음홀로 넘어갈때 기존 체크해주던 
-			// *모든 변수를 초기화* 
+			// *볼이 가지고 있던 변수를 초기화* 
 		}
 		else
 		{
@@ -157,7 +154,7 @@ void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("MoveAngle", this, &ABall::MoveAngle);
 
 	
-	
+
 	
 }
 
@@ -168,7 +165,12 @@ void ABall::OnPressBallHit()
 		bIsChargingHit = true;
 		Print("Press H");
 
-		//공을 치는 순간 타수를 하나 줄여줌
+		//공을 치는 순간 타수를 하나 줄여줌 -> 이건 player state 에서 관리해야 할듯
+		//아니면 볼에서 타수를 가져오고 진행되는동안 볼에서 관리하다가
+		//홀 아웃되면 player state 에 set 해주는 방법?
+
+		//공을 날리기전의 위치를 player state 에 저장시킴
+		BallPlayerState->SetFomerLocation(CurrentBallLocation);
 	}
 }
 
@@ -281,6 +283,8 @@ void ABall::UseLineTrace()
 	{
 		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
 		
+		
+
 		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
 		if (epstemp == 1) 
 		{
@@ -302,14 +306,19 @@ void ABall::UseLineTrace()
 		{
 			NowMaterial = TEXT("Bunker");
 		}
-		// 이 녀석들은 공을 옮겨야함, 추가로 타수를 줄여줌
+		// 이 녀석들은 공을 옮겨야함
+		// 추가로 타수를 줄여줌
 		else if (epstemp == 6)
 		{
 			NowMaterial = TEXT("Hazard");
+			BallMesh->SetWorldLocation(BallPlayerState->GetFomerLocation());
+			
 		}
 		else if (epstemp == 7)
 		{
 			NowMaterial = TEXT("OB");
+			BallMesh->SetWorldLocation(BallPlayerState->GetFomerLocation());
+
 		}
 		
 		
@@ -323,14 +332,14 @@ void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 {
 	Print("OverLap");
 
-	if (OtherComp->GetName() == TEXT("CONCEDE"))
+	/*if (OtherComp->GetName() == TEXT("CONCEDE"))
 	{
 		bCheckConcede = true;
 	}
 	if (OtherComp->GetName() == TEXT("HOLECUP"))
 	{
 		bCheckConcede = true;
-	}
+	}*/
 }
 
 void ABall::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

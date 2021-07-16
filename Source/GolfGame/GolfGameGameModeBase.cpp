@@ -2,10 +2,10 @@
 
 
 #include "GolfGameGameModeBase.h"
-#include "Ball.h"
+
 
 AGolfGameGameModeBase::AGolfGameGameModeBase()
 {
 	DefaultPawnClass = ABall::StaticClass();
-
+	PlayerStateClass = AMyPlayerState::StaticClass();
 }

@@ -5,9 +5,11 @@
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
 
-#include "DrawDebugHelpers.h"
+#include "MyPlayerState.h"
 
 #include "GameFramework/Controller.h"
+
+
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
 
@@ -39,7 +41,7 @@ public:
 
 
 public:
-	/* Constructor */
+	/* »ý¼ºÀÚ */
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* BallMesh;
 	UPROPERTY(EditAnywhere)
@@ -60,21 +62,12 @@ public:
 	/* when use line trace */
 	FVector CurrentBallLocation;
 	FVector CurrentBallForwrad;
-
 	FHitResult OutHit;
-
 	UPROPERTY(EditAnywhere)
 	FString NowMaterial;
 
-
-	/* when check current hole name */
-	UPROPERTY(EditAnywhere)
-	FString CurrentHoleName;
-
-	
-
-	
-
+	/* Player state */
+	AMyPlayerState* BallPlayerState;
 public:
 	UPROPERTY(EditAnywhere)
 	bool bCanHitBall;
@@ -89,7 +82,6 @@ public:
 	bool bCheckHoleCup;
 	bool bCheckConcede;
 
-	int32 CurrentHoleNumber;
 
 	bool bCheckOnce;
 
@@ -97,7 +89,7 @@ public:
 	float fcheck = 0;
 
 
-protected:
+public:
 	void OnPressBallHit();
 	void OnRealseBallHit();
 	void MoveDirection(float AxisValue);
