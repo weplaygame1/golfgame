@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -29,13 +29,13 @@ public:
 	int32 GetCurrentHoleIndex() const;
 
 public:
-	// °øÀ» Ä¡±âÀü À§Ä¡
+	// ê³µì„ ì¹˜ê¸°ì „ ìœ„ì¹˜
 	FVector FormerBallLocation;
 
-	// Á¡¼ö ¹è¿­
+	// ì ìˆ˜ ë°°ì—´
 	TArray<int32> ScoreTable;
 
-	// ÇöÀç ÁøÇàÁßÀÎ È¦ ÀÎµ¦½º
+	// í˜„ì¬ ì§„í–‰ì¤‘ì¸ í™€ ì¸ë±ìŠ¤
 	int32 CurrentHoleIndex; 
 	/*
 	// Set CurrentHoleName
@@ -43,7 +43,7 @@ public:
 	CurrentHoleName = FString(TEXT("Hole")) + FString::FromInt(CurrentHoleNumber);
 	*/
 
-	// Å¬·´ Á¾·ù
+	// í´ëŸ½ ì¢…ë¥˜
 
-	// ÇöÀç Å¬·´ or ÇöÀç Å¬·´ ÀÎµ¦½º
+	// í˜„ì¬ í´ëŸ½ or í˜„ì¬ í´ëŸ½ ì¸ë±ìŠ¤
 };

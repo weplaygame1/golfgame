@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -42,7 +42,7 @@ public:
 
 
 public:
-	/* »ı¼ºÀÚ */
+	/* ìƒì„±ì */
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* BallMesh;
 	UPROPERTY(EditAnywhere)
@@ -82,7 +82,7 @@ public:
 	float JumpPower;
 	float JumpAngle;
 
-	// ÇöÀç ÁøÇàÁßÀÎ È¦À» ¸¶ÃÆ´Â°¡
+	// í˜„ì¬ ì§„í–‰ì¤‘ì¸ í™€ì„ ë§ˆì³¤ëŠ”ê°€
 	bool bCheckHoleCup;
 	bool bCheckConcede;
 

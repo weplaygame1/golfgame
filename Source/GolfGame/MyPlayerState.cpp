@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyPlayerState.h"
 
@@ -6,7 +6,7 @@ AMyPlayerState::AMyPlayerState()
 {
 	CurrentHoleIndex = 0;
 
-	// °ÔÀÓ¸ğµå¿¡¼­ score tableÀ» °¡Á®¿È
+	// ê²Œì„ëª¨ë“œì—ì„œ score tableì„ ê°€ì ¸ì˜´
 }
 
 void AMyPlayerState::SetFormerLocation(FVector location)

@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+ï»¿// Copyright Epic Games, Inc. All Rights Reserved.
 
 
 #include "GolfGameGameModeBase.h"
@@ -12,7 +12,7 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 
 void AGolfGameGameModeBase::InitGameState()
 {
-	// ¸ðµç º¯¼öµé ÃÊ±âÈ­
+	// ëª¨ë“  ë³€ìˆ˜ë“¤ ì´ˆê¸°í™”
 
 	itest = 10;
 }

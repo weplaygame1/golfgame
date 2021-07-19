@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+ï»¿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -28,16 +28,16 @@ public:
 
 public:
 
-	//FVector ¹è¿­·Î
-	// ¸ðµç È¦ÀÇ ½ºÆùÀ§Ä¡
+	//FVector ë°°ì—´ë¡œ
+	// ëª¨ë“  í™€ì˜ ìŠ¤í°ìœ„ì¹˜
 
-	// ¾Æ¸¶µµ,, Ã³À½ ÁøÀÔÇÒ¶§ÀÇ Ä«¸Þ¶óÀÇ ¹æÇâ ?
+	// ì•„ë§ˆë„,, ì²˜ìŒ ì§„ìž…í• ë•Œì˜ ì¹´ë©”ë¼ì˜ ë°©í–¥ ?
 
-	// ¸ðµç È¦ÀÇ ÄÅ À§Ä¡
+	// ëª¨ë“  í™€ì˜ ì»µ ìœ„ì¹˜
 
 
-	// ¸ðµç È¦ÀÇ ½ÃÀÛ Å¸¼ö Á¤º¸ ex) ÆÄ3, ÆÄ4, ÆÄ5
-	// ÃÊ±â ScoreTable °ªÀÌ¶ó°í »ý°¢ÇÏ¸éµÉµí
+	// ëª¨ë“  í™€ì˜ ì‹œìž‘ íƒ€ìˆ˜ ì •ë³´ ex) íŒŒ3, íŒŒ4, íŒŒ5
+	// ì´ˆê¸° ScoreTable ê°’ì´ë¼ê³  ìƒê°í•˜ë©´ë ë“¯
 
 
 	int32 itest;

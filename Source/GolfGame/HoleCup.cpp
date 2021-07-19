@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "HoleCup.h"
@@ -23,7 +23,7 @@ void AHoleCup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ÄÁ½ÃµåÀÇ ¹İÁö¸§À» ´Ù½Ã Á¤ÇØÁà¾ßÇÔ
+	// ì»¨ì‹œë“œì˜ ë°˜ì§€ë¦„ì„ ë‹¤ì‹œ ì •í•´ì¤˜ì•¼í•¨
 	
 }
 

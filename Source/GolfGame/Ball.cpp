@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Ball.h"
@@ -69,7 +69,7 @@ void ABall::BeginPlay()
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
 
-	// ÀÌ·¸°Ô Ä¿½ºÅÒ °ÔÀÓ ¸ðµå¸¦ °¡Á®¿Ã¼ö ÀÖ´Ù.
+	// ì´ë ‡ê²Œ ì»¤ìŠ¤í…€ ê²Œìž„ ëª¨ë“œë¥¼ ê°€ì ¸ì˜¬ìˆ˜ ìžˆë‹¤.
 	CheckNowScore = GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>()->itest;
 }
 
@@ -88,29 +88,29 @@ void ABall::Tick(float DeltaTime)
 	CurrentBallLocation = this->GetActorLocation();
 	CurrentBallForwrad = BallCamera->GetForwardVector();
 
-	// °øÀÌ ¿ÏÀüÈ÷ ¸ØÃèÀ»¶§  && µü ÇÑ¹ø ¼öÇà
+	// ê³µì´ ì™„ì „ížˆ ë©ˆì·„ì„ë•Œ  && ë”± í•œë²ˆ ìˆ˜í–‰
 	if (!bIsMoving && bCheckOnce)
 	{
 		Print("Check");
 		bCheckOnce = false;
 
-		// È¦ ¾Æ¿ôÀÎÁö Ã¼Å©
+		// í™€ ì•„ì›ƒì¸ì§€ ì²´í¬
 		if (bCheckConcede || bCheckHoleCup)
 		{
 			if (bCheckHoleCup)
 			{
-				// È¦ÀÎ
+				// í™€ì¸
 			}
 			else
 			{
-				// ÄÁ½Ãµå
-				// Å¸¼öÇÏ³ª ÁÙÀÓ
+				// ì»¨ì‹œë“œ
+				// íƒ€ìˆ˜í•˜ë‚˜ ì¤„ìž„
 			}
 
-			// ´ÙÀ½ È¦·Î ³Ñ¾î°¡´Â ½ºÅÜ
+			// ë‹¤ìŒ í™€ë¡œ ë„˜ì–´ê°€ëŠ” ìŠ¤í…
 			BallPlayerState->NextHole();
 
-			// ±âÁ¸ °øÀ» »èÁ¦ÇÏ°í »õ·Î¿î ÁöÁ¡¿¡¼­ ¸®½ºÆùÇÏ´Â °æ¿ì
+			// ê¸°ì¡´ ê³µì„ ì‚­ì œí•˜ê³  ìƒˆë¡œìš´ ì§€ì ì—ì„œ ë¦¬ìŠ¤í°í•˜ëŠ” ê²½ìš°
 			/*AController* controller = GetController();
 			controller->UnPossess();
 			
@@ -120,32 +120,32 @@ void ABall::Tick(float DeltaTime)
 			controller->Possess(NewBall);
 			CurrentBall->Destroy();*/
 
-			// ±»ÀÌ »õ·Î ½ºÆù¾ÈÇØÁÖ°í ÀÌµ¿ÇØµµ µÉµí, ÀÌ·¯¸é Ãß°¡·Î Ä«¸Þ¶ó ¼öÁ¤ÇØ¾ßÇÔ
-			// Ä«¸Þ¶ó°¡ µû¶ó°¡´Â Çö»óÀ» ¾ø¾Ö±â À§ÇØ ¼Óµµ ¹«ÇÑ´ë·Î ¼³Á¤
+			// êµ³ì´ ìƒˆë¡œ ìŠ¤í°ì•ˆí•´ì£¼ê³  ì´ë™í•´ë„ ë ë“¯, ì´ëŸ¬ë©´ ì¶”ê°€ë¡œ ì¹´ë©”ë¼ ìˆ˜ì •í•´ì•¼í•¨
+			// ì¹´ë©”ë¼ê°€ ë”°ë¼ê°€ëŠ” í˜„ìƒì„ ì—†ì• ê¸° ìœ„í•´ ì†ë„ ë¬´í•œëŒ€ë¡œ ì„¤ì •
 			BallCameraSpringArm->CameraLagSpeed = 0.0f;
 			this->SetActorLocation(FVector(1000, 18000, 20));
 			
 			
 			
-			// Ãß°¡ÀûÀ¸·Î Ä«¸Þ¶óÀÇ ¹æÇâÀ» Á¤ÇØÁà¾ßÇÔ
-			// ÇöÀç´Â ¸¶Áö¸·¿¡ ÃÆ´ø ¹æÇâÀ» º¸°íÀÖÀ½
+			// ì¶”ê°€ì ìœ¼ë¡œ ì¹´ë©”ë¼ì˜ ë°©í–¥ì„ ì •í•´ì¤˜ì•¼í•¨
+			// í˜„ìž¬ëŠ” ë§ˆì§€ë§‰ì— ì³¤ë˜ ë°©í–¥ì„ ë³´ê³ ìžˆìŒ
 
 			
 
 
 
-			// ´ÙÀ½È¦·Î ³Ñ¾î°¥¶§ ±âÁ¸ Ã¼Å©ÇØÁÖ´ø 
-			// *º¼ÀÌ °¡Áö°í ÀÖ´ø º¯¼ö¸¦ ÃÊ±âÈ­* 
+			// ë‹¤ìŒí™€ë¡œ ë„˜ì–´ê°ˆë•Œ ê¸°ì¡´ ì²´í¬í•´ì£¼ë˜ 
+			// *ë³¼ì´ ê°€ì§€ê³  ìžˆë˜ ë³€ìˆ˜ë¥¼ ì´ˆê¸°í™”* 
 
 
 			
 		}
 		else
 		{
-			// ´õºíÆÄÀÌ¸é ´ÙÀ½È¦·Î ³Ñ¾î°¨
+			// ë”ë¸”íŒŒì´ë©´ ë‹¤ìŒí™€ë¡œ ë„˜ì–´ê°
 			
 
-			// ¾î´À ÁöÇü¿¡ ÀÖ´ÂÁö Ã¼Å©
+			// ì–´ëŠ ì§€í˜•ì— ìžˆëŠ”ì§€ ì²´í¬
 			UseLineTrace();
 		}
 	}
@@ -180,12 +180,12 @@ void ABall::OnPressBallHit()
 		bIsChargingHit = true;
 		Print("Press H");
 
-		//°øÀ» Ä¡´Â ¼ø°£ Å¸¼ö¸¦ ÇÏ³ª ÁÙ¿©ÁÜ 
+		//ê³µì„ ì¹˜ëŠ” ìˆœê°„ íƒ€ìˆ˜ë¥¼ í•˜ë‚˜ ì¤„ì—¬ì¤Œ 
 		CheckNowScore++;
 
-		//°øÀ» °ÔÀÌÁö ¸ðÀ¸´Â½ÄÀ¸·Î ÇÒÁö ¹Ù·Î ³¯¸®´Â ½ÄÀ¸·Î ÇÒÁö¿¡ µû¶ó¼­
-		//³¯¸®±â ÀüÀÇ À§Ä¡¸¦ ÀúÀåÇÏ´Â ±â´ÉÀÇ À§Ä¡¸¦ ¹Ù²ã¾ßÇÔ
-		//°øÀ» ³¯¸®±âÀüÀÇ À§Ä¡¸¦ player state ¿¡ ÀúÀå½ÃÅ´
+		//ê³µì„ ê²Œì´ì§€ ëª¨ìœ¼ëŠ”ì‹ìœ¼ë¡œ í• ì§€ ë°”ë¡œ ë‚ ë¦¬ëŠ” ì‹ìœ¼ë¡œ í• ì§€ì— ë”°ë¼ì„œ
+		//ë‚ ë¦¬ê¸° ì „ì˜ ìœ„ì¹˜ë¥¼ ì €ìž¥í•˜ëŠ” ê¸°ëŠ¥ì˜ ìœ„ì¹˜ë¥¼ ë°”ê¿”ì•¼í•¨
+		//ê³µì„ ë‚ ë¦¬ê¸°ì „ì˜ ìœ„ì¹˜ë¥¼ player state ì— ì €ìž¥ì‹œí‚´
 		BallPlayerState->SetFormerLocation(CurrentBallLocation);
 
 		 
@@ -200,7 +200,7 @@ void ABall::OnRealseBallHit()
 		fvtemp.Z = 1;
 		fvtemp = fvtemp * 100 * JumpPower;
 
-		// °¢ È¸ÀüÃàÀÌ¶ó´Âµ¥ ´Ù½Ã Ã¼Å©ÇØ¾ßÇÒµí
+		// ê° íšŒì „ì¶•ì´ë¼ëŠ”ë° ë‹¤ì‹œ ì²´í¬í•´ì•¼í• ë“¯
 		av = fvtemp.GetSafeNormal();
 		bv = av.ToOrientationQuat().GetRightVector();
 		cv = FVector::CrossProduct(av, bv);
@@ -208,8 +208,8 @@ void ABall::OnRealseBallHit()
 		BallMesh->AddAngularImpulseInDegrees(bv*10000, NAME_None, true);
 		BallMesh->AddImpulse(fvtemp, NAME_None, true);
 		
-		// °øÀÌ Ã³À½ ¶¥¿¡ ÂøÁöÇÏ´Â¼ø°£¿¡ angular damping °ªÀ» ¼³Á¤ÇØÁà¾ßÇÒµí?
-		// ¾Æ´Ï¸é physics material¸¦ ¸¸µé¾î¼­ Àû¿ë½ÃÄÑÁà¾ßÇÒµí
+		// ê³µì´ ì²˜ìŒ ë•…ì— ì°©ì§€í•˜ëŠ”ìˆœê°„ì— angular damping ê°’ì„ ì„¤ì •í•´ì¤˜ì•¼í• ë“¯?
+		// ì•„ë‹ˆë©´ physics materialë¥¼ ë§Œë“¤ì–´ì„œ ì ìš©ì‹œì¼œì¤˜ì•¼í• ë“¯
 
 		bIsChargingHit = false;
 		JumpPower = 0;
@@ -232,7 +232,7 @@ void ABall::MoveDirection(float AxisValue)
 
 void ABall::MoveAngle(float AxisValue)
 {
-	// ÃÖ´ëÄ¡¸¦ 1·Î Á¤ÇÏ¸é ÃÖ´ë °¢µµ 45µµ
+	// ìµœëŒ€ì¹˜ë¥¼ 1ë¡œ ì •í•˜ë©´ ìµœëŒ€ ê°ë„ 45ë„
 	if (AxisValue != 0 && !bIsMoving)
 	{
 		if (!bIsChargingHit)
@@ -302,8 +302,8 @@ void ABall::UseLineTrace()
 	{
 		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
 
-		// °¢ ÁöÇü ¼Ó¼º¿¡ ¸Â´Â ¼³Á¤ ex) ÆÄ¿ö°¨¼Ò µîµî
-		// ex) PlayerState.Surface = 0.1 -> 10% ÆÄ¿ö °¨¼Ò
+		// ê° ì§€í˜• ì†ì„±ì— ë§žëŠ” ì„¤ì • ex) íŒŒì›Œê°ì†Œ ë“±ë“±
+		// ex) PlayerState.Surface = 0.1 -> 10% íŒŒì›Œ ê°ì†Œ
 		switch (epstemp)
 		{
 		case SurfaceType1: // GREEN
@@ -321,8 +321,8 @@ void ABall::UseLineTrace()
 		case SurfaceType5: //BUNKER
 
 			break;
-		// ÀÌ ³à¼®µéÀº °øÀ» ¿Å°Ü¾ßÇÔ
-		// Ãß°¡·Î Å¸¼ö¸¦ ÁÙ¿©ÁÜ
+		// ì´ ë…€ì„ë“¤ì€ ê³µì„ ì˜®ê²¨ì•¼í•¨
+		// ì¶”ê°€ë¡œ íƒ€ìˆ˜ë¥¼ ì¤„ì—¬ì¤Œ
 		case SurfaceType6: // HAZARD
 			BallMesh->SetWorldLocation(BallPlayerState->GetFormerLocation());
 
