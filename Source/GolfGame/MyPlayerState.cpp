@@ -4,12 +4,12 @@
 
 AMyPlayerState::AMyPlayerState()
 {
-	CurrentHoleNumber = 0;
+	CurrentHoleIndex = 0;
 
-
+	// 게임모드에서 score table을 가져옴
 }
 
-void AMyPlayerState::SetFomerLocation(FVector location)
+void AMyPlayerState::SetFormerLocation(FVector location)
 {
 	FormerBallLocation = location;
 	FormerBallLocation.Z = 50;
@@ -17,15 +17,21 @@ void AMyPlayerState::SetFomerLocation(FVector location)
 
 void AMyPlayerState::NextHole()
 {
-	CurrentHoleNumber++;
+	CurrentHoleIndex++;
 }
 
-FVector AMyPlayerState::GetFomerLocation() const
+void AMyPlayerState::PlusScore()
+{
+	//ScoreTable[CurrentHoleIndex]++;
+}
+
+
+FVector AMyPlayerState::GetFormerLocation() const
 {
 	return FormerBallLocation;
 }
 
-int32 AMyPlayerState::GetCurrentHoleNumber() const
+int32 AMyPlayerState::GetCurrentHoleIndex() const
 {
-	return CurrentHoleNumber;
+	return CurrentHoleIndex;
 }

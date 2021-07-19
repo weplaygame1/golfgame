@@ -5,7 +5,8 @@
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
 
-#include "SceneManagement.h"
+//#include "SceneManagement.h"
+#include "DrawDebugHelpers.h"
 
 #include "GameFramework/Actor.h"
 #include "HoleCup.generated.h"

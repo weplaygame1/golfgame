@@ -24,7 +24,7 @@ ABall::ABall()
 	BallMesh->SetCollisionObjectType(ECC_Pawn);
 	BallMesh->SetCollisionProfileName("SetLineTraceChannel");
 
-	// temp set angulardamping
+	// set temp angulardamping
 	BallMesh->SetAngularDamping(30);
 
 	// Create CameraSpringArm;
@@ -41,7 +41,6 @@ ABall::ABall()
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
-
 
 	
 	
@@ -60,8 +59,6 @@ void ABall::BeginPlay()
 	BallMesh->OnComponentBeginOverlap.AddDynamic(this, &ABall::OnOverlapBegin);
 	BallMesh->OnComponentEndOverlap.AddDynamic(this, &ABall::OnOverlapEnd);
 	
-
-
 	// Set Default Value
 	bCheckHoleCup = false;
 	bCheckConcede = false;
@@ -69,21 +66,20 @@ void ABall::BeginPlay()
 	bCheckOnce = true;
 	JumpPower = 0;
 
-	// 해저드나 오비일때도 리스폰하는 형식으로 즉 계속 타수++ 
-	// 이러면 홀아웃으로인한 스폰을때는 타수의 기본값에 -1 더해줘야할듯
-
-	// 리스폰하는순간 다른 actor 이므로 기존의 값 다 지워짐
-	// 즉 ball에 저장하는게 아닌 다른곳에 저장시켜야함
-	
+	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
 
-
+	// 이렇게 커스텀 게임 모드를 가져올수 있다.
+	CheckNowScore = GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>()->itest;
 }
 
 // Called every frame
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// TEST
+
 
 	// Check Ball is Moving
 	CheckBallisMoiving();
@@ -92,7 +88,7 @@ void ABall::Tick(float DeltaTime)
 	CurrentBallLocation = this->GetActorLocation();
 	CurrentBallForwrad = BallCamera->GetForwardVector();
 
-	// 공이 완전히 멈췄을때 딱 한번 수행
+	// 공이 완전히 멈췄을때  && 딱 한번 수행
 	if (!bIsMoving && bCheckOnce)
 	{
 		Print("Check");
@@ -111,24 +107,43 @@ void ABall::Tick(float DeltaTime)
 				// 타수하나 줄임
 			}
 
-			// 그 후 다음 홀로 넘어가는 스텝
-			// 공의 위치만 이동 ? or 리스폰 ?
-			AController* controller = GetController();
+			// 다음 홀로 넘어가는 스텝
+			BallPlayerState->NextHole();
+
+			// 기존 공을 삭제하고 새로운 지점에서 리스폰하는 경우
+			/*AController* controller = GetController();
 			controller->UnPossess();
 			
 			ABall* CurrentBall = this;
 			ABall* NewBall = GetWorld()->SpawnActor<ABall>(ABall::StaticClass(), FVector(1000, 18000, 20),FRotator(0,0,0));
 			
 			controller->Possess(NewBall);
-			CurrentBall->Destroy();
+			CurrentBall->Destroy();*/
 
 			// 굳이 새로 스폰안해주고 이동해도 될듯, 이러면 추가로 카메라 수정해야함
+			// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
+			BallCameraSpringArm->CameraLagSpeed = 0.0f;
+			this->SetActorLocation(FVector(1000, 18000, 20));
+			
+			
+			
+			// 추가적으로 카메라의 방향을 정해줘야함
+			// 현재는 마지막에 쳤던 방향을 보고있음
+
+			
+
+
+
 			// 다음홀로 넘어갈때 기존 체크해주던 
 			// *볼이 가지고 있던 변수를 초기화* 
+
+
+			
 		}
 		else
 		{
 			// 더블파이면 다음홀로 넘어감
+			
 
 			// 어느 지형에 있는지 체크
 			UseLineTrace();
@@ -165,12 +180,15 @@ void ABall::OnPressBallHit()
 		bIsChargingHit = true;
 		Print("Press H");
 
-		//공을 치는 순간 타수를 하나 줄여줌 -> 이건 player state 에서 관리해야 할듯
-		//아니면 볼에서 타수를 가져오고 진행되는동안 볼에서 관리하다가
-		//홀 아웃되면 player state 에 set 해주는 방법?
+		//공을 치는 순간 타수를 하나 줄여줌 
+		CheckNowScore++;
 
+		//공을 게이지 모으는식으로 할지 바로 날리는 식으로 할지에 따라서
+		//날리기 전의 위치를 저장하는 기능의 위치를 바꿔야함
 		//공을 날리기전의 위치를 player state 에 저장시킴
-		BallPlayerState->SetFomerLocation(CurrentBallLocation);
+		BallPlayerState->SetFormerLocation(CurrentBallLocation);
+
+		 
 	}
 }
 
@@ -207,6 +225,7 @@ void ABall::MoveDirection(float AxisValue)
 		if (!bIsChargingHit)
 		{
 			AddControllerYawInput(AxisValue);
+			
 		}
 	}
 }
@@ -282,45 +301,40 @@ void ABall::UseLineTrace()
 	if (isHit)
 	{
 		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
-		
-		
 
 		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
-		if (epstemp == 1) 
+		// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
+		switch (epstemp)
 		{
-			NowMaterial = TEXT("Green");
-		}
-		else if (epstemp == 2)
-		{
-			NowMaterial = TEXT("Apron");
-		}
-		else if (epstemp == 3) 
-		{
-			NowMaterial = TEXT("Fairway");
-		}
-		else if (epstemp == 4)
-		{
-			NowMaterial = TEXT("Rough");
-		}
-		else if (epstemp == 5)
-		{
-			NowMaterial = TEXT("Bunker");
-		}
+		case SurfaceType1: // GREEN
+
+			break;
+		case SurfaceType2: // APRON
+
+			break;
+		case SurfaceType3: // FAIRWAY
+
+			break;
+		case SurfaceType4: //ROUGH
+
+			break;
+		case SurfaceType5: //BUNKER
+
+			break;
 		// 이 녀석들은 공을 옮겨야함
 		// 추가로 타수를 줄여줌
-		else if (epstemp == 6)
-		{
-			NowMaterial = TEXT("Hazard");
-			BallMesh->SetWorldLocation(BallPlayerState->GetFomerLocation());
-			
-		}
-		else if (epstemp == 7)
-		{
-			NowMaterial = TEXT("OB");
-			BallMesh->SetWorldLocation(BallPlayerState->GetFomerLocation());
+		case SurfaceType6: // HAZARD
+			BallMesh->SetWorldLocation(BallPlayerState->GetFormerLocation());
 
+			break;
+		case SurfaceType7: // OB
+			BallMesh->SetWorldLocation(BallPlayerState->GetFormerLocation());
+
+			break;
+	
+		default:
+			break;
 		}
-		
 		
 
 	}
@@ -332,14 +346,14 @@ void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 {
 	Print("OverLap");
 
-	/*if (OtherComp->GetName() == TEXT("CONCEDE"))
+	if (OtherComp->GetName() == TEXT("CONCEDE"))
 	{
 		bCheckConcede = true;
 	}
 	if (OtherComp->GetName() == TEXT("HOLECUP"))
 	{
 		bCheckConcede = true;
-	}*/
+	}
 }
 
 void ABall::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

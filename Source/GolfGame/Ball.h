@@ -6,6 +6,7 @@
 #include "GolfGame.h"
 
 #include "MyPlayerState.h"
+#include "GolfGameGameModeBase.h"
 
 #include "GameFramework/Controller.h"
 
@@ -49,6 +50,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* BallCamera;
 	
+	UPROPERTY(EditAnywhere)
+	int32 CheckNowScore;
+
 	/* When AddImpulse to Ball */
 	//UPROPERTY(EditAnywhere)
 		FVector fvtemp;

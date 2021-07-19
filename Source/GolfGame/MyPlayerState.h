@@ -20,27 +20,30 @@ class GOLFGAME_API AMyPlayerState : public APlayerState
 
 	AMyPlayerState();
 public:
-	void SetFomerLocation(FVector location);
+	void SetFormerLocation(FVector location);
 	void NextHole();
+	void PlusScore();
 
 public:
-	FVector GetFomerLocation() const;
-	int32 GetCurrentHoleNumber() const;
+	FVector GetFormerLocation() const;
+	int32 GetCurrentHoleIndex() const;
 
 public:
 	// 공을 치기전 위치
 	FVector FormerBallLocation;
 
 	// 점수 배열
-	TArray<int32> PlayerScores;
+	TArray<int32> ScoreTable;
 
-	// 현재 진행 홀 번호
-	int32 CurrentHoleNumber; 
+	// 현재 진행중인 홀 인덱스
+	int32 CurrentHoleIndex; 
 	/*
 	// Set CurrentHoleName
 	CurrentHoleNumber = 0;
 	CurrentHoleName = FString(TEXT("Hole")) + FString::FromInt(CurrentHoleNumber);
 	*/
 
+	// 클럽 종류
 
+	// 현재 클럽 or 현재 클럽 인덱스
 };
