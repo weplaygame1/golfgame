@@ -6,9 +6,6 @@
 #include "GolfGame.h"
 
 #include "MyPlayerState.h"
-#include "GolfGameGameModeBase.h"
-
-#include "GameFramework/Controller.h"
 
 
 #include "GameFramework/Pawn.h"
@@ -65,13 +62,15 @@ public:
 
 	/* when use line trace */
 	FVector CurrentBallLocation;
-	FVector CurrentBallForwrad;
+	FVector CurrentBallForward;
 	FHitResult OutHit;
 	UPROPERTY(EditAnywhere)
 	FString NowMaterial;
 
 	/* Player state */
 	AMyPlayerState* BallPlayerState;
+
+
 public:
 	UPROPERTY(EditAnywhere)
 	bool bCanHitBall;
@@ -103,5 +102,6 @@ public:
 	void CheckBallisMoiving();
 	void UseLineTrace();
 
+	void MoveNextHole();
 
 };

@@ -33,7 +33,7 @@ ABall::ABall()
 	BallCameraSpringArm->TargetArmLength = 600.0F;
 	BallCameraSpringArm->bEnableCameraLag = true;
 	BallCameraSpringArm->bUsePawnControlRotation = true;
-	BallCameraSpringArm->CameraLagSpeed = 3.0F;
+	BallCameraSpringArm->CameraLagSpeed = .0F;
 	
 	BallCameraSpringArm->SocketOffset = FVector(0.0F, 0.0F, 200.0F);
 	BallCameraSpringArm->TargetOffset = FVector(0.0F, 0.0F, 50.0F);
@@ -44,10 +44,7 @@ ABall::ABall()
 
 	
 	
-
 	
-
-
 	
 }
 
@@ -68,9 +65,12 @@ void ABall::BeginPlay()
 
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
+	
+	// Spawn
+	//SetActorLocation(BallPlayerState->GetNextSpawnLocation());
+	BallCameraSpringArm->CameraLagSpeed = 3.0F;
 
-	// 이렇게 커스텀 게임 모드를 가져올수 있다.
-	CheckNowScore = GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>()->itest;
+	
 }
 
 // Called every frame
@@ -79,14 +79,13 @@ void ABall::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// TEST
-
-
+	
 	// Check Ball is Moving
 	CheckBallisMoiving();
 
 	// Get Current Ball Location
 	CurrentBallLocation = this->GetActorLocation();
-	CurrentBallForwrad = BallCamera->GetForwardVector();
+	CurrentBallForward = BallCamera->GetForwardVector();
 
 	// 공이 완전히 멈췄을때  && 딱 한번 수행
 	if (!bIsMoving && bCheckOnce)
@@ -94,21 +93,25 @@ void ABall::Tick(float DeltaTime)
 		Print("Check");
 		bCheckOnce = false;
 
+		// 더블파인지 체크해야함
+
 		// 홀 아웃인지 체크
 		if (bCheckConcede || bCheckHoleCup)
 		{
+			// 홀인
 			if (bCheckHoleCup)
 			{
-				// 홀인
+				
 			}
+			// 컨시드
 			else
 			{
-				// 컨시드
 				// 타수하나 줄임
+				BallPlayerState->PlusScore();
 			}
 
 			// 다음 홀로 넘어가는 스텝
-			BallPlayerState->NextHole();
+			MoveNextHole();
 
 			// 기존 공을 삭제하고 새로운 지점에서 리스폰하는 경우
 			/*AController* controller = GetController();
@@ -120,33 +123,22 @@ void ABall::Tick(float DeltaTime)
 			controller->Possess(NewBall);
 			CurrentBall->Destroy();*/
 
-			// 굳이 새로 스폰안해주고 이동해도 될듯, 이러면 추가로 카메라 수정해야함
-			// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
-			BallCameraSpringArm->CameraLagSpeed = 0.0f;
-			this->SetActorLocation(FVector(1000, 18000, 20));
-			
-			
-			
-			// 추가적으로 카메라의 방향을 정해줘야함
-			// 현재는 마지막에 쳤던 방향을 보고있음
-
-			
-
-
-
 			// 다음홀로 넘어갈때 기존 체크해주던 
 			// *볼이 가지고 있던 변수를 초기화* 
 
-
-			
 		}
 		else
 		{
-			// 더블파이면 다음홀로 넘어감
-			
-
-			// 어느 지형에 있는지 체크
-			UseLineTrace();
+			// 더블파 -> 다음홀로 넘어감
+			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->iDoublePar)
+			{
+				MoveNextHole();
+			}
+			else
+			{
+				// 어느 지형에 있는지 체크
+				UseLineTrace();
+			}
 		}
 	}
 }
@@ -180,11 +172,15 @@ void ABall::OnPressBallHit()
 		bIsChargingHit = true;
 		Print("Press H");
 
+		// temp
+		BallCameraSpringArm->CameraLagSpeed = 3.0F;
+
 		//공을 치는 순간 타수를 하나 줄여줌 
-		CheckNowScore++;
+		BallPlayerState->PlusScore();
 
 		//공을 게이지 모으는식으로 할지 바로 날리는 식으로 할지에 따라서
 		//날리기 전의 위치를 저장하는 기능의 위치를 바꿔야함
+
 		//공을 날리기전의 위치를 player state 에 저장시킴
 		BallPlayerState->SetFormerLocation(CurrentBallLocation);
 
@@ -215,6 +211,8 @@ void ABall::OnRealseBallHit()
 		JumpPower = 0;
 		JumpAngle = 0;
 
+
+		
 	}
 }
 
@@ -225,7 +223,6 @@ void ABall::MoveDirection(float AxisValue)
 		if (!bIsChargingHit)
 		{
 			AddControllerYawInput(AxisValue);
-			
 		}
 	}
 }
@@ -342,6 +339,35 @@ void ABall::UseLineTrace()
 
 }
 
+void ABall::MoveNextHole()
+{
+	// 기본 설정
+	bCheckHoleCup = false;
+	bCheckConcede = false;
+
+	if (BallPlayerState->NextHole())
+	{
+		// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
+		BallCameraSpringArm->CameraLagSpeed = 0.0f;
+		this->SetActorLocation(BallPlayerState->GetNextSpawnLocation());
+
+		// 추가적으로 카메라의 방향을 정해줘야함
+		// 현재는 마지막에 쳤던 방향을 보고있음
+
+		
+
+		
+	}
+	else
+	{
+		// 게임끝났을때 temp
+		Print("End");
+		this->Destroy();
+
+
+	}
+}
+
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Print("OverLap");
@@ -352,7 +378,7 @@ void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 	}
 	if (OtherComp->GetName() == TEXT("HOLECUP"))
 	{
-		bCheckConcede = true;
+		bCheckHoleCup = true;
 	}
 }
 
@@ -366,6 +392,6 @@ void ABall::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor
 	}
 	if (OtherComp->GetName() == TEXT("HOLECUP"))
 	{
-		bCheckConcede = false;
+		bCheckHoleCup = false;
 	}
 }

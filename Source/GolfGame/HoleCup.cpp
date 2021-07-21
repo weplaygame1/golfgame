@@ -11,11 +11,12 @@ AHoleCup::AHoleCup()
 
 	HoleCup = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HOLECUP"));
 	Concede = CreateDefaultSubobject<USphereComponent>(TEXT("CONCEDE"));
+	Flag = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FLAG"));
 	Concede->SetSphereRadius(300);
 
 	RootComponent = HoleCup;
 	Concede->SetupAttachment(RootComponent);
-
+	Flag->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
