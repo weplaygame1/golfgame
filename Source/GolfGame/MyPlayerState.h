@@ -41,10 +41,7 @@ public:
 	void SetInitEndHoleIndex(int32 num);
 
 	void PlusScore();
-
-
 	bool NextHole();
-
 
 public:
 	FVector GetFormerLocation() const;
@@ -78,13 +75,11 @@ public:
 
 	// 현재 클럽 상태
 	EGolfClub ClubState;
+
 	/*
 	// Set CurrentHoleName
 	CurrentHoleNumber = 0;
 	CurrentHoleName = FString(TEXT("Hole")) + FString::FromInt(CurrentHoleNumber);
 	*/
 
-	// 클럽 종류
-
-	// 현재 클럽 or 현재 클럽 인덱스
 };

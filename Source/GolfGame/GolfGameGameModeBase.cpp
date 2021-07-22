@@ -8,6 +8,7 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 {
 	DefaultPawnClass = ABall::StaticClass();
 	PlayerStateClass = AMyPlayerState::StaticClass();
+	PlayerControllerClass = AMyPlayerController::StaticClass();
 }
 
 void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer) 
@@ -30,8 +31,6 @@ void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer)
 
 
 }
-
-
 
 void AGolfGameGameModeBase::InitSpawnLocation()
 {

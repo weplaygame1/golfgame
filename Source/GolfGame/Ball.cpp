@@ -321,11 +321,11 @@ void ABall::UseLineTrace()
 		// 이 녀석들은 공을 옮겨야함
 		// 추가로 타수를 줄여줌
 		case SurfaceType6: // HAZARD
-			BallMesh->SetWorldLocation(BallPlayerState->GetFormerLocation());
-
+			this->SetActorLocation(BallPlayerState->GetFormerLocation());
+			
 			break;
 		case SurfaceType7: // OB
-			BallMesh->SetWorldLocation(BallPlayerState->GetFormerLocation());
+			this->SetActorLocation(BallPlayerState->GetFormerLocation());
 
 			break;
 	
@@ -350,6 +350,8 @@ void ABall::MoveNextHole()
 		// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
 		BallCameraSpringArm->CameraLagSpeed = 0.0f;
 		this->SetActorLocation(BallPlayerState->GetNextSpawnLocation());
+		BallCameraSpringArm->CameraLagSpeed = 3.0F;
+
 
 		// 추가적으로 카메라의 방향을 정해줘야함
 		// 현재는 마지막에 쳤던 방향을 보고있음
