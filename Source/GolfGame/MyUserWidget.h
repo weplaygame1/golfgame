@@ -5,8 +5,11 @@
 //#include "CoreMinimal.h"
 #include "GolfGame.h"
 
-#include "Components/ProgressBar.h"
+#include "MyPlayerState.h"
+#include "Ball.h"
 
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 
 #include "Blueprint/UserWidget.h"
 #include "MyUserWidget.generated.h"
@@ -21,11 +24,20 @@ class GOLFGAME_API UMyUserWidget : public UUserWidget
 	
 public:
 	
-	virtual bool Initialize();
+	void SetCurrentBallState(ABall* ball);
+	void SetCurrentPlayerState(AMyPlayerState* state);
+
+	void UpdatePower();
+	void SetPowerZero();
+
+public:
+	TWeakObjectPtr<ABall> CurrentBallState;
+	TWeakObjectPtr<AMyPlayerState> CurrentPlayerState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UProgressBar* Bar;
-
-
+	UProgressBar* Power;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* DistanceRemaining;
+	
 	
 };

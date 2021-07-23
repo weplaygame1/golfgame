@@ -9,9 +9,9 @@
 #include "MyPlayerState.h"
 #include "MyPlayerController.h"
 
+
+
 #include "Blueprint/UserWidget.h"
-
-
 
 #include "GameFramework/GameModeBase.h"
 #include "GolfGameGameModeBase.generated.h"
@@ -35,8 +35,6 @@ public:
 public:
 	TArray<FVector> GetSpawnLocation();
 	TArray<int32> GetScoreTable();
-
-public:
 
 	// 모든 홀의 시작 타수 정보 ex) 파3, 파4, 파5
 	// 초기 ScoreTable 값이라고 생각하면될듯

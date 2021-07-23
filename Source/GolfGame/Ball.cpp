@@ -30,7 +30,7 @@ ABall::ABall()
 	// Create CameraSpringArm;
 	BallCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CAMERASPRINGARM"));
 	BallCameraSpringArm->SetupAttachment(RootComponent);
-	BallCameraSpringArm->TargetArmLength = 600.0F;
+	BallCameraSpringArm->TargetArmLength = 700.0F;
 	BallCameraSpringArm->bEnableCameraLag = true;
 	BallCameraSpringArm->bUsePawnControlRotation = true;
 	BallCameraSpringArm->CameraLagSpeed = .0F;
@@ -42,10 +42,11 @@ ABall::ABall()
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
 
+	CurrentState = EBallState::STOP;
+
+
 	
-	
-	
-	
+
 }
 
 // Called when the game starts or when spawned
@@ -59,7 +60,10 @@ void ABall::BeginPlay()
 	// Set Default Value
 	bCheckHoleCup = false;
 	bCheckConcede = false;
+
 	bCanHitBall = true;
+	bIsChargingHit = false;
+
 	bCheckOnce = true;
 	JumpPower = 0;
 
@@ -70,7 +74,8 @@ void ABall::BeginPlay()
 	//SetActorLocation(BallPlayerState->GetNextSpawnLocation());
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
 
-	
+
+
 }
 
 // Called every frame
@@ -78,69 +83,26 @@ void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// TEST
-	
-	// Check Ball is Moving
-	CheckBallisMoiving();
-
-	// Get Current Ball Location
-	CurrentBallLocation = this->GetActorLocation();
-	CurrentBallForward = BallCamera->GetForwardVector();
-
-	// 공이 완전히 멈췄을때  && 딱 한번 수행
-	if (!bIsMoving && bCheckOnce)
+	switch (CurrentState)
 	{
-		Print("Check");
-		bCheckOnce = false;
+	case EBallState::STOP:
+		break;
+	case EBallState::READY:
+		break;
+	case EBallState::CHARGING:
+		ChargingPower();
+		break;
+	case EBallState::MOVING:
+		CheckBallisMoiving();
+		break;
+	case EBallState::CHECK:
+		CheckBallLocation();
+		break;
+	default:
 
-		// 더블파인지 체크해야함
-
-		// 홀 아웃인지 체크
-		if (bCheckConcede || bCheckHoleCup)
-		{
-			// 홀인
-			if (bCheckHoleCup)
-			{
-				
-			}
-			// 컨시드
-			else
-			{
-				// 타수하나 줄임
-				BallPlayerState->PlusScore();
-			}
-
-			// 다음 홀로 넘어가는 스텝
-			MoveNextHole();
-
-			// 기존 공을 삭제하고 새로운 지점에서 리스폰하는 경우
-			/*AController* controller = GetController();
-			controller->UnPossess();
-			
-			ABall* CurrentBall = this;
-			ABall* NewBall = GetWorld()->SpawnActor<ABall>(ABall::StaticClass(), FVector(1000, 18000, 20),FRotator(0,0,0));
-			
-			controller->Possess(NewBall);
-			CurrentBall->Destroy();*/
-
-			// 다음홀로 넘어갈때 기존 체크해주던 
-			// *볼이 가지고 있던 변수를 초기화* 
-
-		}
-		else
-		{
-			// 더블파 -> 다음홀로 넘어감
-			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->iDoublePar)
-			{
-				MoveNextHole();
-			}
-			else
-			{
-				// 어느 지형에 있는지 체크
-				UseLineTrace();
-			}
-		}
+		break;
 	}
+
 }
 
 // Called to bind functionality to input
@@ -151,9 +113,6 @@ void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	// Hit : Press H
 	PlayerInputComponent->BindAction("BallHit", IE_Pressed, this, &ABall::OnPressBallHit);
 	PlayerInputComponent->BindAction("BallHit", IE_Released, this, &ABall::OnRealseBallHit);
-
-	// GetPower : Press H
-	PlayerInputComponent->BindAxis("GetPower", this, &ABall::GettingPower);
 
 	// Move Direction : Press A or D
 	PlayerInputComponent->BindAxis("MoveDirection", this, &ABall::MoveDirection);
@@ -167,29 +126,42 @@ void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ABall::OnPressBallHit()
 {
-	if (bCanHitBall && !bIsMoving)
+	if (CurrentState == EBallState::STOP)
 	{
-		bIsChargingHit = true;
-		Print("Press H");
+		CurrentState = EBallState::READY;
+	}
 
-		// temp
+	if (CurrentState == EBallState::CHARGING)
+	{
+		// ball hit : power = PowerPercent
 		BallCameraSpringArm->CameraLagSpeed = 3.0F;
-
-		//공을 치는 순간 타수를 하나 줄여줌 
+		BallPlayerState->SetFormerLocation(this->GetActorLocation());
 		BallPlayerState->PlusScore();
+		
+		// 공 치는 부분 -> 함수하나 만들고 클럽 종류에따라 각도와 힘 계산
+		fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
+		fvtemp.Z = 1;
+		fvtemp = fvtemp * 100 * 10;
+		av = fvtemp.GetSafeNormal();
+		bv = av.ToOrientationQuat().GetRightVector();
+		BallMesh->AddAngularImpulseInDegrees(bv * 10000, NAME_None, true);
+		BallMesh->AddImpulse(fvtemp, NAME_None, true);
 
-		//공을 게이지 모으는식으로 할지 바로 날리는 식으로 할지에 따라서
-		//날리기 전의 위치를 저장하는 기능의 위치를 바꿔야함
-
-		//공을 날리기전의 위치를 player state 에 저장시킴
-		BallPlayerState->SetFormerLocation(CurrentBallLocation);
-
-		 
+		bCheckOnce = false;
+		CurrentState = EBallState::MOVING;
 	}
 }
 
 void ABall::OnRealseBallHit()
 {
+	if (CurrentState == EBallState::READY)
+	{
+		PowerPercent = 0.0f;
+		PowerIncrease = true;
+		CurrentState = EBallState::CHARGING;
+	}
+
+	/*
 	if (bCanHitBall && !bIsMoving)
 	{
 		fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
@@ -210,20 +182,15 @@ void ABall::OnRealseBallHit()
 		bIsChargingHit = false;
 		JumpPower = 0;
 		JumpAngle = 0;
-
-
-		
 	}
+	*/
 }
 
 void ABall::MoveDirection(float AxisValue)
 {
-	if (AxisValue != 0 && !bIsMoving)
+	if (AxisValue != 0 && CurrentState == EBallState::STOP)
 	{
-		if (!bIsChargingHit)
-		{
-			AddControllerYawInput(AxisValue);
-		}
+		AddControllerYawInput(AxisValue);
 	}
 }
 
@@ -253,32 +220,20 @@ void ABall::MoveAngle(float AxisValue)
 	}
 }
 
-void ABall::GettingPower(float AxisValue)
-{
-	if (AxisValue != 0 && !bIsMoving)
-	{
-		/*if (bCanHitBall)
-		{
-			if (JumpPower <= 9.5)
-			{
-				JumpPower += 0.5;
-				PrintWithFloat("Power : ", JumpPower);
-			}
-		}*/
-		JumpPower = 10;
-	}
-}
-
 void ABall::CheckBallisMoiving()
 {
-	if (BallMesh->GetComponentVelocity().Size()>0)
+	if (BallMesh->GetComponentVelocity().Size() > 0.f)
 	{
-		bIsMoving = true;
 		bCheckOnce = true;
+		bIsMoving = true;
 	}
 	else
 	{
 		bIsMoving = false;
+		if (bCheckOnce && !bIsMoving)
+		{
+			CurrentState = EBallState::CHECK;
+		}
 	}
 }
 
@@ -286,8 +241,8 @@ void ABall::UseLineTrace()
 {
 	Print("UseLineTrace");
 
-	FVector Startpoint = CurrentBallLocation;
-	FVector Endpoint = CurrentBallLocation * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -10.0f);
+	FVector Startpoint = this->GetActorLocation();
+	FVector Endpoint = Startpoint * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -10.0f);
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.bReturnPhysicalMaterial = true;
 	CollisionParams.bTraceComplex = false;
@@ -350,25 +305,83 @@ void ABall::MoveNextHole()
 		// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
 		BallCameraSpringArm->CameraLagSpeed = 0.0f;
 		this->SetActorLocation(BallPlayerState->GetNextSpawnLocation());
-		BallCameraSpringArm->CameraLagSpeed = 3.0F;
-
 
 		// 추가적으로 카메라의 방향을 정해줘야함
 		// 현재는 마지막에 쳤던 방향을 보고있음
-
-		
-
-		
 	}
 	else
 	{
 		// 게임끝났을때 temp
 		Print("End");
 		this->Destroy();
-
-
 	}
 }
+
+void ABall::ChargingPower()
+{
+	PrintWithFloat("", PowerPercent);
+	if (PowerIncrease)
+	{
+		PowerPercent += 0.5f;
+
+		if(PowerPercent>=100.0f)
+		{
+			PowerIncrease = false;
+		}
+	}
+	else
+	{
+		PowerPercent -= 0.5f;
+
+		if (PowerPercent <= 0.0f)
+		{
+			CurrentState = EBallState::STOP;
+		}
+	}
+	GetPowerGauge.Broadcast();
+
+}
+
+void ABall::CheckBallLocation()
+{
+	if (!bIsMoving) {
+		// 홀 아웃인지 체크
+		if (bCheckConcede || bCheckHoleCup)
+		{
+			// 홀인
+			if (bCheckHoleCup)
+			{
+
+			}
+			// 컨시드
+			else
+			{
+				// 타수하나 줄임
+				BallPlayerState->PlusScore();
+			}
+
+			// 다음 홀로 넘어가는 스텝
+			MoveNextHole();
+		}
+		else
+		{
+			// 더블파 -> 다음홀로 넘어감
+			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->iDoublePar)
+			{
+				MoveNextHole();
+			}
+			else
+			{
+				// 어느 지형에 있는지 체크
+				UseLineTrace();
+			}
+		}
+
+		SetPowerZero.Broadcast();
+		CurrentState = EBallState::STOP;
+	}
+}
+
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -396,4 +409,9 @@ void ABall::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor
 	{
 		bCheckHoleCup = false;
 	}
+}
+
+float ABall::GetPower()
+{
+	return PowerPercent / 100;
 }

@@ -76,6 +76,10 @@ public:
 	// 현재 클럽 상태
 	EGolfClub ClubState;
 
+	// 남은 거리
+	float Distance;
+	
+	
 	/*
 	// Set CurrentHoleName
 	CurrentHoleNumber = 0;

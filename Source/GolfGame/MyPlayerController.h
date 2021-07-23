@@ -6,6 +6,7 @@
 #include "GolfGame.h"
 
 #include "MyUserWidget.h"
+#include "MyPlayerState.h"
 
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
@@ -21,14 +22,12 @@ class GOLFGAME_API AMyPlayerController : public APlayerController
 public:
 	AMyPlayerController();
 
-
-	virtual void OnPossess(APawn* aPawn) override;
 	virtual void BeginPlay() override;
-	
+	virtual void OnPossess(APawn* aPawn) override;
 
 public:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UMyUserWidget> Widget_MainClass;
+	TSubclassOf<class UMyUserWidget> PlayerWidget;
 	UPROPERTY(EditAnywhere)
 	UMyUserWidget* CurrentWidget;
 

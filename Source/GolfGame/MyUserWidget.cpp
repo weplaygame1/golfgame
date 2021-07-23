@@ -3,16 +3,24 @@
 
 #include "MyUserWidget.h"
 
-bool UMyUserWidget::Initialize()
+void UMyUserWidget::SetCurrentBallState(ABall* ball) 
 {
-	Super::Initialize();
-
-	Bar = Cast<UProgressBar>(GetWidgetFromName(TEXT("Power")));
-	
-
-
-
-
-	return true;
+	CurrentBallState = ball; 
+	ball->GetPowerGauge.AddUObject(this, &UMyUserWidget::UpdatePower);
+	ball->SetPowerZero.AddUObject(this,&UMyUserWidget::SetPowerZero);
 }
 
+void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
+{
+	CurrentPlayerState = state; 
+}
+
+void UMyUserWidget::UpdatePower()
+{
+	Power->SetPercent(CurrentBallState->GetPower());
+}
+
+void UMyUserWidget::SetPowerZero()
+{
+	Power->SetPercent(0);
+}

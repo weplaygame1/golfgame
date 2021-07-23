@@ -9,6 +9,7 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 	DefaultPawnClass = ABall::StaticClass();
 	PlayerStateClass = AMyPlayerState::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
+
 }
 
 void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer) 
@@ -21,7 +22,7 @@ void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer)
 	InitScoreTable();
 
 	// PlayerState에 초기값을 설정해줌
-	AMyPlayerState* PS = Cast<AMyPlayerState>(NewPlayer->PlayerState);
+	auto PS = Cast<AMyPlayerState>(NewPlayer->PlayerState);
 	PS->SetInitSocreTable(AllScoreTable);
 	PS->SetInitSpawnLocation(AllSpawnLocation);
 	PS->SetInitEndHoleIndex(NumOfAllHole);

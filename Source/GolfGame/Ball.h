@@ -7,9 +7,20 @@
 
 #include "MyPlayerState.h"
 
-
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
+
+DECLARE_MULTICAST_DELEGATE(FUpdatePowerGaugeDelegate);
+
+UENUM()
+enum class EBallState : uint8
+{
+	STOP = 0 UMETA(DisplayName = "STOP"),
+	READY UMETA(DisplayName = "READY"),
+	CHARGING UMETA(DisplayName = "CHARGING"),
+	MOVING UMETA(DisplayName = "MOVING"),
+	CHECK UMETA(DisplayName = "CHECK")
+};
 
 UCLASS()
 class GOLFGAME_API ABall : public APawn
@@ -20,7 +31,8 @@ public:
 	// Sets default values for this pawn's properties
 	ABall();
 
-
+	FUpdatePowerGaugeDelegate GetPowerGauge;
+	FUpdatePowerGaugeDelegate SetPowerZero;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -61,15 +73,12 @@ public:
 		FVector cv;
 
 	/* when use line trace */
-	FVector CurrentBallLocation;
-	FVector CurrentBallForward;
 	FHitResult OutHit;
 	UPROPERTY(EditAnywhere)
 	FString NowMaterial;
 
 	/* Player state */
 	AMyPlayerState* BallPlayerState;
-
 
 public:
 	UPROPERTY(EditAnywhere)
@@ -85,11 +94,13 @@ public:
 	bool bCheckHoleCup;
 	bool bCheckConcede;
 
-
 	bool bCheckOnce;
 
+	float PowerPercent = 0;
+	bool PowerIncrease = true;
 
-	float fcheck = 0;
+	UPROPERTY(EditAnywhere)
+	EBallState CurrentState;
 
 
 public:
@@ -97,11 +108,15 @@ public:
 	void OnRealseBallHit();
 	void MoveDirection(float AxisValue);
 	void MoveAngle(float AxisValue);
-	void GettingPower(float AxisValue);
 
 	void CheckBallisMoiving();
 	void UseLineTrace();
 
 	void MoveNextHole();
 
+
+	void ChargingPower();
+	void CheckBallLocation();
+
+	float GetPower();
 };
