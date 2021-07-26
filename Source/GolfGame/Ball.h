@@ -10,7 +10,7 @@
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FUpdatePowerGaugeDelegate);
+DECLARE_MULTICAST_DELEGATE(FUpdateBallStateDelegate);
 
 UENUM()
 enum class EBallState : uint8
@@ -31,8 +31,8 @@ public:
 	// Sets default values for this pawn's properties
 	ABall();
 
-	FUpdatePowerGaugeDelegate GetPowerGauge;
-	FUpdatePowerGaugeDelegate SetPowerZero;
+	FUpdateBallStateDelegate GetPowerGaugeOnWidget;
+	FUpdateBallStateDelegate SetPowerZeroOnWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -103,6 +103,10 @@ public:
 	EBallState CurrentState;
 
 
+	UPROPERTY(EditAnywhere)
+		 FString tttt4;
+	UPROPERTY(EditAnywhere)
+		FName tttt5;
 public:
 	void OnPressBallHit();
 	void OnRealseBallHit();

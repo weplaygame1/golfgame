@@ -30,6 +30,14 @@ public:
 	void UpdatePower();
 	void SetPowerZero();
 
+	void UpdateWholeDistance();
+
+	void UpdateDistance();
+
+	void UpdatePar();
+
+	void UpdateScore();
+
 public:
 	TWeakObjectPtr<ABall> CurrentBallState;
 	TWeakObjectPtr<AMyPlayerState> CurrentPlayerState;
@@ -37,7 +45,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UProgressBar* Power;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* WholeDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* DistanceRemaining;
-	
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* ShowPar;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* NowScore;
 };

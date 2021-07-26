@@ -13,6 +13,8 @@
  * 
  */
 
+DECLARE_MULTICAST_DELEGATE(FUpdatePlayerStateDelegate);
+
 // 골프클럽 ENUM CLASS
 UENUM()
 enum class EGolfClub : uint8
@@ -32,13 +34,21 @@ class GOLFGAME_API AMyPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 
+public:
 	AMyPlayerState();
+
+	FUpdatePlayerStateDelegate GetDistanceOnWidget;
+	FUpdatePlayerStateDelegate GetParOnWidget;
+	FUpdatePlayerStateDelegate GetScoreOnWidget;
+	FUpdatePlayerStateDelegate GetWholeDistanceOnWidget;
 public:
 	void SetFormerLocation(FVector location);
 	void SetInitSocreTable(TArray<int32> score);
 	void SetInitSpawnLocation(TArray<FVector> location);
+	void SetInitHoleCupLocation(TArray<FVector> location);
 	void SetInitDoublePar(int32 num);
 	void SetInitEndHoleIndex(int32 num);
+	void SetDistanceRemaining();
 
 	void PlusScore();
 	bool NextHole();
@@ -46,8 +56,13 @@ public:
 public:
 	FVector GetFormerLocation() const;
 	FVector GetNextSpawnLocation() const;
+
 	int32 GetNowHoleScore() const;
 	int32 GetCurrentHoleIndex() const;
+	int32 GetDoublePar() const;
+	int32 GetWholeDistance() const;
+
+	float GetDistanceRemaining() const;
 
 public:
 	// 공을 치기전 위치
@@ -65,6 +80,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<FVector> SpawnLocation;
 
+	// 각 홀 컵 위치
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> HoleCupLocation;
+
 	// 현재 진행중인 홀 인덱스
 	UPROPERTY(EditAnywhere)
 	int32 CurrentHoleIndex; 
@@ -77,8 +96,11 @@ public:
 	EGolfClub ClubState;
 
 	// 남은 거리
+	UPROPERTY(EditAnywhere)
 	float Distance;
-	
+
+	int WholeDistacne;
+
 	
 	/*
 	// Set CurrentHoleName

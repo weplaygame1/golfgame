@@ -25,6 +25,11 @@ void AMyPlayerState::SetInitSpawnLocation(TArray<FVector> location)
 	SpawnLocation = location;
 }
 
+void AMyPlayerState::SetInitHoleCupLocation(TArray<FVector> location)
+{
+	HoleCupLocation = location;
+}
+
 void AMyPlayerState::SetInitDoublePar(int32 num)
 {
 	iDoublePar = num;
@@ -33,6 +38,13 @@ void AMyPlayerState::SetInitDoublePar(int32 num)
 void AMyPlayerState::SetInitEndHoleIndex(int32 num)
 {
 	EndHoleIndex = num;
+	WholeDistacne = FVector::Dist(SpawnLocation[CurrentHoleIndex], HoleCupLocation[CurrentHoleIndex]);
+}
+
+void AMyPlayerState::SetDistanceRemaining()
+{
+	Distance = FVector::Dist(GetPawn()->GetActorLocation(), HoleCupLocation[CurrentHoleIndex]);
+	GetDistanceOnWidget.Broadcast();
 }
 
 void AMyPlayerState::PlusScore()
@@ -41,6 +53,7 @@ void AMyPlayerState::PlusScore()
 	if (ScoreTable[CurrentHoleIndex] < iDoublePar)
 	{
 		ScoreTable[CurrentHoleIndex]++;
+		GetScoreOnWidget.Broadcast();
 	}
 }
 
@@ -53,6 +66,11 @@ bool AMyPlayerState::NextHole()
 	{
 		FormerBallLocation = SpawnLocation[CurrentHoleIndex];
 		iDoublePar = -ScoreTable[CurrentHoleIndex];
+		WholeDistacne= FVector::Dist(SpawnLocation[CurrentHoleIndex],HoleCupLocation[CurrentHoleIndex]);
+		
+		GetParOnWidget.Broadcast();
+		GetScoreOnWidget.Broadcast();
+		GetWholeDistanceOnWidget.Broadcast();
 
 		return true;
 	}
@@ -62,8 +80,6 @@ bool AMyPlayerState::NextHole()
 		return false;
 	}
 }
-
-
 
 FVector AMyPlayerState::GetFormerLocation() const
 {
@@ -84,4 +100,18 @@ int32 AMyPlayerState::GetCurrentHoleIndex() const
 	return CurrentHoleIndex;
 }
 
+int32 AMyPlayerState::GetDoublePar() const
+{
+	return iDoublePar;
+}
+
+int32 AMyPlayerState::GetWholeDistance() const
+{
+	return WholeDistacne;
+}
+
+float AMyPlayerState::GetDistanceRemaining() const
+{
+	return Distance;
+}
 

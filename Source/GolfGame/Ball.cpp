@@ -69,7 +69,10 @@ void ABall::BeginPlay()
 
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
-	
+	BallPlayerState->GetParOnWidget.Broadcast();
+	BallPlayerState->GetScoreOnWidget.Broadcast();
+	BallPlayerState->GetWholeDistanceOnWidget.Broadcast();
+
 	// Spawn
 	//SetActorLocation(BallPlayerState->GetNextSpawnLocation());
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
@@ -82,6 +85,8 @@ void ABall::BeginPlay()
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	BallPlayerState->SetDistanceRemaining();
 
 	switch (CurrentState)
 	{
@@ -259,28 +264,32 @@ void ABall::UseLineTrace()
 		switch (epstemp)
 		{
 		case SurfaceType1: // GREEN
-
+			NowMaterial = TEXT("GREEN");
 			break;
 		case SurfaceType2: // APRON
+			NowMaterial = TEXT("APRON");
 
 			break;
 		case SurfaceType3: // FAIRWAY
+			NowMaterial = TEXT("FAIRWAY");
 
 			break;
 		case SurfaceType4: //ROUGH
+			NowMaterial = TEXT("ROUGH");
 
 			break;
 		case SurfaceType5: //BUNKER
+			NowMaterial = TEXT("BUNKER");
 
 			break;
 		// 이 녀석들은 공을 옮겨야함
 		// 추가로 타수를 줄여줌
 		case SurfaceType6: // HAZARD
-			this->SetActorLocation(BallPlayerState->GetFormerLocation());
+			//this->SetActorLocation(BallPlayerState->GetFormerLocation());
 			
 			break;
 		case SurfaceType7: // OB
-			this->SetActorLocation(BallPlayerState->GetFormerLocation());
+			//this->SetActorLocation(BallPlayerState->GetFormerLocation());
 
 			break;
 	
@@ -338,7 +347,7 @@ void ABall::ChargingPower()
 			CurrentState = EBallState::STOP;
 		}
 	}
-	GetPowerGauge.Broadcast();
+	GetPowerGaugeOnWidget.Broadcast();
 
 }
 
@@ -377,7 +386,7 @@ void ABall::CheckBallLocation()
 			}
 		}
 
-		SetPowerZero.Broadcast();
+		SetPowerZeroOnWidget.Broadcast();
 		CurrentState = EBallState::STOP;
 	}
 }
@@ -387,6 +396,9 @@ void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 {
 	Print("OverLap");
 
+	// OtherComp를 이용하여 스플라인에 적용된 속성을 알 수 있다.
+	//tttt4 = OtherComp->GetMaterial(0)->GetName();
+	
 	if (OtherComp->GetName() == TEXT("CONCEDE"))
 	{
 		bCheckConcede = true;
