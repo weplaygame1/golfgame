@@ -1,0 +1,201 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "TestSpline.h"
+
+// Sets default values
+ATestSpline::ATestSpline()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+
+	//scence = CreateDefaultSubobject<USceneComponent>(TEXT("scence"));
+	spline = CreateDefaultSubobject<USplineComponent>(TEXT("spline"));
+	splineprocedural = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("procedural"));
+	material = CreateDefaultSubobject<UMaterialInterface>(TEXT("material"));
+
+	CurrentPoint = 0;
+	
+	TriangleSize = 50;
+	Padding = 0.05;
+}
+
+// Called when the game starts or when spawned
+void ATestSpline::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	MakePointGrid();
+	BuildMeshFromOutline();
+}
+
+// Called every frame
+void ATestSpline::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	/* 내부 점을 보여주는 기능
+	for (int i = 0; i < PointIndex.Num(); i++)
+	{
+		if (PointIndex[i] >= 0)
+		{
+			DrawCircle(GetWorld(), Vertices[i], FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 1, 100, false, -1, 0, 5);
+		}
+	}*/
+}
+
+void ATestSpline::MakePointGrid()
+{
+	//TriangleSize = FMath::Clamp(TriangleSize, 2.f, 30.f);
+
+	FVector Origin;
+	FVector BoxExtent;
+	float SphereRadius;
+	UKismetSystemLibrary::GetComponentBounds(spline, Origin, BoxExtent, SphereRadius);
+
+	// 범위가 부족해서 +1 대신 *2로 수정
+	//NumX = UKismetMathLibrary::FCeil((BoxExtent.X / TriangleSize) + 1);
+	NumX = UKismetMathLibrary::FCeil(BoxExtent.X / TriangleSize * 2);
+	NumY = UKismetMathLibrary::FCeil((BoxExtent.Y / (TriangleSize / 2) * UKismetMathLibrary::DegTan(30)) );
+	
+	for (int32 indexY = -NumY; indexY <= NumY; indexY++)
+	{
+		for (int32 indexX = -NumX; indexX <= NumX; indexX++)
+		{
+			FVector CurrentLoc;
+
+			//블루프린트와 적혀있는 공식이 다름
+			//CurrentLoc.X = Origin.X + (TriangleSize / 2 * indexX) + (FMath::Abs(indexY + NumY) % 2 );
+			//CurrentLoc.Y = Origin.Y + ((TriangleSize / 2) * (UKismetMathLibrary::DegTan(60)) * indexY);
+
+			CurrentLoc.X = Origin.X + (TriangleSize * indexX) + ((TriangleSize / 2)*(FMath::Abs(indexY + NumY) % 2));
+			CurrentLoc.Y = Origin.Y + (((TriangleSize / 2) * UKismetMathLibrary::DegTan(60)) * indexY);
+
+			CurrentLoc.Z = Origin.Z;
+
+			FVector CurrentEdgeLoc = spline->FindLocationClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
+
+			FVector FVtemp1 = CurrentEdgeLoc - CurrentLoc;
+			FVector FVtemp2 = spline->FindDirectionClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
+			FVector FVtemp3 = UKismetMathLibrary::Cross_VectorVector(FVtemp2, FVector(0.0f, 0.0f, 1.0f));
+			//FVector FVtemp3 = UKismetMathLibrary::Cross_VectorVector(FVector(0.0f, 0.0f, 1.0f),FVtemp2);
+			
+			float fdot = UKismetMathLibrary::Dot_VectorVector(FVtemp1, FVtemp3);
+			
+			bool inside = fdot > 0.0f;
+			bool edge = FVtemp1.Size() < TriangleSize;
+			
+			CurrentPoint++;
+
+			if (inside)
+			{
+				Vertices.Add(CurrentLoc);
+				PointIndex.Add(0);
+			}
+			else if (edge)
+			{
+				Vertices.Add(CurrentEdgeLoc);
+				PointIndex.Add(1);
+			}
+			else
+			{
+				Vertices.Add(CurrentLoc);
+				PointIndex.Add(-1);
+			}
+		}
+	}
+	GridX = NumX * 2;
+}
+
+void ATestSpline::BuildMeshFromOutline()
+{
+	GridPoints = PointIndex;
+
+	for (int index = GridX + 1; index <= GridPoints.Num() - 2; index++)
+	{
+		// 적힌 공식과 블루프린트의 식이 약간 다르지만 삼각형 크기가 적당히 작으면 차이없음
+
+		// 역삼각형
+		// 공식
+		//int32 point1 = (((index / (GridX + 1) % 2)* (-1)) + 1) + index;
+		// 블루프린트
+		int32 point1 = ((((index / (GridX + 1)) % 2) * (-1)) + 1) + index;
+	
+		int32 point2 = ((index - (GridX + 1)) - (-1));
+		int32 point3 = (index - (GridX + 1));
+		int32 point4 = GridPoints[point1] + GridPoints[point2] + GridPoints[point3];
+
+		if (GridPoints[point1] != -1 && GridPoints[point2] != -1 && GridPoints[point3] != -1 && point4 != 3)
+		{
+			//TrianglesL.Add((((index / (GridX + 1) % 2)* (-1)) + 1) + index);
+			TrianglesL.Add(((((index / (GridX + 1)) % 2) * (-1)) + 1) + index);
+
+			TrianglesL.Add(((index - (GridX + 1)) - (-1)));
+			TrianglesL.Add((index - (GridX + 1)));
+		}
+
+		// 삼각형
+		point1 = index;
+		point2 = index + 1;
+		
+		// 공식
+		//point3 = index - ((GridX + 1) - ((index / (GridX + 1))) % 2);
+		// 블루프린트
+		point3 = index - ((GridX + 1) - ((index / (GridX + 1)) % 2));
+
+		point4 = GridPoints[point1] + GridPoints[point2] + GridPoints[point3];
+
+		if (GridPoints[point1] != -1 && GridPoints[point2] != -1 && GridPoints[point3] != -1 && point4 != 3)
+		{
+			TrianglesL.Add(index);
+			TrianglesL.Add(index + 1);
+			
+			//TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1))) % 2));
+			TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1)) % 2)));
+		}
+	}
+	Triangles = TrianglesL;
+
+	//NormalizePointGridforUV();
+	
+	FOccluderVertexArray Normals;
+	TArray<FVector2D> UV0;
+	TArray<FColor> VertexColors;
+	TArray<FProcMeshTangent> Tangents;
+
+	splineprocedural->CreateMeshSection(0, Vertices, Triangles, Normals, UV0, VertexColors, Tangents, false);
+	splineprocedural->SetMaterial(0, material);
+}
+
+void ATestSpline::NormalizePointGridforUV()
+{
+	Padding = FMath::Clamp(Padding, 0.f, 0.25f);
+
+	FVector Origin;
+	FVector BoxExtent;
+	float SphereRadius;
+	UKismetSystemLibrary::GetComponentBounds(spline, Origin, BoxExtent, SphereRadius);
+
+	bool condition = BoxExtent.X > BoxExtent.Y;
+	
+	if (condition)
+	{
+		Scale = Padding / (BoxExtent.X * 2);
+	}
+	else
+	{
+		Scale = Padding / (BoxExtent.Y * 2);
+	}
+
+	OriginScaled = Origin * Scale;
+
+	for (int index = 0; index < Vertices.Num(); index++)
+	{
+		FVector temp = Vertices[index];
+
+		float fx = (temp.X * Scale) + (OriginScaled * (-1)).X + 0.5;
+		float fy = (temp.Y * Scale) + (OriginScaled * (-1)).Y + 0.5;
+
+		UV.Add(FVector2D(fx, fy));
+	}
+}
