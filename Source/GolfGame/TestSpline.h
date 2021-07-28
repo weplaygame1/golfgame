@@ -6,11 +6,12 @@
 //#include "GolfGame.h"
 
 #include "Materials/MaterialInterface.h"
-#include "Components/SceneComponent.h"
 #include "Components/SplineComponent.h"
+#include "ProceduralMeshComponent.h"
+
+#include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
-#include "ProceduralMeshComponent.h"
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -36,56 +37,61 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 	void MakePointGrid();
 	void BuildMeshFromOutline();
 	void NormalizePointGridforUV();
 
+	void checktest();
+
 public:
-	UPROPERTY(EditAnywhere)
-	USceneComponent* scence;
 	UPROPERTY(EditAnywhere)
 	USplineComponent* spline;
 	UPROPERTY(EditAnywhere)
-		class UProceduralMeshComponent* splineprocedural;
+	class UProceduralMeshComponent* procedural;
 	UPROPERTY(EditAnywhere)
-		UMaterialInterface* material;
+	UMaterialInterface* material;
 
-	//MakePointGrid
+	/* MakePointGrid */
 	UPROPERTY(EditAnywhere)
-		float TriangleSize;
-	UPROPERTY(EditAnywhere)
-		int32 NumX;
-	UPROPERTY(EditAnywhere)
-		int32 NumY;
-	UPROPERTY(EditAnywhere)
-		int32 CurrentPoint;
-	UPROPERTY(EditAnywhere)
-		int32 GridX;
+	float TriangleSize;
+	//UROPERTY(EditAnywhere)
+	int32 GridX;
 
-	//PointIndex==GridPoints
+	/* BuildMeshFromOutline */
+	//PointIndex == GridPoints
 	//UPROPERTY(EditAnywhere)
-		TArray<int32> PointIndex;
-	//UPROPERTY(EditAnywhere)
-		TArray<int32> GridPoints;
+	TArray<int32> GridPoints;
 
 	//UPROPERTY(EditAnywhere)
-		TArray<FVector> Vertices;
+	TArray<FVector> Vertices;
 
-	//TrianglesL==Triangles
+	//TrianglesL == Triangles
 	//UPROPERTY(EditAnywhere)
-		TArray<int32> TrianglesL;
+	TArray<int32> Triangles;
+
+	/* NormalizePointGridforUV */
 	//UPROPERTY(EditAnywhere)
-		TArray<int32> Triangles;
+	float Padding;
+	//UPROPERTY(EditAnywhere)
+	TArray<FVector2D> UV;
+	//UPROPERTY(EditAnywhere)
+	float Scale;
+	//UPROPERTY(EditAnywhere)
+	FVector OriginScaled;
 
-	//NormalizePointGridforUV
+	
 	UPROPERTY(EditAnywhere)
-		float Padding;
+		bool bin;
 	UPROPERTY(EditAnywhere)
-		TArray<FVector2D> UV;
+		bool bline;
 	UPROPERTY(EditAnywhere)
-		float Scale;
+		float ftest;
 	UPROPERTY(EditAnywhere)
-		FVector OriginScaled;
-
-
+		float fsize;
+	UPROPERTY(EditAnywhere)
+		float fffffff;
+	UPROPERTY(EditAnywhere)
+		FVector closet;
 };

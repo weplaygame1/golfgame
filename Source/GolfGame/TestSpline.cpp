@@ -9,23 +9,31 @@ ATestSpline::ATestSpline()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	//scence = CreateDefaultSubobject<USceneComponent>(TEXT("scence"));
-	spline = CreateDefaultSubobject<USplineComponent>(TEXT("spline"));
-	splineprocedural = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("procedural"));
-	material = CreateDefaultSubobject<UMaterialInterface>(TEXT("material"));
+	spline = CreateDefaultSubobject<USplineComponent>(TEXT("SPLINE"));
+	spline->SetClosedLoop(true);
+	spline->SetCollisionProfileName("BlockAll");
+	material = CreateDefaultSubobject<UMaterialInterface>(TEXT("MATERIAL"));
 
-	CurrentPoint = 0;
-	
+
+
 	TriangleSize = 50;
 	Padding = 0.05;
 }
+
+void ATestSpline::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	BuildMeshFromOutline();
+
+}
+
 
 // Called when the game starts or when spawned
 void ATestSpline::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	MakePointGrid();
 	BuildMeshFromOutline();
 }
 
@@ -34,6 +42,7 @@ void ATestSpline::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	checktest();
 	/* 내부 점을 보여주는 기능
 	for (int i = 0; i < PointIndex.Num(); i++)
 	{
@@ -47,6 +56,7 @@ void ATestSpline::Tick(float DeltaTime)
 void ATestSpline::MakePointGrid()
 {
 	//TriangleSize = FMath::Clamp(TriangleSize, 2.f, 30.f);
+	Vertices = TArray<FVector>();
 
 	FVector Origin;
 	FVector BoxExtent;
@@ -55,9 +65,11 @@ void ATestSpline::MakePointGrid()
 
 	// 범위가 부족해서 +1 대신 *2로 수정
 	//NumX = UKismetMathLibrary::FCeil((BoxExtent.X / TriangleSize) + 1);
-	NumX = UKismetMathLibrary::FCeil(BoxExtent.X / TriangleSize * 2);
-	NumY = UKismetMathLibrary::FCeil((BoxExtent.Y / (TriangleSize / 2) * UKismetMathLibrary::DegTan(30)) );
+	int32 NumX = UKismetMathLibrary::FCeil(BoxExtent.X / TriangleSize * 2);
+	int32 NumY = UKismetMathLibrary::FCeil((BoxExtent.Y / (TriangleSize / 2) * UKismetMathLibrary::DegTan(60)) );
 	
+	TArray<int32> PointIndex;
+
 	for (int32 indexY = -NumY; indexY <= NumY; indexY++)
 	{
 		for (int32 indexX = -NumX; indexX <= NumX; indexX++)
@@ -85,8 +97,6 @@ void ATestSpline::MakePointGrid()
 			bool inside = fdot > 0.0f;
 			bool edge = FVtemp1.Size() < TriangleSize;
 			
-			CurrentPoint++;
-
 			if (inside)
 			{
 				Vertices.Add(CurrentLoc);
@@ -105,11 +115,14 @@ void ATestSpline::MakePointGrid()
 		}
 	}
 	GridX = NumX * 2;
+	GridPoints = PointIndex;
 }
 
 void ATestSpline::BuildMeshFromOutline()
 {
-	GridPoints = PointIndex;
+	MakePointGrid();
+
+	TArray<int32> TrianglesL;
 
 	for (int index = GridX + 1; index <= GridPoints.Num() - 2; index++)
 	{
@@ -158,14 +171,42 @@ void ATestSpline::BuildMeshFromOutline()
 
 	//NormalizePointGridforUV();
 	
+	// Add Procedural Mesh Component
+	procedural = NewObject<UProceduralMeshComponent>(this,TEXT("PROCEDURAL"));
+	procedural->RegisterComponent();
+	this->AddInstanceComponent(procedural);
+
 	FOccluderVertexArray Normals;
 	TArray<FVector2D> UV0;
 	TArray<FColor> VertexColors;
 	TArray<FProcMeshTangent> Tangents;
 
-	splineprocedural->CreateMeshSection(0, Vertices, Triangles, Normals, UV0, VertexColors, Tangents, false);
-	splineprocedural->SetMaterial(0, material);
+	procedural->CreateMeshSection(0, Vertices, TrianglesL, Normals, UV0, VertexColors, Tangents, true);
+	procedural->SetMaterial(0, material);
+
 }
+
+void ATestSpline::checktest()
+{
+	// 공의 위치
+	FVector CurrentLoc = FVector(994, 1000, 0);
+
+	FVector CurrentEdgeLoc = spline->FindLocationClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
+	closet = CurrentEdgeLoc;
+
+	FVector FVtemp1 = CurrentEdgeLoc - CurrentLoc;
+	FVector FVtemp2 = spline->FindDirectionClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
+	FVector FVtemp3 = UKismetMathLibrary::Cross_VectorVector(FVtemp2, FVector(0.0f, 0.0f, 1.0f));
+	
+	float fdot = UKismetMathLibrary::Dot_VectorVector(FVtemp1, FVtemp3);
+
+	ftest = fdot;
+
+	bin = fdot >= 0.0f;
+
+	// bin 이 true이면 스플라인 안에 있다.
+}
+
 
 void ATestSpline::NormalizePointGridforUV()
 {
