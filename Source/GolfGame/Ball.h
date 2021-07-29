@@ -22,6 +22,15 @@ enum class EBallState : uint8
 	CHECK UMETA(DisplayName = "CHECK")
 };
 
+UENUM()
+enum class EGeographyState : uint8
+{
+	ROUGH = 0 UMETA(DisplayName = "ROUGH"),
+	FAIRWAY UMETA(DisplayName = "FAIRWAY"),
+	GREEN UMETA(DisplayName = "GREEN"),
+	BUNKER UMETA(DisplayName = "BUNKER")
+};
+
 UCLASS()
 class GOLFGAME_API ABall : public APawn
 {
@@ -94,6 +103,7 @@ public:
 	bool bCheckHoleCup;
 	bool bCheckConcede;
 
+	// MOVE에서 CHECK 넘어갈때 확인하는 변수
 	bool bCheckOnce;
 
 	float PowerPercent = 0;
@@ -101,12 +111,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	EBallState CurrentState;
-
-
 	UPROPERTY(EditAnywhere)
-		 FString tttt4;
+	EGeographyState GeographyState;
 	UPROPERTY(EditAnywhere)
-		FName tttt5;
+		int32 itestest;
+
 public:
 	void OnPressBallHit();
 	void OnRealseBallHit();

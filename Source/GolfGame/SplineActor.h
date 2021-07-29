@@ -9,22 +9,21 @@
 #include "Components/SplineComponent.h"
 #include "ProceduralMeshComponent.h"
 
-
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetArrayLibrary.h"
 
 #include "GameFramework/Actor.h"
-#include "TestSpline.generated.h"
+#include "SplineActor.generated.h"
 
 UCLASS()
-class GOLFGAME_API ATestSpline : public AActor
+class GOLFGAME_API ASplineActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATestSpline();
+	ASplineActor();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,56 +36,34 @@ public:
 	void MakePointGrid();
 	void BuildMeshFromOutline();
 	void NormalizePointGridforUV();
-
+	
+	// 어떤 위치가 액터 내부에 있는지 체크
 	void checktest();
 
 public:
 	UPROPERTY(EditAnywhere)
 	USplineComponent* spline;
 	UPROPERTY(EditAnywhere)
-	class UProceduralMeshComponent* procedural;
+	UProceduralMeshComponent* procedural;
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* material;
 
 	/* MakePointGrid */
 	UPROPERTY(EditAnywhere)
 	float TriangleSize;
-	//UROPERTY(EditAnywhere)
 	int32 GridX;
 
 	/* BuildMeshFromOutline */
-	//PointIndex == GridPoints
-	//UPROPERTY(EditAnywhere)
 	TArray<int32> GridPoints;
-
-	//UPROPERTY(EditAnywhere)
 	TArray<FVector> Vertices;
-
-	//TrianglesL == Triangles
-	//UPROPERTY(EditAnywhere)
 	TArray<int32> Triangles;
 
+	TArray<FColor> VertexColor;
+
 	/* NormalizePointGridforUV */
-	//UPROPERTY(EditAnywhere)
 	float Padding;
-	//UPROPERTY(EditAnywhere)
 	TArray<FVector2D> UV;
-	//UPROPERTY(EditAnywhere)
 	float Scale;
-	//UPROPERTY(EditAnywhere)
 	FVector OriginScaled;
 
-	
-	UPROPERTY(EditAnywhere)
-		bool bin;
-	UPROPERTY(EditAnywhere)
-		bool bline;
-	UPROPERTY(EditAnywhere)
-		float ftest;
-	UPROPERTY(EditAnywhere)
-		float fsize;
-	UPROPERTY(EditAnywhere)
-		float fffffff;
-	UPROPERTY(EditAnywhere)
-		FVector closet;
 };

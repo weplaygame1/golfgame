@@ -1,10 +1,10 @@
-Ôªø// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TestSpline.h"
+#include "SplineActor.h"
 
 // Sets default values
-ATestSpline::ATestSpline()
+ASplineActor::ASplineActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -15,42 +15,30 @@ ATestSpline::ATestSpline()
 	material = CreateDefaultSubobject<UMaterialInterface>(TEXT("MATERIAL"));
 
 	TriangleSize = 50;
+	Padding = 3;
 }
-
-void ATestSpline::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	BuildMeshFromOutline();
-
-}
-
 
 // Called when the game starts or when spawned
-void ATestSpline::BeginPlay()
+void ASplineActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	BuildMeshFromOutline();
 }
 
 // Called every frame
-void ATestSpline::Tick(float DeltaTime)
+void ASplineActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//checktest();
-	/* ÎÇ¥Î∂Ä Ï†êÏùÑ Î≥¥Ïó¨Ï£ºÎäî Í∏∞Îä•
-	for (int i = 0; i < PointIndex.Num(); i++)
-	{
-		if (PointIndex[i] >= 0)
-		{
-			DrawCircle(GetWorld(), Vertices[i], FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 1, 100, false, -1, 0, 5);
-		}
-	}*/
 }
 
-void ATestSpline::MakePointGrid()
+void ASplineActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	BuildMeshFromOutline();
+}
+
+void ASplineActor::MakePointGrid()
 {
 	//TriangleSize = FMath::Clamp(TriangleSize, 2.f, 30.f);
 	Vertices = TArray<FVector>();
@@ -60,11 +48,11 @@ void ATestSpline::MakePointGrid()
 	float SphereRadius;
 	UKismetSystemLibrary::GetComponentBounds(spline, Origin, BoxExtent, SphereRadius);
 
-	// Î≤îÏúÑÍ∞Ä Î∂ÄÏ°±Ìï¥ÏÑú +1 ÎåÄÏã† *2Î°ú ÏàòÏ†ï
+	// π¸¿ß∞° ∫Œ¡∑«ÿº≠ +1 ¥ÎΩ≈ *2∑Œ ºˆ¡§
 	//NumX = UKismetMathLibrary::FCeil((BoxExtent.X / TriangleSize) + 1);
 	int32 NumX = UKismetMathLibrary::FCeil(BoxExtent.X / TriangleSize * 2);
-	int32 NumY = UKismetMathLibrary::FCeil((BoxExtent.Y / (TriangleSize / 2) * UKismetMathLibrary::DegTan(60)) );
-	
+	int32 NumY = UKismetMathLibrary::FCeil((BoxExtent.Y / (TriangleSize / 2) * UKismetMathLibrary::DegTan(60)));
+
 	TArray<int32> PointIndex;
 
 	for (int32 indexY = -NumY; indexY <= NumY; indexY++)
@@ -73,7 +61,7 @@ void ATestSpline::MakePointGrid()
 		{
 			FVector CurrentLoc;
 
-			//Î∏îÎ£®ÌîÑÎ¶∞Ìä∏ÏôÄ Ï†ÅÌòÄÏûàÎäî Í≥µÏãùÏù¥ Îã§Î¶Ñ
+			//∫Ì∑Á«¡∏∞∆ÆøÕ ¿˚«Ù¿÷¥¬ ∞¯Ωƒ¿Ã ¥Ÿ∏ß
 			//CurrentLoc.X = Origin.X + (TriangleSize / 2 * indexX) + (FMath::Abs(indexY + NumY) % 2 );
 			//CurrentLoc.Y = Origin.Y + ((TriangleSize / 2) * (UKismetMathLibrary::DegTan(60)) * indexY);
 
@@ -88,12 +76,12 @@ void ATestSpline::MakePointGrid()
 			FVector FVtemp2 = spline->FindDirectionClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
 			FVector FVtemp3 = UKismetMathLibrary::Cross_VectorVector(FVtemp2, FVector(0.0f, 0.0f, 1.0f));
 			//FVector FVtemp3 = UKismetMathLibrary::Cross_VectorVector(FVector(0.0f, 0.0f, 1.0f),FVtemp2);
-			
+
 			float fdot = UKismetMathLibrary::Dot_VectorVector(FVtemp1, FVtemp3);
-			
+
 			bool inside = fdot > 0.0f;
 			bool edge = FVtemp1.Size() < TriangleSize;
-			
+
 			if (inside)
 			{
 				Vertices.Add(CurrentLoc);
@@ -115,7 +103,7 @@ void ATestSpline::MakePointGrid()
 	GridPoints = PointIndex;
 }
 
-void ATestSpline::BuildMeshFromOutline()
+void ASplineActor::BuildMeshFromOutline()
 {
 	MakePointGrid();
 
@@ -123,14 +111,14 @@ void ATestSpline::BuildMeshFromOutline()
 
 	for (int index = GridX + 1; index <= GridPoints.Num() - 2; index++)
 	{
-		// Ï†ÅÌûå Í≥µÏãùÍ≥º Î∏îÎ£®ÌîÑÎ¶∞Ìä∏Ïùò ÏãùÏù¥ ÏïΩÍ∞Ñ Îã§Î•¥ÏßÄÎßå ÏÇºÍ∞ÅÌòï ÌÅ¨Í∏∞Í∞Ä Ï†ÅÎãπÌûà ÏûëÏúºÎ©¥ Ï∞®Ïù¥ÏóÜÏùå
+		// ¿˚»˘ ∞¯Ωƒ∞˙ ∫Ì∑Á«¡∏∞∆Æ¿« Ωƒ¿Ã æ‡∞£ ¥Ÿ∏£¡ˆ∏∏ ªÔ∞¢«¸ ≈©±‚∞° ¿˚¥Á»˜ ¿€¿∏∏È ¬˜¿Ãæ¯¿Ω
 
-		// Ïó≠ÏÇºÍ∞ÅÌòï
-		// Í≥µÏãù
+		// ø™ªÔ∞¢«¸
+		// ∞¯Ωƒ
 		//int32 point1 = (((index / (GridX + 1) % 2)* (-1)) + 1) + index;
-		// Î∏îÎ£®ÌîÑÎ¶∞Ìä∏
+		// ∫Ì∑Á«¡∏∞∆Æ
 		int32 point1 = ((((index / (GridX + 1)) % 2) * (-1)) + 1) + index;
-	
+
 		int32 point2 = ((index - (GridX + 1)) - (-1));
 		int32 point3 = (index - (GridX + 1));
 		int32 point4 = GridPoints[point1] + GridPoints[point2] + GridPoints[point3];
@@ -144,13 +132,13 @@ void ATestSpline::BuildMeshFromOutline()
 			TrianglesL.Add((index - (GridX + 1)));
 		}
 
-		// ÏÇºÍ∞ÅÌòï
+		// ªÔ∞¢«¸
 		point1 = index;
 		point2 = index + 1;
-		
-		// Í≥µÏãù
+
+		// ∞¯Ωƒ
 		//point3 = index - ((GridX + 1) - ((index / (GridX + 1))) % 2);
-		// Î∏îÎ£®ÌîÑÎ¶∞Ìä∏
+		// ∫Ì∑Á«¡∏∞∆Æ
 		point3 = index - ((GridX + 1) - ((index / (GridX + 1)) % 2));
 
 		point4 = GridPoints[point1] + GridPoints[point2] + GridPoints[point3];
@@ -159,17 +147,17 @@ void ATestSpline::BuildMeshFromOutline()
 		{
 			TrianglesL.Add(index);
 			TrianglesL.Add(index + 1);
-			
+
 			//TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1))) % 2));
 			TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1)) % 2)));
 		}
 	}
 	Triangles = TrianglesL;
 
-	//NormalizePointGridforUV();
-	
+	NormalizePointGridforUV();
+
 	// Add Procedural Mesh Component
-	procedural = NewObject<UProceduralMeshComponent>(this,TEXT("PROCEDURAL"));
+	procedural = NewObject<UProceduralMeshComponent>(this, TEXT("PROCEDURAL"));
 	procedural->RegisterComponent();
 	this->AddInstanceComponent(procedural);
 
@@ -178,36 +166,14 @@ void ATestSpline::BuildMeshFromOutline()
 	TArray<FColor> VertexColors;
 	TArray<FProcMeshTangent> Tangents;
 
+	//procedural->CreateMeshSection(0, Vertices, TrianglesL, Normals, UV, VertexColor, Tangents, true);
 	procedural->CreateMeshSection(0, Vertices, TrianglesL, Normals, UV0, VertexColors, Tangents, true);
 	procedural->SetMaterial(0, material);
-
 }
 
-void ATestSpline::checktest()
+void ASplineActor::NormalizePointGridforUV()
 {
-	// Í≥µÏùò ÏúÑÏπò
-	FVector CurrentLoc = FVector(994, 1000, 0);
-
-	FVector CurrentEdgeLoc = spline->FindLocationClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
-	closet = CurrentEdgeLoc;
-
-	FVector FVtemp1 = CurrentEdgeLoc - CurrentLoc;
-	FVector FVtemp2 = spline->FindDirectionClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
-	FVector FVtemp3 = UKismetMathLibrary::Cross_VectorVector(FVtemp2, FVector(0.0f, 0.0f, 1.0f));
-	
-	float fdot = UKismetMathLibrary::Dot_VectorVector(FVtemp1, FVtemp3);
-
-	ftest = fdot;
-
-	bin = fdot >= 0.0f;
-
-	// bin Ïù¥ trueÏù¥Î©¥ Ïä§ÌîåÎùºÏù∏ ÏïàÏóê ÏûàÎã§.
-}
-
-
-void ATestSpline::NormalizePointGridforUV()
-{
-	Padding = FMath::Clamp(Padding, 0.f, 0.25f);
+	//Padding = FMath::Clamp(Padding, 0.f, 0.25f);
 
 	FVector Origin;
 	FVector BoxExtent;
@@ -215,7 +181,7 @@ void ATestSpline::NormalizePointGridforUV()
 	UKismetSystemLibrary::GetComponentBounds(spline, Origin, BoxExtent, SphereRadius);
 
 	bool condition = BoxExtent.X > BoxExtent.Y;
-	
+
 	if (condition)
 	{
 		Scale = Padding / (BoxExtent.X * 2);
@@ -235,5 +201,26 @@ void ATestSpline::NormalizePointGridforUV()
 		float fy = (temp.Y * Scale) + (OriginScaled * (-1)).Y + 0.5;
 
 		UV.Add(FVector2D(fx, fy));
+
+		FVector temp1 = spline->FindLocationClosestToWorldLocation(temp, ESplineCoordinateSpace::World) - temp;
+		VertexColor.Add((FColor)(temp1.Size() * Scale));
 	}
 }
+
+void ASplineActor::checktest()
+{
+	// ∞¯¿« ¿ßƒ°
+	FVector CurrentLoc = FVector(994, 1000, 0);
+
+	FVector CurrentEdgeLoc = spline->FindLocationClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
+
+	FVector FVtemp1 = CurrentEdgeLoc - CurrentLoc;
+	FVector FVtemp2 = spline->FindDirectionClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
+	FVector FVtemp3 = UKismetMathLibrary::Cross_VectorVector(FVtemp2, FVector(0.0f, 0.0f, 1.0f));
+
+	float fdot = UKismetMathLibrary::Dot_VectorVector(FVtemp1, FVtemp3);
+
+	bool bin = fdot >= 0.0f;
+	// bin ¿Ã true¿Ã∏È Ω∫«√∂Û¿Œ æ»ø° ¿÷¥Ÿ.
+}
+

@@ -86,6 +86,7 @@ void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 남은거리 갱신
 	BallPlayerState->SetDistanceRemaining();
 
 	switch (CurrentState)
@@ -104,10 +105,10 @@ void ABall::Tick(float DeltaTime)
 		CheckBallLocation();
 		break;
 	default:
-
 		break;
 	}
 
+	
 }
 
 // Called to bind functionality to input
@@ -131,6 +132,7 @@ void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ABall::OnPressBallHit()
 {
+	// 누르는 순간에 공의 속도가 0일때 추가로 체크해줘야할듯
 	if (CurrentState == EBallState::STOP)
 	{
 		CurrentState = EBallState::READY;
@@ -246,8 +248,8 @@ void ABall::UseLineTrace()
 {
 	Print("UseLineTrace");
 
-	FVector Startpoint = this->GetActorLocation();
-	FVector Endpoint = Startpoint * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -10.0f);
+	FVector Startpoint = this->GetActorLocation() + FVector(0.0f, 0.0f, 5.0f);
+	FVector Endpoint = Startpoint * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -100.0f);
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.bReturnPhysicalMaterial = true;
 	CollisionParams.bTraceComplex = false;
@@ -257,6 +259,39 @@ void ABall::UseLineTrace()
 	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
 	if (isHit)
 	{
+		FName GeoState = OutHit.GetComponent()->GetMaterial(0)->GetFName();
+
+		//디버그용, 확인하고 지우기
+		itestest= StaticEnum<EGeographyState>()->GetValueByName(GeoState);
+
+
+		GeographyState = (EGeographyState)StaticEnum<EGeographyState>()->GetValueByName(GeoState);
+
+		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
+		// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
+		switch (GeographyState)
+		{
+		case EGeographyState::ROUGH:
+			Print("ROUGH");
+
+			break;
+		case EGeographyState::FAIRWAY:
+			Print("FAIRWAY");
+
+			break;
+		case EGeographyState::GREEN:
+			Print("GREEN");
+
+			break;
+		case EGeographyState::BUNKER:
+			Print("BUNKER");
+
+			break;
+		default:
+			break;
+		}
+
+		/*
 		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
 
 		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
@@ -296,10 +331,18 @@ void ABall::UseLineTrace()
 		default:
 			break;
 		}
-		
+		*/
 
 	}
-	
+	else
+	{
+		// OB , HAZARD 일때?
+		// 이 녀석들은 공을 옮겨야함
+		// 추가로 타수를 줄여줌
+		Print("OUT");
+
+		// 우선은 OB, HAZARD 공통적으로 그 전 위치로 보내줌
+	}
 
 }
 
@@ -395,9 +438,6 @@ void ABall::CheckBallLocation()
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Print("OverLap");
-
-	// OtherComp를 이용하여 스플라인에 적용된 속성을 알 수 있다.
-	//tttt4 = OtherComp->GetMaterial(0)->GetName();
 	
 	if (OtherComp->GetName() == TEXT("CONCEDE"))
 	{
