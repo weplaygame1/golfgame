@@ -17,6 +17,10 @@ void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
 	state->GetParOnWidget.AddUObject(this, &UMyUserWidget::UpdatePar);
 	state->GetScoreOnWidget.AddUObject(this, &UMyUserWidget::UpdateScore);
 	state->GetWholeDistanceOnWidget.AddUObject(this,&UMyUserWidget::UpdateWholeDistance);
+	state->GetMinimapOnWidget.AddUObject(this, &UMyUserWidget::SetMinimapImage);
+
+
+	SetMinimapImage();
 }
 
 void UMyUserWidget::UpdatePower()
@@ -57,4 +61,11 @@ void UMyUserWidget::UpdateScore()
 	NowScore->SetText(FText::FromString(fstr));
 }
 
+void UMyUserWidget::SetMinimapImage()
+{
+	int index = CurrentPlayerState->GetCurrentHoleIndex();
+	FString Path = FString::Printf(TEXT("/Game/Blueprints/Widget/MinimapImage/MnimapIndex0.MnimapIndex%d"), index);
+	UTexture2D* Texture = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *Path));
+	Minimap->SetBrushFromTexture(Texture);
+}
 

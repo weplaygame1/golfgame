@@ -22,7 +22,7 @@ ASplineActor::ASplineActor()
 void ASplineActor::BeginPlay()
 {
 	Super::BeginPlay();
-	BuildMeshFromOutline();
+	//BuildMeshFromOutline();
 }
 
 // Called every frame
@@ -36,6 +36,7 @@ void ASplineActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	BuildMeshFromOutline();
+	
 }
 
 void ASplineActor::MakePointGrid()
@@ -154,7 +155,7 @@ void ASplineActor::BuildMeshFromOutline()
 	}
 	Triangles = TrianglesL;
 
-	NormalizePointGridforUV();
+	//NormalizePointGridforUV();
 
 	// Add Procedural Mesh Component
 	procedural = NewObject<UProceduralMeshComponent>(this, TEXT("PROCEDURAL"));

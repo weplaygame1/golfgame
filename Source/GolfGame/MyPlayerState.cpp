@@ -71,6 +71,7 @@ bool AMyPlayerState::NextHole()
 		GetParOnWidget.Broadcast();
 		GetScoreOnWidget.Broadcast();
 		GetWholeDistanceOnWidget.Broadcast();
+		GetMinimapOnWidget.Broadcast();
 
 		return true;
 	}

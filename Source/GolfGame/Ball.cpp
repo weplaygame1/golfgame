@@ -85,6 +85,7 @@ void ABall::BeginPlay()
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//UseLineTrace();
 
 	// 남은거리 갱신
 	BallPlayerState->SetDistanceRemaining();
@@ -262,8 +263,7 @@ void ABall::UseLineTrace()
 		FName GeoState = OutHit.GetComponent()->GetMaterial(0)->GetFName();
 
 		//디버그용, 확인하고 지우기
-		itestest= StaticEnum<EGeographyState>()->GetValueByName(GeoState);
-
+		//itestest = StaticEnum<EGeographyState>()->GetValueByName(GeoState);
 
 		GeographyState = (EGeographyState)StaticEnum<EGeographyState>()->GetValueByName(GeoState);
 
@@ -288,6 +288,11 @@ void ABall::UseLineTrace()
 
 			break;
 		default:
+			//GetValueByName(FName name);
+			//만약 enum에 없는 이름이면 -1을 리턴시킴 -> 이걸 사용하는 방법도 가능
+
+
+
 			break;
 		}
 

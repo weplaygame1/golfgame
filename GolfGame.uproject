@@ -1,18 +1,18 @@
 {
-  "FileVersion": 3,
-  "EngineAssociation": "4.26",
-  "Category": "",
-  "Description": "",
-  "Modules": [
-    {
-      "Name": "GolfGame",
-      "Type": "Runtime",
-      "LoadingPhase": "Default",
-      "AdditionalDependencies": [
-        "Engine",
-        "UMG",
-        "ProceduralMeshComponent"
-      ]
-    }
-  ]
+	"FileVersion": 3,
+	"EngineAssociation": "4.26",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "GolfGame",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG",
+				"ProceduralMeshComponent"
+			]
+		}
+	]
 }

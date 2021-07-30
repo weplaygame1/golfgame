@@ -10,6 +10,8 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "Engine/Texture2D.h"
 
 #include "Blueprint/UserWidget.h"
 #include "MyUserWidget.generated.h"
@@ -38,6 +40,8 @@ public:
 
 	void UpdateScore();
 
+	void SetMinimapImage();
+
 public:
 	TWeakObjectPtr<ABall> CurrentBallState;
 	TWeakObjectPtr<AMyPlayerState> CurrentPlayerState;
@@ -52,4 +56,6 @@ public:
 	UTextBlock* ShowPar;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* NowScore;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UImage* Minimap;
 };

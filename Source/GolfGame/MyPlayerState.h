@@ -41,6 +41,7 @@ public:
 	FUpdatePlayerStateDelegate GetParOnWidget;
 	FUpdatePlayerStateDelegate GetScoreOnWidget;
 	FUpdatePlayerStateDelegate GetWholeDistanceOnWidget;
+	FUpdatePlayerStateDelegate GetMinimapOnWidget;
 public:
 	void SetFormerLocation(FVector location);
 	void SetInitSocreTable(TArray<int32> score);
