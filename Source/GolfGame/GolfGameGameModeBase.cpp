@@ -6,10 +6,9 @@
 
 AGolfGameGameModeBase::AGolfGameGameModeBase()
 {
-	DefaultPawnClass = ABall::StaticClass();
-	PlayerStateClass = AMyPlayerState::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
-
+	PlayerStateClass = AMyPlayerState::StaticClass();
+	DefaultPawnClass = ABall::StaticClass();
 }
 
 void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer) 

@@ -42,6 +42,8 @@ public:
 
 	void SetMinimapImage();
 
+	void UpdateBallIcon();
+
 public:
 	TWeakObjectPtr<ABall> CurrentBallState;
 	TWeakObjectPtr<AMyPlayerState> CurrentPlayerState;
@@ -58,4 +60,7 @@ public:
 	UTextBlock* NowScore;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UImage* Minimap;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UImage* BallIcon;
+
 };

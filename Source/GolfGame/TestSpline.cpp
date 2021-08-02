@@ -32,6 +32,7 @@ void ATestSpline::BeginPlay()
 	Super::BeginPlay();
 	
 	BuildMeshFromOutline();
+
 }
 
 // Called every frame

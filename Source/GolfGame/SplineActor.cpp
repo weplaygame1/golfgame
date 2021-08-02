@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SplineActor.h"
 
 // Sets default values
@@ -14,7 +13,7 @@ ASplineActor::ASplineActor()
 
 	material = CreateDefaultSubobject<UMaterialInterface>(TEXT("MATERIAL"));
 
-	TriangleSize = 50;
+	TriangleSize = 90;
 	Padding = 3;
 }
 
@@ -34,9 +33,7 @@ void ASplineActor::Tick(float DeltaTime)
 void ASplineActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
 	BuildMeshFromOutline();
-	
 }
 
 void ASplineActor::MakePointGrid()
@@ -48,6 +45,8 @@ void ASplineActor::MakePointGrid()
 	FVector BoxExtent;
 	float SphereRadius;
 	UKismetSystemLibrary::GetComponentBounds(spline, Origin, BoxExtent, SphereRadius);
+
+	tempOrigin = Origin;
 
 	// 범위가 부족해서 +1 대신 *2로 수정
 	//NumX = UKismetMathLibrary::FCeil((BoxExtent.X / TriangleSize) + 1);

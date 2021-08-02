@@ -7,7 +7,8 @@ void UMyUserWidget::SetCurrentBallState(ABall* ball)
 {
 	CurrentBallState = ball; 
 	ball->GetPowerGaugeOnWidget.AddUObject(this, &UMyUserWidget::UpdatePower);
-	ball->SetPowerZeroOnWidget.AddUObject(this,&UMyUserWidget::SetPowerZero);
+	ball->SetPowerZeroOnWidget.AddUObject(this, &UMyUserWidget::SetPowerZero);
+	ball->UpdateBallIconOnWidget.AddUObject(this,&UMyUserWidget::UpdateBallIcon);
 }
 
 void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
@@ -67,5 +68,23 @@ void UMyUserWidget::SetMinimapImage()
 	FString Path = FString::Printf(TEXT("/Game/Blueprints/Widget/MinimapImage/MnimapIndex0.MnimapIndex%d"), index);
 	UTexture2D* Texture = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *Path));
 	Minimap->SetBrushFromTexture(Texture);
+}
+
+void UMyUserWidget::UpdateBallIcon()
+{
+	FVector BallLocation = CurrentBallState->GetActorLocation();
+
+	FVector2D IconLocation;
+	IconLocation.X = BallLocation.Y / 6000 * 150;
+	IconLocation.Y = 500 - (BallLocation.X / 7500 * 250);
+
+	BallIcon->SetRenderTranslation(IconLocation);
+	//BallIcon->SetRenderTranslation(FVector2D(150-15, 250-15));
+
+	/*;
+	IconTransform.Translation = FVector2D(IconLocation);
+	IconTransform.Angle = CurrentBallState->GetActorRotation().Yaw;
+
+	BallIcon->SetRenderTransform(IconTransform);*/
 }
 

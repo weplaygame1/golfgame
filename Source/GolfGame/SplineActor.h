@@ -66,4 +66,7 @@ public:
 	float Scale;
 	FVector OriginScaled;
 
+	UPROPERTY(EditAnywhere)
+		FVector tempOrigin;
+
 };

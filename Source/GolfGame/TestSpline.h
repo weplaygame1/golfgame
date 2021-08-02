@@ -89,4 +89,13 @@ public:
 		float fffffff;
 	UPROPERTY(EditAnywhere)
 		FVector closet;
+
+
+
+	UPROPERTY(EditAnywhere)
+		FVector origin;
+	UPROPERTY(EditAnywhere)
+		FVector extent;
+	UPROPERTY(EditAnywhere)
+		float boundLength;
 };

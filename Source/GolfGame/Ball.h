@@ -42,6 +42,7 @@ public:
 
 	FUpdateBallStateDelegate GetPowerGaugeOnWidget;
 	FUpdateBallStateDelegate SetPowerZeroOnWidget;
+	FUpdateBallStateDelegate UpdateBallIconOnWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -115,6 +116,11 @@ public:
 	EGeographyState GeographyState;
 	UPROPERTY(EditAnywhere)
 		int32 itestest;
+
+
+	UPROPERTY(EditAnywhere)
+		FString fsttt;
+
 
 public:
 	void OnPressBallHit();

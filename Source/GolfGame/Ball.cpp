@@ -41,8 +41,9 @@ ABall::ABall()
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
-
+	
 	CurrentState = EBallState::STOP;
+	GeographyState = EGeographyState::FAIRWAY;
 
 
 	
@@ -86,6 +87,7 @@ void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//UseLineTrace();
+	UpdateBallIconOnWidget.Broadcast();
 
 	// 남은거리 갱신
 	BallPlayerState->SetDistanceRemaining();
@@ -257,9 +259,11 @@ void ABall::UseLineTrace()
 	
 	//DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor::Orange,false,10);
 
-	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
+	//ECC_GameTraceChannel1 -> Custom trace channel
+	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
 	if (isHit)
 	{
+		fsttt=OutHit.GetActor()->GetName();
 		FName GeoState = OutHit.GetComponent()->GetMaterial(0)->GetFName();
 
 		//디버그용, 확인하고 지우기
@@ -288,6 +292,8 @@ void ABall::UseLineTrace()
 
 			break;
 		default:
+			Print("DEFAULT");
+
 			//GetValueByName(FName name);
 			//만약 enum에 없는 이름이면 -1을 리턴시킴 -> 이걸 사용하는 방법도 가능
 
