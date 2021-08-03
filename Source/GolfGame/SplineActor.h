@@ -2,16 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-//#include "GolfGame.h"
-
-#include "Materials/MaterialInterface.h"
-#include "Components/SplineComponent.h"
-#include "ProceduralMeshComponent.h"
-
-#include "Kismet/KismetSystemLibrary.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetArrayLibrary.h"
+#include "GolfGame.h"
 
 #include "GameFramework/Actor.h"
 #include "SplineActor.generated.h"
@@ -42,11 +33,11 @@ public:
 
 public:
 	UPROPERTY(EditAnywhere)
-	USplineComponent* spline;
+	class USplineComponent* spline;
 	UPROPERTY(EditAnywhere)
-	UProceduralMeshComponent* procedural;
+	class UProceduralMeshComponent* procedural;
 	UPROPERTY(EditAnywhere)
-	UMaterialInterface* material;
+	class UMaterialInterface* material;
 
 	/* MakePointGrid */
 	UPROPERTY(EditAnywhere)

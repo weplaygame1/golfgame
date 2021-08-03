@@ -2,11 +2,7 @@
 
 #pragma once
 
-//#include "CoreMinimal.h"
 #include "GolfGame.h"
-
-//#include "SceneManagement.h"
-#include "DrawDebugHelpers.h"
 
 #include "GameFramework/Actor.h"
 #include "HoleCup.generated.h"
@@ -31,11 +27,9 @@ public:
 public:
 
 	UPROPERTY(EditAnywhere)
-	UCapsuleComponent* HoleCup;
+	class UCapsuleComponent* HoleCup;
 	UPROPERTY(EditAnywhere)
-	USphereComponent* Concede;
+	class USphereComponent* Concede;
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* Flag;
-
-
+	class UStaticMeshComponent* Flag;
 };

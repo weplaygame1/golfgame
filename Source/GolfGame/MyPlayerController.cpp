@@ -3,6 +3,11 @@
 
 #include "MyPlayerController.h"
 
+#include "MyUserWidget.h"
+#include "GolfGameGameModeBase.h"
+#include "MyPlayerState.h"
+#include "Ball.h"
+
 AMyPlayerController::AMyPlayerController()
 {
 	static ConstructorHelpers::FClassFinder<UMyUserWidget> UUW(TEXT("/Game/Blueprints/Widget/NewBlueprint.NewBlueprint_C"));
@@ -19,14 +24,8 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget = CreateWidget<UMyUserWidget>(this, PlayerWidget);
 	CurrentWidget->AddToViewport();
 	
-	CurrentWidget->SetCurrentBallState(Cast<class ABall>(GetPawn()));
-	CurrentWidget->SetCurrentPlayerState(Cast<class AMyPlayerState>(PlayerState));
-
-	
-
-}
-
-void AMyPlayerController::OnPossess(APawn* aPawn)
-{
-	Super::OnPossess(aPawn);
+	CurrentWidget->SetCurrentBallState(Cast<ABall>(GetPawn()));
+	CurrentWidget->SetCurrentPlayerState(Cast<AMyPlayerState>(PlayerState));
+	CurrentWidget->SetCurrentGameMode(GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>());
+	CurrentWidget->SetMinimapImage();
 }

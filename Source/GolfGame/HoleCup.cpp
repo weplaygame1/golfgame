@@ -3,6 +3,12 @@
 
 #include "HoleCup.h"
 
+#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+
+#include "DrawDebugHelpers.h"
+
 // Sets default values
 AHoleCup::AHoleCup()
 {

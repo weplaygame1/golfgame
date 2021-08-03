@@ -3,6 +3,20 @@
 
 #include "MyUserWidget.h"
 
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "Engine/Texture2D.h"
+
+#include "GolfGameGameModeBase.h"
+#include "MyPlayerState.h"
+#include "Ball.h"
+
+void UMyUserWidget::SetCurrentGameMode(AGolfGameGameModeBase* mode)
+{
+	CurrentGameMode = mode;
+}
+
 void UMyUserWidget::SetCurrentBallState(ABall* ball) 
 {
 	CurrentBallState = ball; 
@@ -20,8 +34,6 @@ void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
 	state->GetWholeDistanceOnWidget.AddUObject(this,&UMyUserWidget::UpdateWholeDistance);
 	state->GetMinimapOnWidget.AddUObject(this, &UMyUserWidget::SetMinimapImage);
 
-
-	SetMinimapImage();
 }
 
 void UMyUserWidget::UpdatePower()
@@ -64,10 +76,20 @@ void UMyUserWidget::UpdateScore()
 
 void UMyUserWidget::SetMinimapImage()
 {
+	// 미니맵 이미지 세팅
 	int index = CurrentPlayerState->GetCurrentHoleIndex();
 	FString Path = FString::Printf(TEXT("/Game/Blueprints/Widget/MinimapImage/MnimapIndex0.MnimapIndex%d"), index);
 	UTexture2D* Texture = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *Path));
 	Minimap->SetBrushFromTexture(Texture);
+
+	// 홀컵 이미지 세팅
+	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
+
+	FVector2D IconLocation;
+	IconLocation.X = (FlagLocation.Y + 1500) / 15000 * 500;
+	IconLocation.Y = 500 - (FlagLocation.X / 15000 * 500);
+
+	FlagIcon->SetRenderTranslation(IconLocation);
 }
 
 void UMyUserWidget::UpdateBallIcon()
@@ -75,16 +97,13 @@ void UMyUserWidget::UpdateBallIcon()
 	FVector BallLocation = CurrentBallState->GetActorLocation();
 
 	FVector2D IconLocation;
-	IconLocation.X = BallLocation.Y / 6000 * 150;
-	IconLocation.Y = 500 - (BallLocation.X / 7500 * 250);
+	IconLocation.X = (BallLocation.Y + 1500) / 15000 * 500;
+	IconLocation.Y = 500 - (BallLocation.X / 15000 * 500);
 
 	BallIcon->SetRenderTranslation(IconLocation);
-	//BallIcon->SetRenderTranslation(FVector2D(150-15, 250-15));
-
-	/*;
-	IconTransform.Translation = FVector2D(IconLocation);
-	IconTransform.Angle = CurrentBallState->GetActorRotation().Yaw;
-
-	BallIcon->SetRenderTransform(IconTransform);*/
 }
 
+// 좌표변환 부분에서
+// 1. 카메라 좌표
+// 2. width
+// 따로 저장해서 해당 변수들을 불러와 계산하는 식으로

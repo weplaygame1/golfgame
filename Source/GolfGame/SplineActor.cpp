@@ -2,6 +2,14 @@
 
 #include "SplineActor.h"
 
+#include "Materials/MaterialInterface.h"
+#include "Components/SplineComponent.h"
+#include "ProceduralMeshComponent.h"
+
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetArrayLibrary.h"
+
 // Sets default values
 ASplineActor::ASplineActor()
 {

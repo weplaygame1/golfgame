@@ -2,16 +2,28 @@
 
 #pragma once
 
-//#include "CoreMinimal.h"
 #include "GolfGame.h"
-
-#include "MyPlayerState.h"
 
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FUpdateBallStateDelegate);
 
+// 골프 클럽 ENUM CLASS
+UENUM()
+enum class EGolfClub : uint8
+{
+	//우드
+	//아이언
+	//퍼터 
+	//우선 이렇게 3개만
+
+	WOOD = 0 UMETA(DisplayName = "WOOD"),
+	IRON UMETA(DisplayName = "IRON"),
+	PUTTER UMETA(DisplayName = "PUTTER")
+};
+
+// 공 상태 ENUM CLASS
 UENUM()
 enum class EBallState : uint8
 {
@@ -21,7 +33,7 @@ enum class EBallState : uint8
 	MOVING UMETA(DisplayName = "MOVING"),
 	CHECK UMETA(DisplayName = "CHECK")
 };
-
+// 지형속성 ENUM CLASS
 UENUM()
 enum class EGeographyState : uint8
 {
@@ -59,15 +71,14 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-
 public:
 	/* 생성자 */
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* BallMesh;
+	class UStaticMeshComponent* BallMesh;
 	UPROPERTY(EditAnywhere)
-	USpringArmComponent* BallCameraSpringArm;
+	class USpringArmComponent* BallCameraSpringArm;
 	UPROPERTY(EditAnywhere)
-	UCameraComponent* BallCamera;
+	class UCameraComponent* BallCamera;
 	
 	UPROPERTY(EditAnywhere)
 	int32 CheckNowScore;
@@ -82,13 +93,16 @@ public:
 	//UPROPERTY(EditAnywhere)
 		FVector cv;
 
+	UPROPERTY(EditAnywhere)
+	EGolfClub ClubState;
+
 	/* when use line trace */
 	FHitResult OutHit;
 	UPROPERTY(EditAnywhere)
 	FString NowMaterial;
 
 	/* Player state */
-	AMyPlayerState* BallPlayerState;
+	class AMyPlayerState* BallPlayerState;
 
 public:
 	UPROPERTY(EditAnywhere)
@@ -114,13 +128,24 @@ public:
 	EBallState CurrentState;
 	UPROPERTY(EditAnywhere)
 	EGeographyState GeographyState;
+
+	//test
+	UPROPERTY(EditAnywhere)
+		FString fsttt;
 	UPROPERTY(EditAnywhere)
 		int32 itestest;
 
-
+	
 	UPROPERTY(EditAnywhere)
-		FString fsttt;
-
+		FVector ftemp1;
+	UPROPERTY(EditAnywhere)
+		FVector ftemp2;
+	UPROPERTY(EditAnywhere)
+		FVector ftemp3; 
+	UPROPERTY(EditAnywhere)
+		FVector ftemp4;
+	UPROPERTY(EditAnywhere)
+		int32 itestlen;
 
 public:
 	void OnPressBallHit();

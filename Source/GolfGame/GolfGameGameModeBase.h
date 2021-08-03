@@ -2,16 +2,7 @@
 
 #pragma once
 
-//#include "CoreMinimal.h"
 #include "GolfGame.h"
-
-#include "Ball.h"
-#include "MyPlayerState.h"
-#include "MyPlayerController.h"
-
-
-
-#include "Blueprint/UserWidget.h"
 
 #include "GameFramework/GameModeBase.h"
 #include "GolfGameGameModeBase.generated.h"
@@ -26,16 +17,17 @@ class GOLFGAME_API AGolfGameGameModeBase : public AGameModeBase
 	
 	AGolfGameGameModeBase();
 	virtual void PostLogin(APlayerController* NewPlayer);
-
-
 public:
 	void InitSpawnLocation();
 	void InitHoleCupLocation();
 	void InitScoreTable();
 
-	TArray<FVector> GetSpawnLocation();
-	TArray<FVector> GetHoleCupLocation();
 	TArray<int32> GetScoreTable();
+
+	FVector GetSpawnLocation(int index);
+	FVector GetHoleCupLocation(int index);
+
+	int GetNumOfAllHole() const;
 
 public:
 
@@ -48,8 +40,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<FVector> AllSpawnLocation;
 
-	// 아마도,, 처음 진입할때의 카메라의 방향 ?
-
 	// 모든 홀의 컵 위치
 	UPROPERTY(EditAnywhere)
 	TArray<FVector> AllHoleCupLocation;
@@ -57,6 +47,7 @@ public:
 	// 총 홀의 개수 ex)나는 3개만 구성할것이므로 3
 	int32 NumOfAllHole;
 
+	// 아마도,, 처음 진입할때의 카메라의 방향 ?
 
 
 };

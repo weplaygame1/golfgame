@@ -3,6 +3,16 @@
 
 #include "Ball.h"
 
+#include "Components/StaticMeshComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+
+#include "MyPlayerState.h"
+#include "GolfGameGameModeBase.h"
+
+#include "DrawDebugHelpers.h"
+
+
 // Sets default values
 ABall::ABall()
 {
@@ -68,24 +78,32 @@ void ABall::BeginPlay()
 	bCheckOnce = true;
 	JumpPower = 0;
 
+	ClubState = EGolfClub::WOOD;
+
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
 	BallPlayerState->GetParOnWidget.Broadcast();
 	BallPlayerState->GetScoreOnWidget.Broadcast();
 	BallPlayerState->GetWholeDistanceOnWidget.Broadcast();
 
-	// Spawn
-	//SetActorLocation(BallPlayerState->GetNextSpawnLocation());
+
+	// Set Default CameraLagSpeed
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
-
-
-
+	
+	
 }
 
 // Called every frame
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//test
+	ftemp1 = BallCamera->GetForwardVector();
+	ftemp4 = this->GetActorLocation() + ftemp1 * 1000;
+	DrawCircle(GetWorld(), ftemp4, FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 10, 100, false, -1, 0, 5);
+
+	itestlen = FVector::Dist(this->GetActorLocation(), ftemp4);
+
 	//UseLineTrace();
 	UpdateBallIconOnWidget.Broadcast();
 
@@ -367,7 +385,7 @@ void ABall::MoveNextHole()
 	{
 		// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
 		BallCameraSpringArm->CameraLagSpeed = 0.0f;
-		this->SetActorLocation(BallPlayerState->GetNextSpawnLocation());
+		this->SetActorLocation(BallPlayerState->GetFormerLocation());
 
 		// 추가적으로 카메라의 방향을 정해줘야함
 		// 현재는 마지막에 쳤던 방향을 보고있음
@@ -429,7 +447,7 @@ void ABall::CheckBallLocation()
 		else
 		{
 			// 더블파 -> 다음홀로 넘어감
-			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->iDoublePar)
+			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->GetDoublePar())
 			{
 				MoveNextHole();
 			}

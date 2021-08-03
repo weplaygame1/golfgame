@@ -2,11 +2,17 @@
 
 #include "MyPlayerState.h"
 
+#include "GolfGameGameModeBase.h"
+
 AMyPlayerState::AMyPlayerState()
 {
-	ClubState = EGolfClub::E_Wood;
 	CurrentHoleIndex = 0;
 	iDoublePar = 0;
+}
+
+void AMyPlayerState::SetCurrentGameMode(class AGolfGameGameModeBase* mode)
+{
+	CurrentGameMode = mode;
 }
 
 void AMyPlayerState::SetFormerLocation(FVector location)
@@ -20,36 +26,20 @@ void AMyPlayerState::SetInitSocreTable(TArray<int32> score)
 	ScoreTable = score;
 }
 
-void AMyPlayerState::SetInitSpawnLocation(TArray<FVector> location)
-{
-	SpawnLocation = location;
-}
-
-void AMyPlayerState::SetInitHoleCupLocation(TArray<FVector> location)
-{
-	HoleCupLocation = location;
-}
-
 void AMyPlayerState::SetInitDoublePar(int32 num)
 {
 	iDoublePar = num;
 }
 
-void AMyPlayerState::SetInitEndHoleIndex(int32 num)
-{
-	EndHoleIndex = num;
-	WholeDistacne = FVector::Dist(SpawnLocation[CurrentHoleIndex], HoleCupLocation[CurrentHoleIndex]);
-}
-
 void AMyPlayerState::SetDistanceRemaining()
 {
-	Distance = FVector::Dist(GetPawn()->GetActorLocation(), HoleCupLocation[CurrentHoleIndex]);
+	Distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex));
 	GetDistanceOnWidget.Broadcast();
 }
 
 void AMyPlayerState::PlusScore()
 {
-	// 더블파일때는 증가시키지 않음
+	// 더블파일때는 증가시키지 않음 -> 규칙 체크 필요 !
 	if (ScoreTable[CurrentHoleIndex] < iDoublePar)
 	{
 		ScoreTable[CurrentHoleIndex]++;
@@ -62,11 +52,11 @@ bool AMyPlayerState::NextHole()
 	CurrentHoleIndex++;
 
 	// 다음 홀로 진행
-	if (CurrentHoleIndex < EndHoleIndex)
+	if (CurrentHoleIndex < CurrentGameMode->GetNumOfAllHole())
 	{
-		FormerBallLocation = SpawnLocation[CurrentHoleIndex];
+		FormerBallLocation = CurrentGameMode->GetSpawnLocation(CurrentHoleIndex);
 		iDoublePar = -ScoreTable[CurrentHoleIndex];
-		WholeDistacne= FVector::Dist(SpawnLocation[CurrentHoleIndex],HoleCupLocation[CurrentHoleIndex]);
+		WholeDistacne = FVector::Dist(FormerBallLocation, CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex));
 		
 		GetParOnWidget.Broadcast();
 		GetScoreOnWidget.Broadcast();
@@ -79,16 +69,13 @@ bool AMyPlayerState::NextHole()
 	else
 	{
 		return false;
+		
 	}
 }
 
 FVector AMyPlayerState::GetFormerLocation() const
 {
 	return FormerBallLocation;
-}
-FVector AMyPlayerState::GetNextSpawnLocation() const
-{
-	return SpawnLocation[CurrentHoleIndex];
 }
 
 int32 AMyPlayerState::GetNowHoleScore() const
