@@ -21,14 +21,18 @@ public:
 	void InitSpawnLocation();
 	void InitHoleCupLocation();
 	void InitScoreTable();
+	void InitMinimapCenterLocation();
+	void InitMinimapWidth();
 
-	TArray<int32> GetScoreTable();
+	TArray<int32> GetScoreTable() { return AllScoreTable; }
 
-	FVector GetSpawnLocation(int index);
-	FVector GetHoleCupLocation(int index);
+	FVector GetSpawnLocation(int index) { return AllSpawnLocation[index]; }
+	FVector GetHoleCupLocation(int index) { return AllHoleCupLocation[index]; }
 
-	int GetNumOfAllHole() const;
+	int GetNumOfAllHole() const { return NumOfAllHole; }
 
+	FVector GetMinimapCenterLocation(int index) { return MinimapCenterLocation[index]; }
+	int32 GetMinimapWidth(int index) { return MinimapWidth[index]; }
 public:
 
 	// 모든 홀의 시작 타수 정보 ex) 파3, 파4, 파5
@@ -47,7 +51,11 @@ public:
 	// 총 홀의 개수 ex)나는 3개만 구성할것이므로 3
 	int32 NumOfAllHole;
 
-	// 아마도,, 처음 진입할때의 카메라의 방향 ?
-
-
+	//미니맵 좌표전환에서 사용할 변수들
+	//캡처 카메라 중심 위치, 미니맵 중심 위치
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> MinimapCenterLocation;
+	//캡처 카메라 너비 Width, 미니맵 너비
+	UPROPERTY(EditAnywhere)
+	TArray<int32> MinimapWidth;
 };

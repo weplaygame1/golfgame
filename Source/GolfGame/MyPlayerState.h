@@ -35,14 +35,14 @@ public:
 	bool NextHole();
 
 public:
-	FVector GetFormerLocation() const;
+	FVector GetFormerLocation() const { return FormerBallLocation; }
 
-	int32 GetNowHoleScore() const;
-	int32 GetCurrentHoleIndex() const;
-	int32 GetDoublePar() const;
-	int32 GetWholeDistance() const;
+	int32 GetNowHoleScore() const { return ScoreTable[CurrentHoleIndex]; }
+	int32 GetCurrentHoleIndex() const { return CurrentHoleIndex; }
+	int32 GetDoublePar() const { return iDoublePar; }
+	int32 GetWholeDistance() const { return WholeDistacne; }
 
-	float GetDistanceRemaining() const;
+	float GetDistanceRemaining() const { return Distance; }
 
 public:
 	TWeakObjectPtr<class AGolfGameGameModeBase> CurrentGameMode;

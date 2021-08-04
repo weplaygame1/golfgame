@@ -33,7 +33,7 @@ void AMyPlayerState::SetInitDoublePar(int32 num)
 
 void AMyPlayerState::SetDistanceRemaining()
 {
-	Distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex));
+	Distance = FVector::Dist(GetPawn()->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex)) / 100;
 	GetDistanceOnWidget.Broadcast();
 }
 
@@ -56,7 +56,7 @@ bool AMyPlayerState::NextHole()
 	{
 		FormerBallLocation = CurrentGameMode->GetSpawnLocation(CurrentHoleIndex);
 		iDoublePar = -ScoreTable[CurrentHoleIndex];
-		WholeDistacne = FVector::Dist(FormerBallLocation, CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex));
+		WholeDistacne = FVector::Dist(FormerBallLocation, CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex)) / 100;
 		
 		GetParOnWidget.Broadcast();
 		GetScoreOnWidget.Broadcast();
@@ -72,34 +72,3 @@ bool AMyPlayerState::NextHole()
 		
 	}
 }
-
-FVector AMyPlayerState::GetFormerLocation() const
-{
-	return FormerBallLocation;
-}
-
-int32 AMyPlayerState::GetNowHoleScore() const
-{
-	return ScoreTable[CurrentHoleIndex];
-}
-
-int32 AMyPlayerState::GetCurrentHoleIndex() const
-{
-	return CurrentHoleIndex;
-}
-
-int32 AMyPlayerState::GetDoublePar() const
-{
-	return iDoublePar;
-}
-
-int32 AMyPlayerState::GetWholeDistance() const
-{
-	return WholeDistacne;
-}
-
-float AMyPlayerState::GetDistanceRemaining() const
-{
-	return Distance;
-}
-

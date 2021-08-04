@@ -55,6 +55,7 @@ public:
 	FUpdateBallStateDelegate GetPowerGaugeOnWidget;
 	FUpdateBallStateDelegate SetPowerZeroOnWidget;
 	FUpdateBallStateDelegate UpdateBallIconOnWidget;
+	FUpdateBallStateDelegate UpdatePredictIconOnWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -135,15 +136,18 @@ public:
 	UPROPERTY(EditAnywhere)
 		int32 itestest;
 
-	
+	UPROPERTY(EditAnywhere)
+		FVector PredictLocation;
+
+
 	UPROPERTY(EditAnywhere)
 		FVector ftemp1;
 	UPROPERTY(EditAnywhere)
-		FVector ftemp2;
-	UPROPERTY(EditAnywhere)
 		FVector ftemp3; 
 	UPROPERTY(EditAnywhere)
-		FVector ftemp4;
+		FVector outVelocity;
+	UPROPERTY(EditAnywhere)
+		FVector outVelocity22;
 	UPROPERTY(EditAnywhere)
 		int32 itestlen;
 
@@ -163,4 +167,6 @@ public:
 	void CheckBallLocation();
 
 	float GetPower();
+
+	FVector GetPredictLocation() const { return PredictLocation; }
 };

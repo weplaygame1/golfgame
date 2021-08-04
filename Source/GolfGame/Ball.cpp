@@ -10,6 +10,8 @@
 #include "MyPlayerState.h"
 #include "GolfGameGameModeBase.h"
 
+#include "Kismet/GameplayStatics.h"
+
 #include "DrawDebugHelpers.h"
 
 
@@ -90,6 +92,8 @@ void ABall::BeginPlay()
 	// Set Default CameraLagSpeed
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
 	
+
+	
 	
 }
 
@@ -99,10 +103,28 @@ void ABall::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	//test
 	ftemp1 = BallCamera->GetForwardVector();
-	ftemp4 = this->GetActorLocation() + ftemp1 * 1000;
-	DrawCircle(GetWorld(), ftemp4, FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 10, 100, false, -1, 0, 5);
+	PredictLocation = this->GetActorLocation() + ftemp1 * 2500;
+	DrawCircle(GetWorld(), PredictLocation, FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 10, 100, false, -1, 0, 5);
 
-	itestlen = FVector::Dist(this->GetActorLocation(), ftemp4);
+	
+	/*
+	FVector startLoc = this->GetActorLocation();      // 발사 지점
+	FVector targetLoc = ftemp4; // 타겟 지점.
+	float arcValue = 0.5f;                       // ArcParam (0.0-1.0)
+	FVector outVelocity = FVector::ZeroVector;   // 결과 Velocity
+
+	if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), arcValue))
+	{
+		FPredictProjectilePathParams predictParams(5.f, startLoc, outVelocity, 4);
+		predictParams.DrawDebugTime = 0.1f;
+		predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;
+		predictParams.OverrideGravityZ = GetWorld()->GetGravityZ();
+
+		FPredictProjectilePathResult result;
+
+		UGameplayStatics::PredictProjectilePath(this, predictParams, result);
+	}
+	*/
 
 	//UseLineTrace();
 	UpdateBallIconOnWidget.Broadcast();
@@ -113,6 +135,7 @@ void ABall::Tick(float DeltaTime)
 	switch (CurrentState)
 	{
 	case EBallState::STOP:
+		UpdatePredictIconOnWidget.Broadcast();
 		break;
 	case EBallState::READY:
 		break;
@@ -156,6 +179,20 @@ void ABall::OnPressBallHit()
 	// 누르는 순간에 공의 속도가 0일때 추가로 체크해줘야할듯
 	if (CurrentState == EBallState::STOP)
 	{
+		FVector startLoc = this->GetActorLocation();     // 발사 지점
+		FVector targetLoc = PredictLocation;  // 타겟 지점.
+		float arcValue = 0.5;                       // ArcParam (0.0-1.0)
+		outVelocity = FVector::ZeroVector;   // 결과 Velocity
+		if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), arcValue))
+		{
+			FPredictProjectilePathParams predictParams(5.0f, startLoc, outVelocity, 10.0f);   // 20: tracing 보여질 프로젝타일 크기, 15: 시물레이션되는 Max 시간(초)
+			predictParams.DrawDebugTime = 5.0f;     //디버그 라인 보여지는 시간 (초)
+			predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;  // DrawDebugTime 을 지정하면 EDrawDebugTrace::Type::ForDuration 필요.
+			predictParams.OverrideGravityZ = GetWorld()->GetGravityZ();
+			FPredictProjectilePathResult result;
+			UGameplayStatics::PredictProjectilePath(this, predictParams, result);
+		}
+
 		CurrentState = EBallState::READY;
 	}
 
@@ -167,6 +204,7 @@ void ABall::OnPressBallHit()
 		BallPlayerState->PlusScore();
 		
 		// 공 치는 부분 -> 함수하나 만들고 클럽 종류에따라 각도와 힘 계산
+		/*
 		fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
 		fvtemp.Z = 1;
 		fvtemp = fvtemp * 100 * 10;
@@ -174,6 +212,14 @@ void ABall::OnPressBallHit()
 		bv = av.ToOrientationQuat().GetRightVector();
 		BallMesh->AddAngularImpulseInDegrees(bv * 10000, NAME_None, true);
 		BallMesh->AddImpulse(fvtemp, NAME_None, true);
+		*/
+		
+		
+
+		BallMesh->AddImpulse(outVelocity, NAME_None, true);
+		//BallMesh->AddForce(outVelocity*60, NAME_None, true);
+
+
 
 		bCheckOnce = false;
 		CurrentState = EBallState::MOVING;
@@ -462,7 +508,6 @@ void ABall::CheckBallLocation()
 		CurrentState = EBallState::STOP;
 	}
 }
-
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

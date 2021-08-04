@@ -34,6 +34,8 @@ public:
 	void SetMinimapImage();
 
 	void UpdateBallIcon();
+
+	void UpdatePredictIcon();
 public:
 	TWeakObjectPtr<class ABall> CurrentBallState;
 	TWeakObjectPtr<class AMyPlayerState> CurrentPlayerState;
@@ -60,4 +62,6 @@ public:
 	class UImage* BallIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* FlagIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UImage* PredictIcon;
 };

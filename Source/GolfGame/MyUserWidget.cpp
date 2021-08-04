@@ -23,6 +23,7 @@ void UMyUserWidget::SetCurrentBallState(ABall* ball)
 	ball->GetPowerGaugeOnWidget.AddUObject(this, &UMyUserWidget::UpdatePower);
 	ball->SetPowerZeroOnWidget.AddUObject(this, &UMyUserWidget::SetPowerZero);
 	ball->UpdateBallIconOnWidget.AddUObject(this,&UMyUserWidget::UpdateBallIcon);
+	ball->UpdatePredictIconOnWidget.AddUObject(this, &UMyUserWidget::UpdatePredictIcon);
 }
 
 void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
@@ -86,8 +87,8 @@ void UMyUserWidget::SetMinimapImage()
 	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
 
 	FVector2D IconLocation;
-	IconLocation.X = (FlagLocation.Y + 1500) / 15000 * 500;
-	IconLocation.Y = 500 - (FlagLocation.X / 15000 * 500);
+	IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 500;
+	IconLocation.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500);
 
 	FlagIcon->SetRenderTranslation(IconLocation);
 }
@@ -97,13 +98,26 @@ void UMyUserWidget::UpdateBallIcon()
 	FVector BallLocation = CurrentBallState->GetActorLocation();
 
 	FVector2D IconLocation;
-	IconLocation.X = (BallLocation.Y + 1500) / 15000 * 500;
-	IconLocation.Y = 500 - (BallLocation.X / 15000 * 500);
+	IconLocation.X = (BallLocation.Y + 6500) / 25000 * 500;
+	IconLocation.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500);
 
 	BallIcon->SetRenderTranslation(IconLocation);
+
+	// 좌표변환 부분에서
+	// 1. 카메라 좌표
+	// 2. width
+	// 따로 저장해서 해당 변수들을 불러와 계산하는 식으로
 }
 
-// 좌표변환 부분에서
-// 1. 카메라 좌표
-// 2. width
-// 따로 저장해서 해당 변수들을 불러와 계산하는 식으로
+void UMyUserWidget::UpdatePredictIcon()
+{
+	FVector PredictLocation = CurrentBallState->GetPredictLocation();
+
+	FVector2D IconLocation;
+	IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 500;
+	IconLocation.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500);
+
+	PredictIcon->SetRenderTranslation(IconLocation);
+	
+	// 여기에서 추가로 직선 이미지까지 ?
+}
