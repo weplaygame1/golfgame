@@ -13,7 +13,7 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 	PlayerStateClass = AMyPlayerState::StaticClass();
 	DefaultPawnClass = ABall::StaticClass();
 
-	// 게임 정보 초기화
+	/* 게임 정보 초기화 */
 	// 코스 갯수
 	NumOfAllHole = 2;
 	// 시작 위치
@@ -22,6 +22,10 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 	InitHoleCupLocation();
 	// 점수 테이블
 	InitScoreTable();
+	// 미니맵 중심 위치
+	InitMinimapCenterLocation();
+	// 미니맵 너비
+	InitMinimapWidth();
 }
 
 void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer) 
@@ -61,10 +65,12 @@ void AGolfGameGameModeBase::InitScoreTable()
 
 void AGolfGameGameModeBase::InitMinimapCenterLocation()
 {
+	// 미니맵 중심 위치
 	MinimapCenterLocation.Add(FVector(11000, 6000, 100));
 }
 
 void AGolfGameGameModeBase::InitMinimapWidth()
 {
+	// 미니맵 너비
 	MinimapWidth.Add(25000);
 }

@@ -36,6 +36,10 @@ public:
 	void UpdateBallIcon();
 
 	void UpdatePredictIcon();
+
+	void UpdateClubState();
+
+	void UpdateMovingInformation();
 public:
 	TWeakObjectPtr<class ABall> CurrentBallState;
 	TWeakObjectPtr<class AMyPlayerState> CurrentPlayerState;
@@ -45,7 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UProgressBar* Power;
 
-	// 텍스트로 보여주는 정보들
+	// 각종 정보들
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* WholeDistance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
@@ -54,7 +58,17 @@ public:
 	class UTextBlock* ShowPar;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* NowScore;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* ClubState;
 
+	// 공이 날아갈때의 정보
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* MovingDis;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* RemainingDis; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* GeoState;
+	
 	// 미니맵
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* Minimap;

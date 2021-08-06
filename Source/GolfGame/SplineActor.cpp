@@ -133,7 +133,9 @@ void ASplineActor::BuildMeshFromOutline()
 
 		if (GridPoints[point1] != -1 && GridPoints[point2] != -1 && GridPoints[point3] != -1 && point4 != 3)
 		{
+			// 공식
 			//TrianglesL.Add((((index / (GridX + 1) % 2)* (-1)) + 1) + index);
+			// 블루프린트
 			TrianglesL.Add(((((index / (GridX + 1)) % 2) * (-1)) + 1) + index);
 
 			TrianglesL.Add(((index - (GridX + 1)) - (-1)));
@@ -156,7 +158,9 @@ void ASplineActor::BuildMeshFromOutline()
 			TrianglesL.Add(index);
 			TrianglesL.Add(index + 1);
 
+			// 공식
 			//TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1))) % 2));
+			// 블루프린트
 			TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1)) % 2)));
 		}
 	}

@@ -43,7 +43,7 @@ void AHoleCup::Tick(float DeltaTime)
 	DrawCircle(GetWorld(), GetActorLocation(), FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 250, 100, false, -1, 0, 5);
 
 	// Draw Concede
-	DrawCircle(GetWorld(), GetActorLocation(),FVector(1, 0, 0), FVector(0, 1, 0),FColor::Blue, 800, 100, false, -1, 0, 5);
+	DrawCircle(GetWorld(), GetActorLocation(),FVector(1, 0, 0), FVector(0, 1, 0),FColor::Blue, 500, 100, false, -1, 0, 5);
 	
 }
 

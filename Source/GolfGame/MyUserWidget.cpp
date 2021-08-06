@@ -24,6 +24,8 @@ void UMyUserWidget::SetCurrentBallState(ABall* ball)
 	ball->SetPowerZeroOnWidget.AddUObject(this, &UMyUserWidget::SetPowerZero);
 	ball->UpdateBallIconOnWidget.AddUObject(this,&UMyUserWidget::UpdateBallIcon);
 	ball->UpdatePredictIconOnWidget.AddUObject(this, &UMyUserWidget::UpdatePredictIcon);
+	ball->UpdateClubStateOnWidget.AddUObject(this, &UMyUserWidget::UpdateClubState);
+	ball->UpdateMovingInfoOnWidget.AddUObject(this, &UMyUserWidget::UpdateMovingInformation);
 }
 
 void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
@@ -71,7 +73,15 @@ void UMyUserWidget::UpdatePar()
 void UMyUserWidget::UpdateScore()
 {
 	int32 inum = CurrentPlayerState->GetNowHoleScore();
-	FString fstr = FString::Printf(TEXT("%d"), inum);
+	FString fstr;
+	if (inum < 0) 
+	{
+		fstr = FString::Printf(TEXT("%d"), inum);
+	}
+	else
+	{
+		fstr = FString::Printf(TEXT("+%d"), inum);
+	}
 	NowScore->SetText(FText::FromString(fstr));
 }
 
@@ -120,4 +130,21 @@ void UMyUserWidget::UpdatePredictIcon()
 	PredictIcon->SetRenderTranslation(IconLocation);
 	
 	// 여기에서 추가로 직선 이미지까지 ?
+}
+
+void UMyUserWidget::UpdateClubState()
+{
+	FText txt = (FText)StaticEnum<EGolfClub>()->GetDisplayNameTextByIndex((int32)CurrentBallState->GetClubState());
+	ClubState->SetText(txt);
+}
+
+void UMyUserWidget::UpdateMovingInformation()
+{
+	float Moving_Dis = CurrentBallState->GetMovingDis();
+	FString fstr0 = FString::Printf(TEXT("%.2fm"), Moving_Dis);
+	MovingDis->SetText(FText::FromString(fstr0));
+
+	float Remaining_dis = CurrentPlayerState->GetDistanceRemaining();
+	FString fstr1 = FString::Printf(TEXT("%.2fm"), Remaining_dis);
+	RemainingDis->SetText(FText::FromString(fstr1));
 }

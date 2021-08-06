@@ -56,6 +56,8 @@ public:
 	FUpdateBallStateDelegate SetPowerZeroOnWidget;
 	FUpdateBallStateDelegate UpdateBallIconOnWidget;
 	FUpdateBallStateDelegate UpdatePredictIconOnWidget;
+	FUpdateBallStateDelegate UpdateClubStateOnWidget;
+	FUpdateBallStateDelegate UpdateMovingInfoOnWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -94,8 +96,11 @@ public:
 	//UPROPERTY(EditAnywhere)
 		FVector cv;
 
+	/* Club State */
 	UPROPERTY(EditAnywhere)
 	EGolfClub ClubState;
+	float DrivingDis;
+	float ArcValue;
 
 	/* when use line trace */
 	FHitResult OutHit;
@@ -105,7 +110,6 @@ public:
 	/* Player state */
 	class AMyPlayerState* BallPlayerState;
 
-public:
 	UPROPERTY(EditAnywhere)
 	bool bCanHitBall;
 	bool bIsChargingHit;
@@ -130,6 +134,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	EGeographyState GeographyState;
 
+	float MovingDis;
+
 	//test
 	UPROPERTY(EditAnywhere)
 		FString fsttt;
@@ -151,22 +157,31 @@ public:
 	UPROPERTY(EditAnywhere)
 		int32 itestlen;
 
+
 public:
 	void OnPressBallHit();
 	void OnRealseBallHit();
+	void OnPressChangeClub();
 	void MoveDirection(float AxisValue);
-	void MoveAngle(float AxisValue);
 
 	void CheckBallisMoiving();
 	void UseLineTrace();
 
 	void MoveNextHole();
 
-
 	void ChargingPower();
 	void CheckBallLocation();
 
-	float GetPower();
+	void CalPredictLocation();
 
+	void SetMovingDis();
+
+	float GetPower() { return PowerPercent / 100; }
 	FVector GetPredictLocation() const { return PredictLocation; }
+
+	float GetDrivingDis() { return DrivingDis; }
+	float GetMovingDis() { return MovingDis; }
+	EGolfClub GetClubState() { return ClubState; }
+
+	EGeographyState GetGeographyState() { return GeographyState; }
 };
