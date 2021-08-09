@@ -3,10 +3,15 @@
 
 #include "MyUserWidget.h"
 
+#include "Components/CanvasPanel.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
+
+#include "Blueprint/WidgetBlueprintLibrary.h"
+
+#include "SceneManagement.h"
 
 #include "GolfGameGameModeBase.h"
 #include "MyPlayerState.h"
@@ -26,6 +31,10 @@ void UMyUserWidget::SetCurrentBallState(ABall* ball)
 	ball->UpdatePredictIconOnWidget.AddUObject(this, &UMyUserWidget::UpdatePredictIcon);
 	ball->UpdateClubStateOnWidget.AddUObject(this, &UMyUserWidget::UpdateClubState);
 	ball->UpdateMovingInfoOnWidget.AddUObject(this, &UMyUserWidget::UpdateMovingInformation);
+	ball->UpdateGeoStateOnWidget.AddUObject(this, &UMyUserWidget::UpdateGeoState);
+
+	ball->OnOffMainPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMainPanel);
+	ball->OnOffMovingPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMovingPanel);
 }
 
 void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
@@ -59,29 +68,22 @@ void UMyUserWidget::UpdateWholeDistance()
 void UMyUserWidget::UpdateDistance()
 {
 	float dis = CurrentPlayerState->GetDistanceRemaining();
-	FString fstr = TEXT("남은거리 : ") + FString::Printf(TEXT("%.1fm"), dis);
+	FString fstr = FString::Printf(TEXT("%.1fm"), dis);
 	DistanceRemaining->SetText(FText::FromString(fstr));
 }
 
 void UMyUserWidget::UpdatePar()
 {
-	int32 inum = CurrentPlayerState->GetDoublePar();
+	int32 inum = CurrentGameMode->GetScoreTable(CurrentPlayerState->GetCurrentHoleIndex());
 	FString fstr = TEXT("Par ") + FString::Printf(TEXT("%d"), inum);
 	ShowPar->SetText(FText::FromString(fstr));
 }
 
 void UMyUserWidget::UpdateScore()
 {
-	int32 inum = CurrentPlayerState->GetNowHoleScore();
-	FString fstr;
-	if (inum < 0) 
-	{
-		fstr = FString::Printf(TEXT("%d"), inum);
-	}
-	else
-	{
-		fstr = FString::Printf(TEXT("+%d"), inum);
-	}
+	int32 parNum = CurrentGameMode->GetScoreTable(CurrentPlayerState->GetCurrentHoleIndex());
+	int32 inum = ((-1) * parNum) + CurrentPlayerState->GetNowHoleScore();
+	FString fstr = FString::Printf(TEXT("%d"), inum);
 	NowScore->SetText(FText::FromString(fstr));
 }
 
@@ -101,6 +103,9 @@ void UMyUserWidget::SetMinimapImage()
 	IconLocation.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500);
 
 	FlagIcon->SetRenderTranslation(IconLocation);
+
+	// 플래그 아이콘 조건추가
+	// 좌표변환 식으로
 }
 
 void UMyUserWidget::UpdateBallIcon()
@@ -112,7 +117,7 @@ void UMyUserWidget::UpdateBallIcon()
 	IconLocation.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500);
 
 	BallIcon->SetRenderTranslation(IconLocation);
-
+	
 	// 좌표변환 부분에서
 	// 1. 카메라 좌표
 	// 2. width
@@ -129,7 +134,6 @@ void UMyUserWidget::UpdatePredictIcon()
 
 	PredictIcon->SetRenderTranslation(IconLocation);
 	
-	// 여기에서 추가로 직선 이미지까지 ?
 }
 
 void UMyUserWidget::UpdateClubState()
@@ -147,4 +151,82 @@ void UMyUserWidget::UpdateMovingInformation()
 	float Remaining_dis = CurrentPlayerState->GetDistanceRemaining();
 	FString fstr1 = FString::Printf(TEXT("%.2fm"), Remaining_dis);
 	RemainingDis->SetText(FText::FromString(fstr1));
+}
+
+void UMyUserWidget::UpdateGeoState()
+{
+	FText txt = StaticEnum<EGeographyState>()->GetDisplayNameTextByIndex((int32)CurrentBallState->GetGeographyState());
+	GeoState_0->SetText(txt);
+	GeoState_1->SetText(txt);
+}
+
+void UMyUserWidget::OnOffMainPanel(bool on)
+{
+	if (on)
+	{
+		MainPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		MainPanel->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMyUserWidget::OnOffMovingPanel(bool on)
+{
+	if (on)
+	{
+		MovingPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		MovingPanel->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMyUserWidget::OnPaint(UPARAM(ref) FPaintContext& Context) const
+{
+	FVector BallLocation = CurrentBallState->GetActorLocation();
+	FVector2D BallLoc;
+	BallLoc.X = (BallLocation.Y + 6500) / 25000 * 500 + 1520;
+	BallLoc.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500) + 120;
+
+	FVector PredictLocation = CurrentBallState->GetPredictLocation();
+	FVector2D PreLoc;
+	PreLoc.X = (PredictLocation.Y + 6500) / 25000 * 500 + 1520;
+	PreLoc.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500)+ 120;
+	
+	int index = CurrentPlayerState->GetCurrentHoleIndex();
+	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
+	FVector2D FlagLoc;
+	FlagLoc.X = (FlagLocation.Y + 6500) / 25000 * 500 + 1515;
+	FlagLoc.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500) + 120;
+	
+	// 이렇게 설정하니 공아래에 그려짐 why? 모르겠음
+	Context.MaxLayer = 53;
+	UWidgetBlueprintLibrary::DrawLine(Context, BallLoc, PreLoc, FLinearColor::Yellow, false, 4);
+	
+
+	UWidgetBlueprintLibrary::DrawLine(Context, PreLoc, FlagLoc, FLinearColor::White, false, 4);
+
+
+}
+
+int32 UMyUserWidget::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+
+	if (CurrentBallState != NULL) {
+		if (CurrentBallState->CurrentState == EBallState::STOP 
+			|| CurrentBallState->CurrentState == EBallState::READY
+			|| CurrentBallState->CurrentState == EBallState::CHARGING) 
+		{
+		
+			FPaintContext Context(AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+			OnPaint(Context);
+			
+		}
+	}
+
+	return LayerId;
 }

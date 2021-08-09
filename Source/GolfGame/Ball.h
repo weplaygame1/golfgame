@@ -8,18 +8,16 @@
 #include "Ball.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FUpdateBallStateDelegate);
+DECLARE_MULTICAST_DELEGATE_OneParam(FDele_Multi_OneParam, bool);
 
 // 골프 클럽 ENUM CLASS
 UENUM()
 enum class EGolfClub : uint8
 {
-	//우드
-	//아이언
-	//퍼터 
-	//우선 이렇게 3개만
-
-	WOOD = 0 UMETA(DisplayName = "WOOD"),
+	DRIVER = 0 UMETA(DisplayName = "DRIVER"),
+	WOOD UMETA(DisplayName = "WOOD"),
 	IRON UMETA(DisplayName = "IRON"),
+	WEDGE UMETA(DisplayName = "WEDGE"),
 	PUTTER UMETA(DisplayName = "PUTTER")
 };
 
@@ -58,6 +56,10 @@ public:
 	FUpdateBallStateDelegate UpdatePredictIconOnWidget;
 	FUpdateBallStateDelegate UpdateClubStateOnWidget;
 	FUpdateBallStateDelegate UpdateMovingInfoOnWidget;
+	FUpdateBallStateDelegate UpdateGeoStateOnWidget;
+
+	FDele_Multi_OneParam OnOffMainPanelOnWidget;
+	FDele_Multi_OneParam OnOffMovingPanelOnWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -82,9 +84,6 @@ public:
 	class USpringArmComponent* BallCameraSpringArm;
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* BallCamera;
-	
-	UPROPERTY(EditAnywhere)
-	int32 CheckNowScore;
 
 	/* When AddImpulse to Ball */
 	//UPROPERTY(EditAnywhere)
@@ -110,8 +109,6 @@ public:
 	/* Player state */
 	class AMyPlayerState* BallPlayerState;
 
-	UPROPERTY(EditAnywhere)
-	bool bCanHitBall;
 	bool bIsChargingHit;
 
 	UPROPERTY(EditAnywhere)
@@ -145,7 +142,6 @@ public:
 	UPROPERTY(EditAnywhere)
 		FVector PredictLocation;
 
-
 	UPROPERTY(EditAnywhere)
 		FVector ftemp1;
 	UPROPERTY(EditAnywhere)
@@ -163,25 +159,19 @@ public:
 	void OnRealseBallHit();
 	void OnPressChangeClub();
 	void MoveDirection(float AxisValue);
-
 	void CheckBallisMoiving();
 	void UseLineTrace();
-
 	void MoveNextHole();
-
 	void ChargingPower();
 	void CheckBallLocation();
-
-	void CalPredictLocation();
-
+	void ChangeClub();
 	void SetMovingDis();
+	void ChangeClubFromDis();
 
 	float GetPower() { return PowerPercent / 100; }
-	FVector GetPredictLocation() const { return PredictLocation; }
-
 	float GetDrivingDis() { return DrivingDis; }
 	float GetMovingDis() { return MovingDis; }
+	FVector GetPredictLocation() const { return PredictLocation; }
 	EGolfClub GetClubState() { return ClubState; }
-
 	EGeographyState GetGeographyState() { return GeographyState; }
 };

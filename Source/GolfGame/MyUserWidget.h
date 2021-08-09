@@ -14,8 +14,14 @@ UCLASS()
 class GOLFGAME_API UMyUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
 	
 public:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
+
+	void OnPaint(UPARAM(ref) FPaintContext& Context) const;
+
+
 	void SetCurrentBallState(class ABall* ball);
 	void SetCurrentPlayerState(class AMyPlayerState* state);
 	void SetCurrentGameMode(class AGolfGameGameModeBase* mode);
@@ -24,32 +30,26 @@ public:
 	void SetPowerZero();
 
 	void UpdateWholeDistance();
-
 	void UpdateDistance();
-
 	void UpdatePar();
-
 	void UpdateScore();
-
 	void SetMinimapImage();
-
 	void UpdateBallIcon();
-
 	void UpdatePredictIcon();
-
 	void UpdateClubState();
-
 	void UpdateMovingInformation();
+	void UpdateGeoState();
+
+	void OnOffMainPanel(bool on);
+	void OnOffMovingPanel(bool on);
 public:
 	TWeakObjectPtr<class ABall> CurrentBallState;
 	TWeakObjectPtr<class AMyPlayerState> CurrentPlayerState;
 	TWeakObjectPtr<class AGolfGameGameModeBase> CurrentGameMode;
 
-	// 게이지바
+	/* 메인 패널 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	class UProgressBar* Power;
-
-	// 각종 정보들
+	class UCanvasPanel* MainPanel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* WholeDistance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
@@ -60,15 +60,13 @@ public:
 	class UTextBlock* NowScore;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ClubState;
-
-	// 공이 날아갈때의 정보
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	class UTextBlock* MovingDis;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	class UTextBlock* RemainingDis; 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	class UTextBlock* GeoState;
+	class UTextBlock* GeoState_1;
 	
+	// 게이지바
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UProgressBar* Power;
+
 	// 미니맵
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* Minimap;
@@ -78,4 +76,15 @@ public:
 	class UImage* FlagIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* PredictIcon;
+	
+	/* 무빙 패널 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UCanvasPanel* MovingPanel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* MovingDis;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* RemainingDis; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* GeoState_0;
+	
 };

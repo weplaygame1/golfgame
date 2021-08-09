@@ -14,7 +14,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 
-
 // Sets default values
 ABall::ABall()
 {
@@ -72,17 +71,10 @@ void ABall::BeginPlay()
 	// Set Default Value
 	bCheckHoleCup = false;
 	bCheckConcede = false;
-
-	bCanHitBall = true;
 	bIsChargingHit = false;
 
 	bCheckOnce = true;
 	JumpPower = 0;
-
-	CurrentState = EBallState::STOP;
-	GeographyState = EGeographyState::FAIRWAY;
-	ClubState = EGolfClub::WOOD;
-	CalPredictLocation();
 
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
@@ -93,30 +85,29 @@ void ABall::BeginPlay()
 	// Set Default CameraLagSpeed
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
 	
+	OnOffMainPanelOnWidget.Broadcast(true);
+	OnOffMovingPanelOnWidget.Broadcast(false);
+
+	CurrentState = EBallState::STOP;
+	GeographyState = EGeographyState::FAIRWAY;
+	UpdateGeoStateOnWidget.Broadcast();
+	ClubState = EGolfClub::DRIVER;
+	ChangeClub();
+
+	// 볼 아이콘 업데이트 델리게이트
+	UpdateBallIconOnWidget.Broadcast();
+	// 남은거리 갱신
+	BallPlayerState->SetDistanceRemaining();
 }
 
 // Called every frame
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//test
-
-	//투비전을 참고해보면 날아가는 동안 지형속성이 계속 업데이트됨
-	//그럼 라인트레이스를 움직이는 동안 계속 사용해주는걸로 설정해야할듯
-	//날아갈때 사용하는 라인트레이스 함수와 도착했을때 사용하는 라인트레이스 함수를 따로 만들어서
-	//설정해주면 될듯, 날아갈때는 지형속성만 출력하고 지형속성 변수를 바꿀 필요는 없을듯
-	//UseLineTrace();
-	
-	// 아래 두개는 볼이 움직일때(MOVING) 일때만 수행해줘도 될듯
-	// 볼 아이콘 업데이트 델리게이트
-	UpdateBallIconOnWidget.Broadcast();
-	// 남은거리 갱신
-	BallPlayerState->SetDistanceRemaining();
 
 	switch (CurrentState)
 	{
 	case EBallState::STOP:
-		CalPredictLocation();
 		break;
 	case EBallState::READY:
 		break;
@@ -158,22 +149,6 @@ void ABall::OnPressBallHit()
 	// 누르는 순간에 공의 속도가 0일때 추가로 체크해줘야할듯
 	if (CurrentState == EBallState::STOP)
 	{
-		FVector startLoc = this->GetActorLocation();// 발사 지점
-		FVector targetLoc = PredictLocation;		// 타겟 지점.
-		float arcValue = 0.5;                       // ArcParam (0.0-1.0)
-		outVelocity = FVector::ZeroVector;			// 결과 Velocity
-		if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))
-		{
-			FPredictProjectilePathParams predictParams(-1, startLoc+FVector(0,0,10), outVelocity, 0.3f);   // 20: tracing 보여질 프로젝타일 크기, 15: 시물레이션되는 Max 시간(초)
-			predictParams.DrawDebugTime = 5.0f;     //디버그 라인 보여지는 시간 (초)
-			predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;  // DrawDebugTime 을 지정하면 EDrawDebugTrace::Type::ForDuration 필요.
-			predictParams.OverrideGravityZ = 0;
-			
-			
-			FPredictProjectilePathResult result;
-			UGameplayStatics::PredictProjectilePath(this, predictParams, result);
-		}
-
 		CurrentState = EBallState::READY;
 	}
 
@@ -196,41 +171,50 @@ void ABall::OnPressBallHit()
 		*/
 
 		// 차징된 파워를 가지고 여기에서 위의 파워식을 계산해야함 !
-		FVector startLoc = this->GetActorLocation();// 발사 지점
-		FVector targetLoc = this->GetActorLocation() + (BallCamera->GetForwardVector() * (DrivingDis * PowerPercent / 100));// 타겟 지점.
-		outVelocity = FVector::ZeroVector;// 결과 Velocity
-		if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))
+
+		float fPercent = PowerPercent / 100;
+
+		// 지형에 따라 추가 감소 설정
+		switch (GeographyState)
 		{
-			//FPredictProjectilePathParams predictParams(-1, startLoc, outVelocity, 5.0f);   // 20: tracing 보여질 프로젝타일 크기, 15: 시물레이션되는 Max 시간(초)
-			//predictParams.DrawDebugTime = 5.0f;     //디버그 라인 보여지는 시간 (초)
-			//predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;  // DrawDebugTime 을 지정하면 EDrawDebugTrace::Type::ForDuration 필요.
-			//predictParams.OverrideGravityZ = 0;
-
-			//FPredictProjectilePathResult result;
-			//UGameplayStatics::PredictProjectilePath(this, predictParams, result);
-		}
-		
-		//BallMesh->AddImpulse(outVelocity, NAME_None, true);
-		BallMesh->AddImpulse(BallCamera->GetForwardVector()*2000, NAME_None, true);
-
-		switch (ClubState)
-		{
-		case EGolfClub::WOOD:
-		case EGolfClub::IRON:
-			
-
-
-			// 다른 클럽들은 SuggestProjectileVelocity_CustomArc 함수사용
-			// 퍼터는 해당 방향에 파워만 조절하면 될듯, 즉 각도가 필요없음
-			// why? 각도가 낮으면 버그발생
+		case EGeographyState::ROUGH:
+			// 85% ~ 95%
+			fPercent *= 0.9;
 			break;
-		case EGolfClub::PUTTER:
+		case EGeographyState::FAIRWAY:
+			break;
+		case EGeographyState::GREEN:
+			break;
+		case EGeographyState::BUNKER:
+			//55%  ~ 65% , 75% ~ 85%
+			//안쪽과 바깥쪽의 퍼센트가 다름
+			fPercent *= 0.6;
 			break;
 		default:
 			break;
 		}
 
+		FVector startLoc = this->GetActorLocation();// 발사 지점
+		FVector targetLoc = this->GetActorLocation() + (BallCamera->GetForwardVector() * (DrivingDis * fPercent));// 타겟 지점.
+		outVelocity = FVector::ZeroVector;// 결과 Velocity
+		if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))
+		{
+			/* 예상 포물선 DRAW LINE
+			FPredictProjectilePathParams predictParams(-1, startLoc, outVelocity, 5.0f);   // 20: tracing 보여질 프로젝타일 크기, 15: 시물레이션되는 Max 시간(초)
+			predictParams.DrawDebugTime = 5.0f;     //디버그 라인 보여지는 시간 (초)
+			predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;  // DrawDebugTime 을 지정하면 EDrawDebugTrace::Type::ForDuration 필요.
+			predictParams.OverrideGravityZ = 0;
 
+			FPredictProjectilePathResult result;
+			UGameplayStatics::PredictProjectilePath(this, predictParams, result);
+			*/
+		}
+		
+		// 여기에서 지형속성에 따른 패널티 부과 (러프와 벙커에서만?)
+		BallMesh->AddImpulse(outVelocity, NAME_None, true);
+
+		OnOffMainPanelOnWidget.Broadcast(false);
+		OnOffMovingPanelOnWidget.Broadcast(true);
 
 		bCheckOnce = false;
 		CurrentState = EBallState::MOVING;
@@ -245,49 +229,37 @@ void ABall::OnRealseBallHit()
 		PowerIncrease = true;
 		CurrentState = EBallState::CHARGING;
 	}
-
-	/*
-	if (bCanHitBall && !bIsMoving)
-	{
-		fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
-		fvtemp.Z = 1;
-		fvtemp = fvtemp * 100 * JumpPower;
-
-		// 각 회전축이라는데 다시 체크해야할듯
-		av = fvtemp.GetSafeNormal();
-		bv = av.ToOrientationQuat().GetRightVector();
-		cv = FVector::CrossProduct(av, bv);
-		
-		BallMesh->AddAngularImpulseInDegrees(bv*10000, NAME_None, true);
-		BallMesh->AddImpulse(fvtemp, NAME_None, true);
-		
-		// 공이 처음 땅에 착지하는순간에 angular damping 값을 설정해줘야할듯?
-		// 아니면 physics material를 만들어서 적용시켜줘야할듯
-
-		bIsChargingHit = false;
-		JumpPower = 0;
-		JumpAngle = 0;
-	}
-	*/
 }
 
 void ABall::OnPressChangeClub()
 {
-	// 아직 클럽 사용 룰을 적용하지 않음
-	// 우선 모든 클럽을 선택할 수 있게 구현
-	if (CurrentState == EBallState::STOP)
+	// 볼이 멈춰있으면서 && 그린이 아닐때
+	if (CurrentState == EBallState::STOP && GeographyState != EGeographyState::GREEN)
 	{
 		int32 index = (int32)ClubState + 1;
 
-		if (index == (int32)StaticEnum<EGolfClub>()->NumEnums() - 1)
+		// 티샷일때
+		// 드라이버부터 웨지까지
+		// 이때 지형속성을 TEE라고 보여줘야할까 ?
+		if (BallPlayerState->GetNowHoleScore() == 0)
 		{
-			index = 0;
+			if (index == (int32)StaticEnum<EGolfClub>()->NumEnums() - 2)
+			{
+				index = 0;
+			}
+		}
+		// 우드부터 웨지까지
+		else
+		{
+			if (index == (int32)StaticEnum<EGolfClub>()->NumEnums() - 2)
+			{
+				index = 1;
+			}
 		}
 
 		ClubState = (EGolfClub)StaticEnum<EGolfClub>()->GetValueByIndex(index);
 
-		CalPredictLocation();
-		UpdateClubStateOnWidget.Broadcast();
+		ChangeClub();
 	}
 }
 
@@ -296,12 +268,19 @@ void ABall::MoveDirection(float AxisValue)
 	if (AxisValue != 0 && CurrentState == EBallState::STOP)
 	{
 		AddControllerYawInput(AxisValue);
+
+		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
+		UpdatePredictIconOnWidget.Broadcast();
 	}
 }
 
 void ABall::CheckBallisMoiving()
 {
+	// 남은거리 갱신
+	BallPlayerState->SetDistanceRemaining();
+	// 비거리 계산
 	SetMovingDis();
+	UseLineTrace();
 	
 	if (BallMesh->GetComponentVelocity().Size() > 0.f)
 	{
@@ -320,15 +299,13 @@ void ABall::CheckBallisMoiving()
 
 void ABall::UseLineTrace()
 {
-	Print("UseLineTrace");
+	//Print("UseLineTrace");
 
 	FVector Startpoint = this->GetActorLocation() + FVector(0.0f, 0.0f, 5.0f);
 	FVector Endpoint = Startpoint * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -100.0f);
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.bReturnPhysicalMaterial = true;
 	CollisionParams.bTraceComplex = false;
-	
-	//DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor::Orange,false,10);
 
 	//ECC_GameTraceChannel1 -> Custom trace channel
 	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
@@ -341,29 +318,32 @@ void ABall::UseLineTrace()
 		//itestest = StaticEnum<EGeographyState>()->GetValueByName(GeoState);
 
 		GeographyState = (EGeographyState)StaticEnum<EGeographyState>()->GetValueByName(GeoState);
+		UpdateGeoStateOnWidget.Broadcast();
 
 		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
 		// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
+
+		/* ***이부분은 계속 돌릴필요없이 공을 치기전에 계산해주면 될거같은데?*** */
 		switch (GeographyState)
 		{
 		case EGeographyState::ROUGH:
-			Print("ROUGH");
+			//Print("ROUGH");
 
 			break;
 		case EGeographyState::FAIRWAY:
-			Print("FAIRWAY");
+			//Print("FAIRWAY");
 
 			break;
 		case EGeographyState::GREEN:
-			Print("GREEN");
+			//Print("GREEN");
 
 			break;
 		case EGeographyState::BUNKER:
-			Print("BUNKER");
+			//Print("BUNKER");
 
 			break;
 		default:
-			Print("DEFAULT");
+			//Print("DEFAULT");
 
 			//GetValueByName(FName name);
 			//만약 enum에 없는 이름이면 -1을 리턴시킴 -> 이걸 사용하는 방법도 가능
@@ -372,48 +352,6 @@ void ABall::UseLineTrace()
 
 			break;
 		}
-
-		/*
-		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
-
-		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
-		// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
-		switch (epstemp)
-		{
-		case SurfaceType1: // GREEN
-			NowMaterial = TEXT("GREEN");
-			break;
-		case SurfaceType2: // APRON
-			NowMaterial = TEXT("APRON");
-
-			break;
-		case SurfaceType3: // FAIRWAY
-			NowMaterial = TEXT("FAIRWAY");
-
-			break;
-		case SurfaceType4: //ROUGH
-			NowMaterial = TEXT("ROUGH");
-
-			break;
-		case SurfaceType5: //BUNKER
-			NowMaterial = TEXT("BUNKER");
-
-			break;
-		// 이 녀석들은 공을 옮겨야함
-		// 추가로 타수를 줄여줌
-		case SurfaceType6: // HAZARD
-			//this->SetActorLocation(BallPlayerState->GetFormerLocation());
-			
-			break;
-		case SurfaceType7: // OB
-			//this->SetActorLocation(BallPlayerState->GetFormerLocation());
-
-			break;
-	
-		default:
-			break;
-		}
-		*/
 
 	}
 	else
@@ -426,6 +364,7 @@ void ABall::UseLineTrace()
 		// 우선은 OB, HAZARD 공통적으로 그 전 위치로 보내줌
 	}
 
+	
 }
 
 void ABall::MoveNextHole()
@@ -442,12 +381,19 @@ void ABall::MoveNextHole()
 
 		// 추가적으로 카메라의 방향을 정해줘야함
 		// 현재는 마지막에 쳤던 방향을 보고있음
+
+
+		GeographyState = EGeographyState::FAIRWAY;
+		UpdateGeoStateOnWidget.Broadcast();
+
+		// 여기에서 다음홀을 준비하기 위한 변수들 디폴트값으로 세팅
+
 	}
 	else
 	{
 		// 게임끝났을때 temp
 		Print("End");
-		this->Destroy();
+		
 	}
 }
 
@@ -506,26 +452,50 @@ void ABall::CheckBallLocation()
 			}
 			else
 			{
-				// 어느 지형에 있는지 체크
-				UseLineTrace();
+				// 여기에서 남은거리에 따라 클럽 지정해줌.
+				// 그린이 아닐때는 남은 거리에 따라
+				if (GeographyState != EGeographyState::GREEN) {
+					ChangeClubFromDis();
+				}
+				else
+				{
+					ClubState = EGolfClub::PUTTER;
+
+					// 그린 위에 도착하면 미니맵을 바꿔줘야함
+					// ex) 원래 미니맵 hidden, 그린전용 미니맵 visibility 이런식으로?
+					// 그에따라 예상 도착지점도 바꾸고 표현해줄 필요 없음
+					// 이부분 구현 필요
+					ChangeClub();
+				}
 			}
 		}
-
+		OnOffMainPanelOnWidget.Broadcast(true);
+		OnOffMovingPanelOnWidget.Broadcast(false);
+		UpdateBallIconOnWidget.Broadcast();
 		SetPowerZeroOnWidget.Broadcast();
 		CurrentState = EBallState::STOP;
 	}
 }
 
-void ABall::CalPredictLocation() {
-
+void ABall::ChangeClub()
+{
+	// 각도 수정 필요
 	switch (ClubState)
 	{
+	case EGolfClub::DRIVER:
+		DrivingDis = 15000;
+		ArcValue = 0.7;
+		break;
 	case EGolfClub::WOOD:
-		DrivingDis = 20000;
+		DrivingDis = 13000;
 		ArcValue = 0.7;
 		break;
 	case EGolfClub::IRON:
-		DrivingDis = 12000;
+		DrivingDis = 10000;
+		ArcValue = 0.6;
+		break;
+	case EGolfClub::WEDGE:
+		DrivingDis = 7000;
 		ArcValue = 0.6;
 		break;
 	case EGolfClub::PUTTER:
@@ -537,6 +507,29 @@ void ABall::CalPredictLocation() {
 	}
 	PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
 	UpdatePredictIconOnWidget.Broadcast();
+	UpdateClubStateOnWidget.Broadcast();
+}
+
+void ABall::ChangeClubFromDis()
+{
+	//남은 거리에 따라
+	float fDis = BallPlayerState->GetDistanceRemaining();
+
+	if (fDis > 100)
+	{
+		ClubState = EGolfClub::WOOD;
+	}
+	else if (fDis > 70)
+	{
+		ClubState = EGolfClub::IRON;
+	}
+	else
+	{
+		ClubState = EGolfClub::WEDGE;
+	}
+	PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
+	UpdatePredictIconOnWidget.Broadcast();
+	UpdateClubStateOnWidget.Broadcast();
 }
 
 void ABall::SetMovingDis()

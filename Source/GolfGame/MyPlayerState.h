@@ -37,7 +37,7 @@ public:
 public:
 	FVector GetFormerLocation() const { return FormerBallLocation; }
 
-	int32 GetNowHoleScore() const { return ScoreTable[CurrentHoleIndex]; }
+	int32 GetNowHoleScore() const { return NowHoleScore; }
 	int32 GetCurrentHoleIndex() const { return CurrentHoleIndex; }
 	int32 GetDoublePar() const { return iDoublePar; }
 	int32 GetWholeDistance() const { return WholeDistacne; }
@@ -70,5 +70,9 @@ public:
 	// 처음부터의 총 거리
 	UPROPERTY(EditAnywhere)
 	int WholeDistacne;
+
+	// 이번 홀에서 친 횟수
+	UPROPERTY(EditAnywhere)
+	int32 NowHoleScore;
 
 };

@@ -34,8 +34,7 @@ void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer)
 	
 	// PlayerState에 초기값을 설정해줌
 	auto PS = Cast<AMyPlayerState>(NewPlayer->PlayerState);
-	PS->SetInitSocreTable(AllScoreTable);
-	PS->SetInitDoublePar((PS->GetNowHoleScore()) * (-1));
+	PS->SetInitDoublePar((AllScoreTable[0] * 2) - 1);
 	PS->SetCurrentGameMode(this);
 	PS->WholeDistacne = FVector::Dist(AllSpawnLocation[0], AllHoleCupLocation[0]) / 100;
 
@@ -59,8 +58,8 @@ void AGolfGameGameModeBase::InitHoleCupLocation()
 void AGolfGameGameModeBase::InitScoreTable()
 {
 	// Par 수
-	AllScoreTable.Add(-3);
-	AllScoreTable.Add(-4);
+	AllScoreTable.Add(3);
+	AllScoreTable.Add(4);
 }
 
 void AGolfGameGameModeBase::InitMinimapCenterLocation()

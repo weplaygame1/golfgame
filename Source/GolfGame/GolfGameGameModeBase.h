@@ -24,7 +24,7 @@ public:
 	void InitMinimapCenterLocation();
 	void InitMinimapWidth();
 
-	TArray<int32> GetScoreTable() { return AllScoreTable; }
+	int32 GetScoreTable(int index) { return AllScoreTable[index]; }
 
 	FVector GetSpawnLocation(int index) { return AllSpawnLocation[index]; }
 	FVector GetHoleCupLocation(int index) { return AllHoleCupLocation[index]; }
