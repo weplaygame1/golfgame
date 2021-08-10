@@ -1,10 +1,6 @@
-/Saved
 /Intermediate
-/.vs
-/Build
 /Plugins
-/Binaries
-*.sln
+/Content/StarterContent/*
 *_BuiltData.uasset
 
 # Visual Studio 2015 user specific files
