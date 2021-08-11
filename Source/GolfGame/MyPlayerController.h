@@ -25,4 +25,9 @@ public:
 	TSubclassOf<class UMyUserWidget> PlayerWidget;
 	UPROPERTY(EditAnywhere)
 	class UMyUserWidget* CurrentWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ULineWidget> LineWidget;
+	UPROPERTY(EditAnywhere)
+	class ULineWidget* CurrentLineWidget;
 };

@@ -1,6 +1,5 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MyUserWidget.h"
 
 #include "Components/CanvasPanel.h"
@@ -10,8 +9,6 @@
 #include "Engine/Texture2D.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
-
-#include "SceneManagement.h"
 
 #include "GolfGameGameModeBase.h"
 #include "MyPlayerState.h"
@@ -182,52 +179,4 @@ void UMyUserWidget::OnOffMovingPanel(bool on)
 	{
 		MovingPanel->SetVisibility(ESlateVisibility::Hidden);
 	}
-}
-
-void UMyUserWidget::OnPaint(UPARAM(ref) FPaintContext& Context) const
-{
-	FVector BallLocation = CurrentBallState->GetActorLocation();
-	FVector2D BallLoc;
-	BallLoc.X = (BallLocation.Y + 6500) / 25000 * 500 + 1520;
-	BallLoc.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500) + 120;
-
-	FVector PredictLocation = CurrentBallState->GetPredictLocation();
-	FVector2D PreLoc;
-	PreLoc.X = (PredictLocation.Y + 6500) / 25000 * 500 + 1520;
-	PreLoc.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500)+ 120;
-	
-	int index = CurrentPlayerState->GetCurrentHoleIndex();
-	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
-	FVector2D FlagLoc;
-	FlagLoc.X = (FlagLocation.Y + 6500) / 25000 * 500 + 1515;
-	FlagLoc.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500) + 120;
-	
-	// 이렇게 설정하니 공아래에 그려짐 why? 모르겠음
-	// 메인에서는 안됨, 위젯 블루프린트에서는 잘됨	
-	//Context.MaxLayer = 53;
-	UWidgetBlueprintLibrary::DrawLine(Context, BallLoc, PreLoc, FLinearColor::Yellow, false, 4);
-
-	// 시작과 도착을 잘게 잘라서 적절하게 그려주면 점선됨
-	UWidgetBlueprintLibrary::DrawLine(Context, PreLoc, FlagLoc, FLinearColor::White, false, 4);
-
-	
-}
-
-int32 UMyUserWidget::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
-{
-	//Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-	if (CurrentBallState != NULL) {
-		if (CurrentBallState->CurrentState == EBallState::STOP 
-			|| CurrentBallState->CurrentState == EBallState::READY
-			|| CurrentBallState->CurrentState == EBallState::CHARGING) 
-		{
-			// 이렇게하면 메인에서는 됨, 위젯 블루프린트에서는 안됨
-			LayerId = 78;
-			FPaintContext Context(AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-			OnPaint(Context);
-			
-		}
-	}
-	
-	return LayerId;
 }
