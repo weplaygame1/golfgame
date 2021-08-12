@@ -11,7 +11,12 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 {
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	PlayerStateClass = AMyPlayerState::StaticClass();
-	DefaultPawnClass = ABall::StaticClass();
+	//DefaultPawnClass = ABall::StaticClass();
+	static ConstructorHelpers::FClassFinder<ABall> Ball_BP(TEXT("/Game/Blueprints/MyBall_BP.MyBall_BP_C"));
+	if (Ball_BP.Succeeded())
+	{
+		DefaultPawnClass = Ball_BP.Class;
+	}
 
 	/* 게임 정보 초기화 */
 	// 코스 갯수

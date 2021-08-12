@@ -282,7 +282,7 @@ void ABall::CheckBallisMoiving()
 	SetMovingDis();
 	UseLineTrace();
 	
-	if (BallMesh->GetComponentVelocity().Size() > 0.f)
+	if (BallMesh->GetComponentVelocity().Size() > 0.1f)
 	{
 		bCheckOnce = true;
 		bIsMoving = true;
@@ -316,7 +316,7 @@ void ABall::UseLineTrace()
 
 		//디버그용, 확인하고 지우기
 		//itestest = StaticEnum<EGeographyState>()->GetValueByName(GeoState);
-
+		
 		GeographyState = (EGeographyState)StaticEnum<EGeographyState>()->GetValueByName(GeoState);
 		UpdateGeoStateOnWidget.Broadcast();
 
@@ -359,7 +359,7 @@ void ABall::UseLineTrace()
 		// OB , HAZARD 일때?
 		// 이 녀석들은 공을 옮겨야함
 		// 추가로 타수를 줄여줌
-		Print("OUT");
+		//Print("OUT");
 
 		// 우선은 OB, HAZARD 공통적으로 그 전 위치로 보내줌
 	}
@@ -399,7 +399,7 @@ void ABall::MoveNextHole()
 
 void ABall::ChargingPower()
 {
-	PrintWithFloat("", PowerPercent);
+	//PrintWithFloat("", PowerPercent);
 	if (PowerIncrease)
 	{
 		PowerPercent += 0.5f;
@@ -419,7 +419,6 @@ void ABall::ChargingPower()
 		}
 	}
 	GetPowerGaugeOnWidget.Broadcast();
-
 }
 
 void ABall::CheckBallLocation()
@@ -496,7 +495,7 @@ void ABall::ChangeClub()
 		break;
 	case EGolfClub::WEDGE:
 		DrivingDis = 7000;
-		ArcValue = 0.6;
+		ArcValue = 0.3;
 		break;
 	case EGolfClub::PUTTER:
 		DrivingDis = 6000;
