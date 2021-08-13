@@ -9,6 +9,7 @@
 
 #include "MyPlayerState.h"
 #include "GolfGameGameModeBase.h"
+#include "TestSpline.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -85,9 +86,11 @@ void ABall::BeginPlay()
 	// Set Default CameraLagSpeed
 	BallCameraSpringArm->CameraLagSpeed = 3.0F;
 	
+	// 미니맵 세팅
 	OnOffMainPanelOnWidget.Broadcast(true);
 	OnOffMovingPanelOnWidget.Broadcast(false);
 
+	// 값 초기화
 	CurrentState = EBallState::STOP;
 	GeographyState = EGeographyState::FAIRWAY;
 	UpdateGeoStateOnWidget.Broadcast();
@@ -104,6 +107,9 @@ void ABall::BeginPlay()
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// TEST
+	UseLineTrace();
 
 	switch (CurrentState)
 	{
@@ -194,6 +200,9 @@ void ABall::OnPressBallHit()
 			break;
 		}
 
+		// if 퍼터일때는 그냥 addimpulse
+
+		// else 아래 그대로
 		FVector startLoc = this->GetActorLocation();// 발사 지점
 		FVector targetLoc = this->GetActorLocation() + (BallCamera->GetForwardVector() * (DrivingDis * fPercent));// 타겟 지점.
 		outVelocity = FVector::ZeroVector;// 결과 Velocity
@@ -280,7 +289,7 @@ void ABall::CheckBallisMoiving()
 	BallPlayerState->SetDistanceRemaining();
 	// 비거리 계산
 	SetMovingDis();
-	UseLineTrace();
+	//UseLineTrace();
 	
 	if (BallMesh->GetComponentVelocity().Size() > 0.1f)
 	{
@@ -301,13 +310,14 @@ void ABall::UseLineTrace()
 {
 	//Print("UseLineTrace");
 
-	FVector Startpoint = this->GetActorLocation() + FVector(0.0f, 0.0f, 5.0f);
+	FVector Startpoint = this->GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
 	FVector Endpoint = Startpoint * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -100.0f);
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.bReturnPhysicalMaterial = true;
 	CollisionParams.bTraceComplex = false;
 
 	//ECC_GameTraceChannel1 -> Custom trace channel
+	/*
 	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
 	if (isHit)
 	{
@@ -323,7 +333,7 @@ void ABall::UseLineTrace()
 		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
 		// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
 
-		/* ***이부분은 계속 돌릴필요없이 공을 치기전에 계산해주면 될거같은데?*** */
+		// 부분은 계속 돌릴필요없이 공을 치기전에 계산해주면 될거같은데?
 		switch (GeographyState)
 		{
 		case EGeographyState::ROUGH:
@@ -363,8 +373,51 @@ void ABall::UseLineTrace()
 
 		// 우선은 OB, HAZARD 공통적으로 그 전 위치로 보내줌
 	}
+	*/
 
-	
+	DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor(255, 0, 0), false, -1, 0, 12.333);
+
+	// 랜드스케이프에 칠해진 surface physics 가져오는 방법
+	// EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
+	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
+	if (isHit)
+	{
+		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
+
+		switch (epstemp)
+		{
+		case SurfaceType1:
+			Print("GREEN");
+			break;
+		case SurfaceType2:
+			Print("FAIR");
+
+			break;
+		case SurfaceType3:
+			Print("ROUGH");
+
+			break;
+		case SurfaceType4:
+			Print("BUNKER");
+
+			break;
+		default:
+			// 여기에서 경계부분이나 OB를 체크하면 될듯?
+
+			Print("Out");
+
+			fsttt = Cast<ATestSpline>(OutHit.GetActor())->GetMaterialName();
+			// 이거 디폴트 값 설정을 잘 생각해서 설계해야할듯
+			
+
+			// 마지지막 볼 로케이션 함수에서
+			// fsttt (예정) 이 None이 아닐때 && OB or HAZARD면 처리
+			// 그외 나머지는 지금 라인트레이스 그대로 수행
+			
+
+			break;
+		}
+	}
 }
 
 void ABall::MoveNextHole()
@@ -423,6 +476,9 @@ void ABall::ChargingPower()
 
 void ABall::CheckBallLocation()
 {
+
+	//더블파 규칙 확인하고 수정해야함 !!!!!
+
 	if (!bIsMoving) {
 		// 홀 아웃인지 체크
 		if (bCheckConcede || bCheckHoleCup)
@@ -468,6 +524,8 @@ void ABall::CheckBallLocation()
 				}
 			}
 		}
+		//여기서 딜레이 1초 정도?
+
 		OnOffMainPanelOnWidget.Broadcast(true);
 		OnOffMovingPanelOnWidget.Broadcast(false);
 		UpdateBallIconOnWidget.Broadcast();
@@ -539,7 +597,6 @@ void ABall::SetMovingDis()
 	// 위젯에서 비거리를 업데이트 해주는 델리게이트
 	UpdateMovingInfoOnWidget.Broadcast();
 }
-
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

@@ -104,7 +104,7 @@ public:
 	/* when use line trace */
 	FHitResult OutHit;
 	UPROPERTY(EditAnywhere)
-	FString NowMaterial;
+		UPrimitiveComponent* outactor;
 
 	/* Player state */
 	class AMyPlayerState* BallPlayerState;

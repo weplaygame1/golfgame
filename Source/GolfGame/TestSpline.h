@@ -3,16 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-//#include "GolfGame.h"
-
-#include "Materials/MaterialInterface.h"
-#include "Components/SplineComponent.h"
-#include "ProceduralMeshComponent.h"
-
-
-#include "Kismet/KismetSystemLibrary.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetArrayLibrary.h"
 
 #include "GameFramework/Actor.h"
 #include "TestSpline.generated.h"
@@ -31,71 +21,30 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void OnConstruction(const FTransform& Transform) override;
+	void build0();
 
-	void MakePointGrid();
-	void BuildMeshFromOutline();
-	void NormalizePointGridforUV();
-
-	void checktest();
-
+	FString GetMaterialName() { return material->GetName(); }
 public:
 	UPROPERTY(EditAnywhere)
-	USplineComponent* spline;
+	class USplineComponent* spline;
 	UPROPERTY(EditAnywhere)
-	class UProceduralMeshComponent* procedural;
+	class UMaterialInterface* material;
 	UPROPERTY(EditAnywhere)
-	UMaterialInterface* material;
-
-	/* MakePointGrid */
+	class UDecalComponent* decal;
 	UPROPERTY(EditAnywhere)
-	float TriangleSize;
-	//UROPERTY(EditAnywhere)
-	int32 GridX;
-
-	/* BuildMeshFromOutline */
-	//PointIndex == GridPoints
-	//UPROPERTY(EditAnywhere)
-	TArray<int32> GridPoints;
-
-	//UPROPERTY(EditAnywhere)
-	TArray<FVector> Vertices;
-
-	//TrianglesL == Triangles
-	//UPROPERTY(EditAnywhere)
-	TArray<int32> Triangles;
-
-	/* NormalizePointGridforUV */
-	//UPROPERTY(EditAnywhere)
-	float Padding;
-	//UPROPERTY(EditAnywhere)
-	TArray<FVector2D> UV;
-	//UPROPERTY(EditAnywhere)
-	float Scale;
-	//UPROPERTY(EditAnywhere)
-	FVector OriginScaled;
-
-	
-	UPROPERTY(EditAnywhere)
-		bool bin;
-	UPROPERTY(EditAnywhere)
-		bool bline;
-	UPROPERTY(EditAnywhere)
-		float ftest;
-	UPROPERTY(EditAnywhere)
-		float fsize;
-	UPROPERTY(EditAnywhere)
-		float fffffff;
-	UPROPERTY(EditAnywhere)
-		FVector closet;
-
-
+	class UBoxComponent* box;
 
 	UPROPERTY(EditAnywhere)
-		FVector origin;
+	TArray<class UDecalComponent*> decalArray;
 	UPROPERTY(EditAnywhere)
-		FVector extent;
+	TArray<class UBoxComponent*> boxArray;
 	UPROPERTY(EditAnywhere)
-		float boundLength;
+	float decalSize_X;
+	UPROPERTY(EditAnywhere)
+	float decalSize_Y;
+	UPROPERTY(EditAnywhere)
+	float decalSize_Z;
+	UPROPERTY(EditAnywhere)
+	int32 SOrder;
 };
