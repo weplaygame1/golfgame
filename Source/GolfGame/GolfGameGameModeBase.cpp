@@ -49,7 +49,7 @@ void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer)
 void AGolfGameGameModeBase::InitSpawnLocation()
 {
 	// 시작 위치
-	AllSpawnLocation.Add(FVector(2000, 6200, 200));
+	AllSpawnLocation.Add(FVector(1500, 6700, 200));
 	AllSpawnLocation.Add(FVector(1000, 18000, 200));
 }
 

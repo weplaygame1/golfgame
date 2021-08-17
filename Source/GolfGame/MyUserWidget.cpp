@@ -96,7 +96,9 @@ void UMyUserWidget::SetMinimapImage()
 	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
 
 	FVector2D IconLocation;
-	IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 500;
+	//IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 500;
+	IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 300;
+
 	IconLocation.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500);
 
 	FlagIcon->SetRenderTranslation(IconLocation);
@@ -110,7 +112,9 @@ void UMyUserWidget::UpdateBallIcon()
 	FVector BallLocation = CurrentBallState->GetActorLocation();
 
 	FVector2D IconLocation;
-	IconLocation.X = (BallLocation.Y + 6500) / 25000 * 500;
+	//IconLocation.X = (BallLocation.Y + 6500) / 25000 * 500;
+	IconLocation.X = (BallLocation.Y + 6500) / 25000 * 300;
+
 	IconLocation.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500);
 
 	BallIcon->SetRenderTranslation(IconLocation);
@@ -126,7 +130,9 @@ void UMyUserWidget::UpdatePredictIcon()
 	FVector PredictLocation = CurrentBallState->GetPredictLocation();
 
 	FVector2D IconLocation;
-	IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 500;
+	//IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 500;
+	IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 300;
+
 	IconLocation.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500);
 
 	PredictIcon->SetRenderTranslation(IconLocation);

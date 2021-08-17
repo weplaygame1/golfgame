@@ -22,19 +22,25 @@ int32 ULineWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Allotted
 	{
 		FVector BallLocation = Cast<ABall>(GetOwningPlayerPawn())->GetActorLocation();
 		FVector2D BallLoc;
-		BallLoc.X = (BallLocation.Y + 6500) / 25000 * 500 ;
-		BallLoc.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500) ;
+		//BallLoc.X = (BallLocation.Y + 6500) / 25000 * 500 ;
+		BallLoc.X = (BallLocation.Y + 6500) / 25000 * 300;
+
+		BallLoc.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500);
 
 		FVector PredictLocation = Cast<ABall>(GetOwningPlayerPawn())->GetPredictLocation();
 		FVector2D PreLoc;
-		PreLoc.X = (PredictLocation.Y + 6500) / 25000 * 500 ;
-		PreLoc.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500) ;
+		//PreLoc.X = (PredictLocation.Y + 6500) / 25000 * 500 ;
+		PreLoc.X = (PredictLocation.Y + 6500) / 25000 * 300;
+
+		PreLoc.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500);
 
 		int index = Cast<AMyPlayerState>(GetOwningPlayerState())->GetCurrentHoleIndex();
 		FVector FlagLocation = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode())->GetHoleCupLocation(index);
 		FVector2D FlagLoc;
-		FlagLoc.X = (FlagLocation.Y + 6500) / 25000 * 500 ;
-		FlagLoc.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500) ;
+		//FlagLoc.X = (FlagLocation.Y + 6500) / 25000 * 500;
+		FlagLoc.X = (FlagLocation.Y + 6500) / 25000 * 300;
+
+		FlagLoc.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500);
 
 		UWidgetBlueprintLibrary::DrawLine(Context, BallLoc, PreLoc, FLinearColor::Yellow, false, 4);
 

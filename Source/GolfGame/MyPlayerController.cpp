@@ -4,7 +4,6 @@
 #include "MyPlayerController.h"
 
 #include "MyUserWidget.h"
-#include "LineWidget.h"
 
 #include "GolfGameGameModeBase.h"
 #include "MyPlayerState.h"
@@ -12,17 +11,11 @@
 
 AMyPlayerController::AMyPlayerController()
 {
-	static ConstructorHelpers::FClassFinder<UMyUserWidget> UUW(TEXT("/Game/Blueprints/Widget/NewBlueprint.NewBlueprint_C"));
+	static ConstructorHelpers::FClassFinder<UMyUserWidget> UUW(TEXT("/Game/Blueprints/Widget/MainWidget.MainWidget_C"));
 	if (UUW.Succeeded())
 	{
 		PlayerWidget = UUW.Class;
 	}
-
-	/*static ConstructorHelpers::FClassFinder<ULineWidget> UUW1(TEXT("/Script/GolfGame.LineWidget"));
-	if (UUW1.Succeeded())
-	{
-		LineWidget = UUW1.Class;
-	}*/
 }
 
 void AMyPlayerController::BeginPlay()
@@ -36,7 +29,5 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget->SetCurrentPlayerState(Cast<AMyPlayerState>(PlayerState));
 	CurrentWidget->SetCurrentGameMode(GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>());
 	CurrentWidget->SetMinimapImage();
-
-	//CurrentLineWidget = CreateWidget<ULineWidget>(GetWorld(), LineWidget);
 
 }

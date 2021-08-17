@@ -38,7 +38,8 @@ enum class EGeographyState : uint8
 	ROUGH = 0 UMETA(DisplayName = "ROUGH"),
 	FAIRWAY UMETA(DisplayName = "FAIRWAY"),
 	GREEN UMETA(DisplayName = "GREEN"),
-	BUNKER UMETA(DisplayName = "BUNKER")
+	BUNKER UMETA(DisplayName = "BUNKER"),
+	OB UMETA(DisplayName = "OB")
 };
 
 UCLASS()
@@ -75,7 +76,6 @@ public:
 	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
 public:
 	/* 생성자 */
 	UPROPERTY(EditAnywhere)
@@ -85,33 +85,23 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* BallCamera;
 
-	/* When AddImpulse to Ball */
-	//UPROPERTY(EditAnywhere)
-		FVector fvtemp;
-	//UPROPERTY(EditAnywhere)
-		FVector av;
-	//UPROPERTY(EditAnywhere)
-		FVector bv;
-	//UPROPERTY(EditAnywhere)
-		FVector cv;
-
 	/* Club State */
-	UPROPERTY(EditAnywhere)
 	EGolfClub ClubState;
 	float DrivingDis;
 	float ArcValue;
 
 	/* when use line trace */
-	FHitResult OutHit;
 	UPROPERTY(EditAnywhere)
-		UPrimitiveComponent* outactor;
+		UPrimitiveComponent* outactor1;
+
+		UPROPERTY(EditAnywhere)
+		UPrimitiveComponent* outactor2;
 
 	/* Player state */
 	class AMyPlayerState* BallPlayerState;
 
 	bool bIsChargingHit;
 
-	UPROPERTY(EditAnywhere)
 	bool bIsMoving;
 	float JumpPower;
 	float JumpAngle;
@@ -126,33 +116,23 @@ public:
 	float PowerPercent = 0;
 	bool PowerIncrease = true;
 
-	UPROPERTY(EditAnywhere)
 	EBallState CurrentState;
-	UPROPERTY(EditAnywhere)
 	EGeographyState GeographyState;
 
 	float MovingDis;
 
+	FVector PredictLocation;
+	
+	UPROPERTY(EditAnywhere)
+	bool bCheckOB;
+
 	//test
 	UPROPERTY(EditAnywhere)
 		FString fsttt;
-	UPROPERTY(EditAnywhere)
-		int32 itestest;
-
-	UPROPERTY(EditAnywhere)
-		FVector PredictLocation;
-
-	UPROPERTY(EditAnywhere)
-		FVector ftemp1;
-	UPROPERTY(EditAnywhere)
-		FVector ftemp3; 
-	UPROPERTY(EditAnywhere)
-		FVector outVelocity;
-	UPROPERTY(EditAnywhere)
-		FVector outVelocity22;
+	
+	//랜드스케이프 테스트용
 	UPROPERTY(EditAnywhere)
 		int32 itestlen;
-
 
 public:
 	void OnPressBallHit();

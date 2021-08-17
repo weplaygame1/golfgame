@@ -14,20 +14,12 @@ UCLASS()
 class GOLFGAME_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
 public:
 	AMyPlayerController();
-
 	virtual void BeginPlay() override;
-
 public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UMyUserWidget> PlayerWidget;
 	UPROPERTY(EditAnywhere)
 	class UMyUserWidget* CurrentWidget;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ULineWidget> LineWidget;
-	UPROPERTY(EditAnywhere)
-	class ULineWidget* CurrentLineWidget;
 };

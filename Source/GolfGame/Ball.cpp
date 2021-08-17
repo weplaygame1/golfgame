@@ -35,6 +35,7 @@ ABall::ABall()
 
 	BallMesh->SetCollisionObjectType(ECC_Pawn);
 	BallMesh->SetCollisionProfileName("SetLineTraceChannel");
+	BallMesh->SetReceivesDecals(false);
 
 	// set temp angulardamping
 	BallMesh->SetAngularDamping(30);
@@ -77,6 +78,8 @@ void ABall::BeginPlay()
 	bCheckOnce = true;
 	JumpPower = 0;
 
+	bCheckOB = false;
+
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
 	BallPlayerState->GetParOnWidget.Broadcast();
@@ -109,7 +112,7 @@ void ABall::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// TEST
-	UseLineTrace();
+	//UseLineTrace();
 
 	switch (CurrentState)
 	{
@@ -167,11 +170,11 @@ void ABall::OnPressBallHit()
 		
 		// 공 치는 부분 -> 함수하나 만들고 클럽 종류에따라 각도와 힘 계산
 		/*
-		fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
+		FVector fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
 		fvtemp.Z = 1;
 		fvtemp = fvtemp * 100 * 10;
-		av = fvtemp.GetSafeNormal();
-		bv = av.ToOrientationQuat().GetRightVector();
+		FVector av = fvtemp.GetSafeNormal();
+		FVector bv = av.ToOrientationQuat().GetRightVector();
 		BallMesh->AddAngularImpulseInDegrees(bv * 10000, NAME_None, true);
 		BallMesh->AddImpulse(fvtemp, NAME_None, true);
 		*/
@@ -205,7 +208,7 @@ void ABall::OnPressBallHit()
 		// else 아래 그대로
 		FVector startLoc = this->GetActorLocation();// 발사 지점
 		FVector targetLoc = this->GetActorLocation() + (BallCamera->GetForwardVector() * (DrivingDis * fPercent));// 타겟 지점.
-		outVelocity = FVector::ZeroVector;// 결과 Velocity
+		FVector outVelocity = FVector::ZeroVector;// 결과 Velocity
 		if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))
 		{
 			/* 예상 포물선 DRAW LINE
@@ -289,7 +292,8 @@ void ABall::CheckBallisMoiving()
 	BallPlayerState->SetDistanceRemaining();
 	// 비거리 계산
 	SetMovingDis();
-	//UseLineTrace();
+	// 지형속성 체크
+	UseLineTrace();
 	
 	if (BallMesh->GetComponentVelocity().Size() > 0.1f)
 	{
@@ -308,116 +312,124 @@ void ABall::CheckBallisMoiving()
 
 void ABall::UseLineTrace()
 {
-	//Print("UseLineTrace");
+	// OB 아닐때
+	if (!bCheckOB) {
+		FHitResult OutHit;
+		FVector Startpoint = this->GetActorLocation() + FVector(0.0f, 0.0f, 1000.0f);
+		FVector Endpoint = this->GetActorLocation() * FVector(1, 1, 0) + FVector(0.0f, 0.0f, -3000.0f);
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.bReturnPhysicalMaterial = true;
+		CollisionParams.bTraceComplex = false;
 
-	FVector Startpoint = this->GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
-	FVector Endpoint = Startpoint * FVector(1.0f, 1.0f, 0.0f) + FVector(0.0f, 0.0f, -100.0f);
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.bReturnPhysicalMaterial = true;
-	CollisionParams.bTraceComplex = false;
-
-	//ECC_GameTraceChannel1 -> Custom trace channel
-	/*
-	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
-	if (isHit)
-	{
-		fsttt=OutHit.GetActor()->GetName();
-		FName GeoState = OutHit.GetComponent()->GetMaterial(0)->GetFName();
-
-		//디버그용, 확인하고 지우기
-		//itestest = StaticEnum<EGeographyState>()->GetValueByName(GeoState);
-		
-		GeographyState = (EGeographyState)StaticEnum<EGeographyState>()->GetValueByName(GeoState);
-		UpdateGeoStateOnWidget.Broadcast();
-
-		// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
-		// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
-
-		// 부분은 계속 돌릴필요없이 공을 치기전에 계산해주면 될거같은데?
-		switch (GeographyState)
+		//ECC_GameTraceChannel1 -> Custom trace channel
+		/*
+		bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
+		if (isHit)
 		{
-		case EGeographyState::ROUGH:
-			//Print("ROUGH");
+			fsttt=OutHit.GetActor()->GetName();
+			FName GeoState = OutHit.GetComponent()->GetMaterial(0)->GetFName();
 
-			break;
-		case EGeographyState::FAIRWAY:
-			//Print("FAIRWAY");
+			GeographyState = (EGeographyState)StaticEnum<EGeographyState>()->GetValueByName(GeoState);
+			UpdateGeoStateOnWidget.Broadcast();
 
-			break;
-		case EGeographyState::GREEN:
-			//Print("GREEN");
+			// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
+			// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
 
-			break;
-		case EGeographyState::BUNKER:
-			//Print("BUNKER");
+			// 부분은 계속 돌릴필요없이 공을 치기전에 계산해주면 될거같은데?
+			switch (GeographyState)
+			{
+			case EGeographyState::ROUGH:
+				//Print("ROUGH");
 
-			break;
-		default:
-			//Print("DEFAULT");
+				break;
+			case EGeographyState::FAIRWAY:
+				//Print("FAIRWAY");
 
-			//GetValueByName(FName name);
-			//만약 enum에 없는 이름이면 -1을 리턴시킴 -> 이걸 사용하는 방법도 가능
+				break;
+			case EGeographyState::GREEN:
+				//Print("GREEN");
+
+				break;
+			case EGeographyState::BUNKER:
+				//Print("BUNKER");
+
+				break;
+			default:
+				//Print("DEFAULT");
+
+				//GetValueByName(FName name);
+				//만약 enum에 없는 이름이면 -1을 리턴시킴 -> 이걸 사용하는 방법도 가능
 
 
 
-			break;
+				break;
+			}
+
 		}
+		else
+		{
+			// OB , HAZARD 일때?
+			// 이 녀석들은 공을 옮겨야함
+			// 추가로 타수를 줄여줌
+			//Print("OUT");
 
+			// 우선은 OB, HAZARD 공통적으로 그 전 위치로 보내줌
+		}
+		*/
+
+		//DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor(255, 0, 0), false, -1, 0, 12.333);
+
+		// 랜드스케이프에 칠해진 surface physics 가져오는 방법
+		// EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
+		bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
+		if (isHit)
+		{
+			EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
+
+			switch (epstemp)
+			{
+			case SurfaceType1:
+				GeographyState = EGeographyState::GREEN;
+				break;
+			case SurfaceType2:
+				GeographyState = EGeographyState::FAIRWAY;
+				break;
+			case SurfaceType3:
+				GeographyState = EGeographyState::ROUGH;
+				break;
+			case SurfaceType4:
+				GeographyState = EGeographyState::BUNKER;
+				break;
+			default:
+				// 데칼의 메테리얼 이름으로 확인
+				FString DecalMat = Cast<ATestSpline>(OutHit.GetActor())->GetMaterialName();
+				if (DecalMat == "Decal_FAIRWAY")
+				{
+					GeographyState = EGeographyState::FAIRWAY;
+				}
+				else if (DecalMat == "Decal_BUNKER")
+				{
+					GeographyState = EGeographyState::BUNKER;
+				}
+				else if (DecalMat == "Decal_GREEN")
+				{
+					GeographyState = EGeographyState::GREEN;
+				}
+
+				// 마지지막 볼 로케이션 함수에서
+				// fsttt (예정) 이 None이 아닐때 && OB or HAZARD면 처리
+				// 그외 나머지는 지금 라인트레이스 그대로 수행
+				break;
+			}
+		}
 	}
+	// OB 일때
 	else
 	{
-		// OB , HAZARD 일때?
-		// 이 녀석들은 공을 옮겨야함
-		// 추가로 타수를 줄여줌
-		//Print("OUT");
-
-		// 우선은 OB, HAZARD 공통적으로 그 전 위치로 보내줌
+		GeographyState = EGeographyState::OB;
 	}
-	*/
 
-	DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor(255, 0, 0), false, -1, 0, 12.333);
-
-	// 랜드스케이프에 칠해진 surface physics 가져오는 방법
-	// EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
-	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
-	if (isHit)
-	{
-		EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
-
-		switch (epstemp)
-		{
-		case SurfaceType1:
-			Print("GREEN");
-			break;
-		case SurfaceType2:
-			Print("FAIR");
-
-			break;
-		case SurfaceType3:
-			Print("ROUGH");
-
-			break;
-		case SurfaceType4:
-			Print("BUNKER");
-
-			break;
-		default:
-			// 여기에서 경계부분이나 OB를 체크하면 될듯?
-
-			Print("Out");
-
-			fsttt = Cast<ATestSpline>(OutHit.GetActor())->GetMaterialName();
-			// 이거 디폴트 값 설정을 잘 생각해서 설계해야할듯
-			
-
-			// 마지지막 볼 로케이션 함수에서
-			// fsttt (예정) 이 None이 아닐때 && OB or HAZARD면 처리
-			// 그외 나머지는 지금 라인트레이스 그대로 수행
-			
-
-			break;
-		}
-	}
+	UpdateGeoStateOnWidget.Broadcast();
 }
 
 void ABall::MoveNextHole()
@@ -476,9 +488,9 @@ void ABall::ChargingPower()
 
 void ABall::CheckBallLocation()
 {
+	// 여기는 전체 설계를 다시 하자 !!!!!!!
 
 	//더블파 규칙 확인하고 수정해야함 !!!!!
-
 	if (!bIsMoving) {
 		// 홀 아웃인지 체크
 		if (bCheckConcede || bCheckHoleCup)
@@ -507,11 +519,22 @@ void ABall::CheckBallLocation()
 			}
 			else
 			{
+				//OB일때
+				if (GeographyState == EGeographyState::OB)
+				{
+					//벌타? 
+					
+					//이전지점으로 이동
+					this->SetActorLocation(BallPlayerState->GetFormerLocation());
+					bCheckOB = !bCheckOB;
+					UseLineTrace();
+				}
 				// 여기에서 남은거리에 따라 클럽 지정해줌.
 				// 그린이 아닐때는 남은 거리에 따라
-				if (GeographyState != EGeographyState::GREEN) {
+				else if (GeographyState != EGeographyState::GREEN) {
 					ChangeClubFromDis();
 				}
+				// 그린일때
 				else
 				{
 					ClubState = EGolfClub::PUTTER;
@@ -541,11 +564,11 @@ void ABall::ChangeClub()
 	{
 	case EGolfClub::DRIVER:
 		DrivingDis = 15000;
-		ArcValue = 0.7;
+		ArcValue = 0.6;
 		break;
 	case EGolfClub::WOOD:
 		DrivingDis = 13000;
-		ArcValue = 0.7;
+		ArcValue = 0.6;
 		break;
 	case EGolfClub::IRON:
 		DrivingDis = 10000;
@@ -553,7 +576,7 @@ void ABall::ChangeClub()
 		break;
 	case EGolfClub::WEDGE:
 		DrivingDis = 7000;
-		ArcValue = 0.3;
+		ArcValue = 0.4;
 		break;
 	case EGolfClub::PUTTER:
 		DrivingDis = 6000;
@@ -600,13 +623,17 @@ void ABall::SetMovingDis()
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Print("OverLap");
-	
-	if (OtherComp->GetName() == TEXT("CONCEDE"))
+	if (OtherComp->GetArchetype()->GetName() == TEXT("Default__SplineMeshComponent"))
+	{
+		Print("Check OB");
+
+		bCheckOB = !bCheckOB;
+	}
+	else if (OtherComp->GetName() == TEXT("CONCEDE"))
 	{
 		bCheckConcede = true;
 	}
-	if (OtherComp->GetName() == TEXT("HOLECUP"))
+	else if (OtherComp->GetName() == TEXT("HOLECUP"))
 	{
 		bCheckHoleCup = true;
 	}
@@ -614,13 +641,11 @@ void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 
 void ABall::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Print("EndLap");
-
 	if (OtherComp->GetName() == TEXT("CONCEDE"))
 	{
 		bCheckConcede = false;
 	}
-	if (OtherComp->GetName() == TEXT("HOLECUP"))
+	else if (OtherComp->GetName() == TEXT("HOLECUP"))
 	{
 		bCheckHoleCup = false;
 	}
