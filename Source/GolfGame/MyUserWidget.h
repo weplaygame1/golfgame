@@ -32,6 +32,8 @@ public:
 	void UpdateClubState();
 	void UpdateMovingInformation();
 	void UpdateGeoState();
+	void UpdateShotNumberth();
+	void UpdateResult();
 
 	void OnOffMainPanel(bool on);
 	void OnOffMovingPanel(bool on);
@@ -55,7 +57,11 @@ public:
 	class UTextBlock* ClubState;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* GeoState_1;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* ShotNumberth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* Result;
+
 	// 게이지바
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UProgressBar* Power;

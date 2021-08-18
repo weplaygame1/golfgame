@@ -29,6 +29,7 @@ void UMyUserWidget::SetCurrentBallState(ABall* ball)
 	ball->UpdateClubStateOnWidget.AddUObject(this, &UMyUserWidget::UpdateClubState);
 	ball->UpdateMovingInfoOnWidget.AddUObject(this, &UMyUserWidget::UpdateMovingInformation);
 	ball->UpdateGeoStateOnWidget.AddUObject(this, &UMyUserWidget::UpdateGeoState);
+	ball->UpdateShotNumberthOnWidget.AddUObject(this, &UMyUserWidget::UpdateShotNumberth);
 
 	ball->OnOffMainPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMainPanel);
 	ball->OnOffMovingPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMovingPanel);
@@ -78,9 +79,16 @@ void UMyUserWidget::UpdatePar()
 
 void UMyUserWidget::UpdateScore()
 {
-	int32 parNum = CurrentGameMode->GetScoreTable(CurrentPlayerState->GetCurrentHoleIndex());
-	int32 inum = ((-1) * parNum) + CurrentPlayerState->GetNowHoleScore();
-	FString fstr = FString::Printf(TEXT("%d"), inum);
+	int32 inum = CurrentPlayerState->GetAllScore();
+	FString fstr;
+	if (inum > 0)
+	{
+		fstr = FString::Printf(TEXT("+%d"), inum);
+	}
+	else
+	{
+		fstr = FString::Printf(TEXT("%d"), inum);
+	}
 	NowScore->SetText(FText::FromString(fstr));
 }
 
@@ -96,8 +104,7 @@ void UMyUserWidget::SetMinimapImage()
 	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
 
 	FVector2D IconLocation;
-	//IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 500;
-	IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 300;
+	IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 500;
 
 	IconLocation.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500);
 
@@ -112,8 +119,7 @@ void UMyUserWidget::UpdateBallIcon()
 	FVector BallLocation = CurrentBallState->GetActorLocation();
 
 	FVector2D IconLocation;
-	//IconLocation.X = (BallLocation.Y + 6500) / 25000 * 500;
-	IconLocation.X = (BallLocation.Y + 6500) / 25000 * 300;
+	IconLocation.X = (BallLocation.Y + 6500) / 25000 * 500;
 
 	IconLocation.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500);
 
@@ -130,8 +136,7 @@ void UMyUserWidget::UpdatePredictIcon()
 	FVector PredictLocation = CurrentBallState->GetPredictLocation();
 
 	FVector2D IconLocation;
-	//IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 500;
-	IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 300;
+	IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 500;
 
 	IconLocation.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500);
 
@@ -162,6 +167,41 @@ void UMyUserWidget::UpdateGeoState()
 	GeoState_0->SetText(txt);
 	GeoState_1->SetText(txt);
 }
+
+void UMyUserWidget::UpdateShotNumberth()
+{
+	int32 inum = CurrentPlayerState->GetNumberth() + 1;
+	
+	FString fstr = FString::Printf(TEXT("%d"), inum);
+
+	if (inum%10 == 1)
+	{
+		fstr += TEXT("st");
+	}
+	else if (inum%10 == 2)
+	{
+		fstr += TEXT("nd");
+	}
+	else if (inum%10 == 3)
+	{
+		fstr += TEXT("rd");
+	}
+	else
+	{
+		fstr += TEXT("th");
+	}
+	fstr+= TEXT(" Shot");
+
+	ShotNumberth->SetText(FText::FromString(fstr));
+}
+
+void UMyUserWidget::UpdateResult()
+{
+	int32 inum = CurrentPlayerState->GetNumberth();
+
+	// par num 적절히 계산하여 텍스트 출력
+}
+
 
 void UMyUserWidget::OnOffMainPanel(bool on)
 {

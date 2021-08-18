@@ -9,6 +9,7 @@ AMyPlayerState::AMyPlayerState()
 	CurrentHoleIndex = 0;
 	iDoublePar = 0;
 	NowHoleScore = 0;
+	AllScore = 0;
 }
 
 void AMyPlayerState::SetCurrentGameMode(class AGolfGameGameModeBase* mode)
@@ -57,6 +58,8 @@ bool AMyPlayerState::NextHole()
 {
 	// 이번 홀 점수 저장
 	ScoreTable.Add(NowHoleScore);
+	// 총 스코어 갱신
+	AllScore += (NowHoleScore - CurrentGameMode->GetScoreTable(CurrentHoleIndex));
 	NowHoleScore = 0;
 
 	CurrentHoleIndex++;

@@ -41,9 +41,11 @@ public:
 	int32 GetCurrentHoleIndex() const { return CurrentHoleIndex; }
 	int32 GetDoublePar() const { return iDoublePar; }
 	int32 GetWholeDistance() const { return WholeDistacne; }
+	int32 GetAllScore() const { return AllScore; }
 
 	float GetDistanceRemaining() const { return Distance; }
 
+	int32 GetNumberth() const { return NowHoleScore; }
 public:
 	TWeakObjectPtr<class AGolfGameGameModeBase> CurrentGameMode;
 
@@ -75,4 +77,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 NowHoleScore;
 
+	// 총 점수
+	UPROPERTY(EditAnywhere)
+	int32 AllScore;
 };

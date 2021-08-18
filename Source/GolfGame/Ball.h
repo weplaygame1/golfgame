@@ -58,6 +58,7 @@ public:
 	FUpdateBallStateDelegate UpdateClubStateOnWidget;
 	FUpdateBallStateDelegate UpdateMovingInfoOnWidget;
 	FUpdateBallStateDelegate UpdateGeoStateOnWidget;
+	FUpdateBallStateDelegate UpdateShotNumberthOnWidget;
 
 	FDele_Multi_OneParam OnOffMainPanelOnWidget;
 	FDele_Multi_OneParam OnOffMovingPanelOnWidget;
@@ -90,21 +91,10 @@ public:
 	float DrivingDis;
 	float ArcValue;
 
-	/* when use line trace */
-	UPROPERTY(EditAnywhere)
-		UPrimitiveComponent* outactor1;
-
-		UPROPERTY(EditAnywhere)
-		UPrimitiveComponent* outactor2;
-
 	/* Player state */
 	class AMyPlayerState* BallPlayerState;
 
-	bool bIsChargingHit;
-
 	bool bIsMoving;
-	float JumpPower;
-	float JumpAngle;
 
 	// 현재 진행중인 홀을 마쳤는가
 	bool bCheckHoleCup;
@@ -126,6 +116,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bCheckOB;
 
+	bool bWaitTimer;
 	//test
 	UPROPERTY(EditAnywhere)
 		FString fsttt;
@@ -133,6 +124,9 @@ public:
 	//랜드스케이프 테스트용
 	UPROPERTY(EditAnywhere)
 		int32 itestlen;
+
+	UPROPERTY(EditAnywhere)
+		int32 numberth;
 
 public:
 	void OnPressBallHit();
@@ -147,6 +141,8 @@ public:
 	void ChangeClub();
 	void SetMovingDis();
 	void ChangeClubFromDis();
+
+	void UseInTimer();
 
 	float GetPower() { return PowerPercent / 100; }
 	float GetDrivingDis() { return DrivingDis; }

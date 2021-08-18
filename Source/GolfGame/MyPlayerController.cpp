@@ -29,5 +29,5 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget->SetCurrentPlayerState(Cast<AMyPlayerState>(PlayerState));
 	CurrentWidget->SetCurrentGameMode(GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>());
 	CurrentWidget->SetMinimapImage();
-
+	
 }

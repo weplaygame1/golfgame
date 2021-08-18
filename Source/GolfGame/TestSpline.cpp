@@ -151,8 +151,9 @@ void ATestSpline::build0()
 			box->RegisterComponent();
 			this->AddInstanceComponent(box);
 
-			//box->SetPhysMaterialOverride();
+			box->SetGenerateOverlapEvents(false);
 			box->SetCollisionProfileName("NoCollision");
+			box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			box->SetWorldLocationAndRotation(Loc, Rot);
 			box->SetBoxExtent(FVector(128, 256, 256) * FVector(decalSize_X, decalSize_Y, decalSize_Z));
 

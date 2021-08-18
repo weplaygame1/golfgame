@@ -15,6 +15,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 
+#include "MyPlayerController.h"
+
 // Sets default values
 ABall::ABall()
 {
@@ -73,12 +75,9 @@ void ABall::BeginPlay()
 	// Set Default Value
 	bCheckHoleCup = false;
 	bCheckConcede = false;
-	bIsChargingHit = false;
-
 	bCheckOnce = true;
-	JumpPower = 0;
-
 	bCheckOB = false;
+	bWaitTimer = true;
 
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
@@ -113,6 +112,7 @@ void ABall::Tick(float DeltaTime)
 
 	// TEST
 	//UseLineTrace();
+	numberth = BallPlayerState->GetNumberth();
 
 	switch (CurrentState)
 	{
@@ -203,30 +203,36 @@ void ABall::OnPressBallHit()
 			break;
 		}
 
-		// if 퍼터일때는 그냥 addimpulse
-
-		// else 아래 그대로
-		FVector startLoc = this->GetActorLocation();// 발사 지점
-		FVector targetLoc = this->GetActorLocation() + (BallCamera->GetForwardVector() * (DrivingDis * fPercent));// 타겟 지점.
-		FVector outVelocity = FVector::ZeroVector;// 결과 Velocity
-		if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))
+		// PUTTER 일때는 단순 Addimpulse
+		if (ClubState == EGolfClub::PUTTER)
 		{
-			/* 예상 포물선 DRAW LINE
-			FPredictProjectilePathParams predictParams(-1, startLoc, outVelocity, 5.0f);   // 20: tracing 보여질 프로젝타일 크기, 15: 시물레이션되는 Max 시간(초)
-			predictParams.DrawDebugTime = 5.0f;     //디버그 라인 보여지는 시간 (초)
-			predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;  // DrawDebugTime 을 지정하면 EDrawDebugTrace::Type::ForDuration 필요.
-			predictParams.OverrideGravityZ = 0;
-
-			FPredictProjectilePathResult result;
-			UGameplayStatics::PredictProjectilePath(this, predictParams, result);
-			*/
+			FVector outVelocity = BallCamera->GetForwardVector() * FVector(1, 1, 1) * 3000 * fPercent;
+			BallMesh->AddImpulse(outVelocity, NAME_None, true);
 		}
-		
-		// 여기에서 지형속성에 따른 패널티 부과 (러프와 벙커에서만?)
-		BallMesh->AddImpulse(outVelocity, NAME_None, true);
+		// 그외에는 SuggestProjectileVelocity_CustomArc 로 계산
+		else
+		{
+			FVector startLoc = this->GetActorLocation();// 발사 지점
+			FVector targetLoc = this->GetActorLocation() + (BallCamera->GetForwardVector() * (DrivingDis * fPercent));// 타겟 지점.
+			FVector outVelocity = FVector::ZeroVector;// 결과 Velocity
+			if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))
+			{
+				/* 예상 포물선 DRAW LINE
+				FPredictProjectilePathParams predictParams(-1, startLoc, outVelocity, 5.0f);   // 20: tracing 보여질 프로젝타일 크기, 15: 시물레이션되는 Max 시간(초)
+				predictParams.DrawDebugTime = 5.0f;     //디버그 라인 보여지는 시간 (초)
+				predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;  // DrawDebugTime 을 지정하면 EDrawDebugTrace::Type::ForDuration 필요.
+				predictParams.OverrideGravityZ = 0;
+
+				FPredictProjectilePathResult result;
+				UGameplayStatics::PredictProjectilePath(this, predictParams, result);
+				*/
+			}
+			BallMesh->AddImpulse(outVelocity, NAME_None, true);
+		}
 
 		OnOffMainPanelOnWidget.Broadcast(false);
 		OnOffMovingPanelOnWidget.Broadcast(true);
+		UpdateShotNumberthOnWidget.Broadcast();
 
 		bCheckOnce = false;
 		CurrentState = EBallState::MOVING;
@@ -415,10 +421,6 @@ void ABall::UseLineTrace()
 				{
 					GeographyState = EGeographyState::GREEN;
 				}
-
-				// 마지지막 볼 로케이션 함수에서
-				// fsttt (예정) 이 None이 아닐때 && OB or HAZARD면 처리
-				// 그외 나머지는 지금 라인트레이스 그대로 수행
 				break;
 			}
 		}
@@ -437,7 +439,9 @@ void ABall::MoveNextHole()
 	// 기본 설정
 	bCheckHoleCup = false;
 	bCheckConcede = false;
+	bCheckOB = false;
 
+	// 다음홀이 있을때
 	if (BallPlayerState->NextHole())
 	{
 		// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
@@ -448,8 +452,8 @@ void ABall::MoveNextHole()
 		// 현재는 마지막에 쳤던 방향을 보고있음
 
 
-		GeographyState = EGeographyState::FAIRWAY;
-		UpdateGeoStateOnWidget.Broadcast();
+		UseLineTrace();
+
 
 		// 여기에서 다음홀을 준비하기 위한 변수들 디폴트값으로 세팅
 
@@ -457,8 +461,9 @@ void ABall::MoveNextHole()
 	else
 	{
 		// 게임끝났을때 temp
+
+
 		Print("End");
-		
 	}
 }
 
@@ -488,78 +493,104 @@ void ABall::ChargingPower()
 
 void ABall::CheckBallLocation()
 {
-	// 여기는 전체 설계를 다시 하자 !!!!!!!
+	FTimerHandle handle;
+	
+	if (!bIsMoving && bWaitTimer) {
+		bWaitTimer = false;
 
-	//더블파 규칙 확인하고 수정해야함 !!!!!
-	if (!bIsMoving) {
-		// 홀 아웃인지 체크
-		if (bCheckConcede || bCheckHoleCup)
+		// 홀인
+		if (bCheckHoleCup)
 		{
-			// 홀인
-			if (bCheckHoleCup)
-			{
+			// 결과 위젯
 
-			}
-			// 컨시드
-			else
-			{
-				// 타수하나 줄임
-				BallPlayerState->PlusScore();
-			}
 
-			// 다음 홀로 넘어가는 스텝
-			MoveNextHole();
+			
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				MoveNextHole();
+				UseInTimer();
+			}, 1, false);
 		}
-		else
+		// 더블파 체크
+		else if (BallPlayerState->GetNowHoleScore() == BallPlayerState->GetDoublePar())
 		{
-			// 더블파 -> 다음홀로 넘어감
+			BallPlayerState->PlusScore();
+
+			// 결과 위젯
+
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				MoveNextHole();
+				UseInTimer();
+			}, 1, false);
+		}
+		// 컨시드
+		else if (bCheckConcede)
+		{
+			BallPlayerState->PlusScore();
+
+			// 결과 위젯
+
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				MoveNextHole();
+				UseInTimer();
+			}, 1, false);
+		}
+		//OB일때
+		else if (GeographyState == EGeographyState::OB)
+		{
+			// OB 상태 해제
+			bCheckOB = false;
+
+			//벌타 추가
+			BallPlayerState->PlusScore();
+
+			// if 더블파일때
 			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->GetDoublePar())
 			{
-				MoveNextHole();
+				// 결과 위젯
+
+				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+					MoveNextHole();
+					UseInTimer();
+				}, 1, false);
 			}
+			// else 더블파 아닐때
 			else
 			{
-				//OB일때
-				if (GeographyState == EGeographyState::OB)
-				{
-					//벌타? 
-					
-					//이전지점으로 이동
+				//이전지점으로 이동
+				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+					BallCameraSpringArm->CameraLagSpeed = 0.0f;
 					this->SetActorLocation(BallPlayerState->GetFormerLocation());
-					bCheckOB = !bCheckOB;
 					UseLineTrace();
-				}
-				// 여기에서 남은거리에 따라 클럽 지정해줌.
-				// 그린이 아닐때는 남은 거리에 따라
-				else if (GeographyState != EGeographyState::GREEN) {
-					ChangeClubFromDis();
-				}
-				// 그린일때
-				else
-				{
-					ClubState = EGolfClub::PUTTER;
-
-					// 그린 위에 도착하면 미니맵을 바꿔줘야함
-					// ex) 원래 미니맵 hidden, 그린전용 미니맵 visibility 이런식으로?
-					// 그에따라 예상 도착지점도 바꾸고 표현해줄 필요 없음
-					// 이부분 구현 필요
-					ChangeClub();
-				}
+					UseInTimer();
+				}, 1, false);
 			}
 		}
-		//여기서 딜레이 1초 정도?
-
-		OnOffMainPanelOnWidget.Broadcast(true);
-		OnOffMovingPanelOnWidget.Broadcast(false);
-		UpdateBallIconOnWidget.Broadcast();
-		SetPowerZeroOnWidget.Broadcast();
-		CurrentState = EBallState::STOP;
+		// 그린일때
+		else if (GeographyState == EGeographyState::GREEN) {
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				ClubState = EGolfClub::PUTTER;
+				ChangeClub();
+				UseInTimer();
+			}, 1, false);
+			
+			// 그린 전용 미니맵? 생각해보기
+		}
+		// 그린이 아닐때
+		else
+		{
+			// 남은거리에 따라 클럽 지정해줌.
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				ChangeClubFromDis();
+				ChangeClub();
+				UseInTimer();
+			}, 1, false);
+		}
 	}
 }
 
 void ABall::ChangeClub()
 {
-	// 각도 수정 필요
+	// 각도 수정 필요 0 ~ 1 , 값이 높을수록 공의 각도 낮아짐
 	switch (ClubState)
 	{
 	case EGolfClub::DRIVER:
@@ -607,9 +638,6 @@ void ABall::ChangeClubFromDis()
 	{
 		ClubState = EGolfClub::WEDGE;
 	}
-	PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
-	UpdatePredictIconOnWidget.Broadcast();
-	UpdateClubStateOnWidget.Broadcast();
 }
 
 void ABall::SetMovingDis()
@@ -621,12 +649,26 @@ void ABall::SetMovingDis()
 	UpdateMovingInfoOnWidget.Broadcast();
 }
 
+void ABall::UseInTimer()
+{
+	//타이머 람다 함수에 사용되는 함수 모음
+	UpdateBallIconOnWidget.Broadcast();
+	SetPowerZeroOnWidget.Broadcast();
+	UpdateShotNumberthOnWidget.Broadcast();
+
+	OnOffMainPanelOnWidget.Broadcast(true);
+	OnOffMovingPanelOnWidget.Broadcast(false);
+
+	CurrentState = EBallState::STOP;
+	bWaitTimer = true;
+}
+
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	Print("Overlap");
 	if (OtherComp->GetArchetype()->GetName() == TEXT("Default__SplineMeshComponent"))
 	{
-		Print("Check OB");
-
+	//	Print("Check OB");
 		bCheckOB = !bCheckOB;
 	}
 	else if (OtherComp->GetName() == TEXT("CONCEDE"))

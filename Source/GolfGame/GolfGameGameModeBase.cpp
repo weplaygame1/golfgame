@@ -70,7 +70,7 @@ void AGolfGameGameModeBase::InitScoreTable()
 void AGolfGameGameModeBase::InitMinimapCenterLocation()
 {
 	// 미니맵 중심 위치
-	MinimapCenterLocation.Add(FVector(11000, 6000, 100));
+	MinimapCenterLocation.Add(FVector(11000, 6000, 10000));
 }
 
 void AGolfGameGameModeBase::InitMinimapWidth()
