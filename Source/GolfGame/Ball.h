@@ -39,7 +39,9 @@ enum class EGeographyState : uint8
 	FAIRWAY UMETA(DisplayName = "FAIRWAY"),
 	GREEN UMETA(DisplayName = "GREEN"),
 	BUNKER UMETA(DisplayName = "BUNKER"),
-	OB UMETA(DisplayName = "OB")
+	OB UMETA(DisplayName = "OB"),
+	HOLECUP UMETA(DisplayName = "HOLECUP"),
+	CONCEDE UMETA(DisplayName = "CONCEDE")
 };
 
 UCLASS()
@@ -59,9 +61,13 @@ public:
 	FUpdateBallStateDelegate UpdateMovingInfoOnWidget;
 	FUpdateBallStateDelegate UpdateGeoStateOnWidget;
 	FUpdateBallStateDelegate UpdateShotNumberthOnWidget;
+	FUpdateBallStateDelegate UpdateScoreResultOnWidget;
 
 	FDele_Multi_OneParam OnOffMainPanelOnWidget;
 	FDele_Multi_OneParam OnOffMovingPanelOnWidget;
+	FDele_Multi_OneParam OnOffOBResultOnWidget;
+	FDele_Multi_OneParam OnOffConcedeResultOnWidget;
+	FDele_Multi_OneParam OnOffOnScoreResultOnWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

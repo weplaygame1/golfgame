@@ -30,9 +30,13 @@ void UMyUserWidget::SetCurrentBallState(ABall* ball)
 	ball->UpdateMovingInfoOnWidget.AddUObject(this, &UMyUserWidget::UpdateMovingInformation);
 	ball->UpdateGeoStateOnWidget.AddUObject(this, &UMyUserWidget::UpdateGeoState);
 	ball->UpdateShotNumberthOnWidget.AddUObject(this, &UMyUserWidget::UpdateShotNumberth);
+	ball->UpdateScoreResultOnWidget.AddUObject(this, &UMyUserWidget::UpdateScoreResult);
 
 	ball->OnOffMainPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMainPanel);
 	ball->OnOffMovingPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMovingPanel);
+	ball->OnOffOBResultOnWidget.AddUObject(this, &UMyUserWidget::OnOffOBResult);
+	ball->OnOffConcedeResultOnWidget.AddUObject(this, &UMyUserWidget::OnOffConcedeResult);
+	ball->OnOffOnScoreResultOnWidget.AddUObject(this, &UMyUserWidget::OnOffScoreResult);
 }
 
 void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
@@ -195,13 +199,56 @@ void UMyUserWidget::UpdateShotNumberth()
 	ShotNumberth->SetText(FText::FromString(fstr));
 }
 
-void UMyUserWidget::UpdateResult()
+void UMyUserWidget::UpdateScoreResult()
 {
-	int32 inum = CurrentPlayerState->GetNumberth();
+	int32 Numberth = CurrentPlayerState->GetNumberth();
+	int32 ParNum = CurrentGameMode->GetScoreTable(CurrentPlayerState->GetCurrentHoleIndex());
+	int32 inum = Numberth - ParNum;
 
-	// par num 적절히 계산하여 텍스트 출력
+	FString fstr;
+
+	if (Numberth == 1)
+	{
+		fstr = TEXT("Hole in One");
+	}
+	else if (inum == ParNum)
+	{
+		fstr = TEXT("Double Par");
+	}
+	else
+	{
+		switch (inum)
+		{
+		case -3:
+			fstr = TEXT("Albatross");
+			break;
+		case -2:
+			fstr = TEXT("Eagle");
+			break;
+		case -1:
+			fstr = TEXT("Birdie");
+			break;
+		case 0:
+			fstr = TEXT("Par");
+			break;
+		case 1:
+			fstr = TEXT("Bogey");
+			break;
+		case 2:
+			fstr = TEXT("Double Bogey");
+			break;
+		case 3:
+			fstr = TEXT("Triple Bogey");
+			break;
+		case 4:
+			fstr = TEXT("Quardruple Bogey");
+			break;
+		default:
+			break;
+		}
+	}
+	Score_Result->SetText(FText::FromString(fstr));
 }
-
 
 void UMyUserWidget::OnOffMainPanel(bool on)
 {
@@ -224,5 +271,41 @@ void UMyUserWidget::OnOffMovingPanel(bool on)
 	else
 	{
 		MovingPanel->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMyUserWidget::OnOffOBResult(bool on)
+{
+	if (on)
+	{
+		OB_Result->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		OB_Result->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMyUserWidget::OnOffConcedeResult(bool on)
+{
+	if (on)
+	{
+		Concede_Result->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		Concede_Result->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMyUserWidget::OnOffScoreResult(bool on)
+{
+	if (on)
+	{
+		Score_Result->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		Score_Result->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

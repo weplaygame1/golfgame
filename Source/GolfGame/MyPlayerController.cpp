@@ -28,6 +28,14 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget->SetCurrentBallState(Cast<ABall>(GetPawn()));
 	CurrentWidget->SetCurrentPlayerState(Cast<AMyPlayerState>(PlayerState));
 	CurrentWidget->SetCurrentGameMode(GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>());
+
 	CurrentWidget->SetMinimapImage();
-	
+	CurrentWidget->OnOffMovingPanel(false);
+	CurrentWidget->OnOffOBResult(false);
+	CurrentWidget->OnOffConcedeResult(false);
+	CurrentWidget->OnOffScoreResult(false);
+
+	CurrentWidget->UpdateWholeDistance();
+	CurrentWidget->UpdateBallIcon();
+	CurrentWidget->UpdatePredictIcon();
 }

@@ -33,10 +33,13 @@ public:
 	void UpdateMovingInformation();
 	void UpdateGeoState();
 	void UpdateShotNumberth();
-	void UpdateResult();
+	void UpdateScoreResult();
 
 	void OnOffMainPanel(bool on);
 	void OnOffMovingPanel(bool on);
+	void OnOffOBResult(bool on);
+	void OnOffConcedeResult(bool on);
+	void OnOffScoreResult(bool on);
 public:
 	TWeakObjectPtr<class ABall> CurrentBallState;
 	TWeakObjectPtr<class AMyPlayerState> CurrentPlayerState;
@@ -59,8 +62,14 @@ public:
 	class UTextBlock* GeoState_1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ShotNumberth;
+
+	/* 스코어패널 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	class UTextBlock* Result;
+	class UTextBlock* OB_Result;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* Concede_Result;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UTextBlock* Score_Result;
 
 	// 게이지바
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))

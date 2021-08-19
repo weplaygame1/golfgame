@@ -27,7 +27,7 @@ ABall::ABall()
 	BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BALLMESH"));
 	BallMesh->SetSimulatePhysics(true);
 	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BALL(TEXT("/Game/Meterial/Shape_Sphere.Shape_Sphere"));
 	if (SM_BALL.Succeeded())
 	{
 		BallMesh->SetStaticMesh(SM_BALL.Object);
@@ -58,9 +58,6 @@ ABall::ABall()
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
 	
 
-	
-
-	
 
 }
 
@@ -318,8 +315,25 @@ void ABall::CheckBallisMoiving()
 
 void ABall::UseLineTrace()
 {
-	// OB 아닐때
-	if (!bCheckOB) {
+	// 홀컵
+	if (bCheckHoleCup)
+	{
+		GeographyState = EGeographyState::HOLECUP;
+
+	}
+	// 컨시드
+	else if (bCheckConcede)
+	{
+		GeographyState = EGeographyState::CONCEDE;
+
+	}
+	// OB 
+	else if (bCheckOB) {
+		GeographyState = EGeographyState::OB;
+	}
+	// 그 외에 지형속성
+	else
+	{
 		FHitResult OutHit;
 		FVector Startpoint = this->GetActorLocation() + FVector(0.0f, 0.0f, 1000.0f);
 		FVector Endpoint = this->GetActorLocation() * FVector(1, 1, 0) + FVector(0.0f, 0.0f, -3000.0f);
@@ -425,11 +439,6 @@ void ABall::UseLineTrace()
 			}
 		}
 	}
-	// OB 일때
-	else
-	{
-		GeographyState = EGeographyState::OB;
-	}
 
 	UpdateGeoStateOnWidget.Broadcast();
 }
@@ -453,17 +462,20 @@ void ABall::MoveNextHole()
 
 
 		UseLineTrace();
-
+		ClubState = EGolfClub::DRIVER;
+		ChangeClub();
 
 		// 여기에서 다음홀을 준비하기 위한 변수들 디폴트값으로 세팅
 
 	}
 	else
 	{
-		// 게임끝났을때 temp
+		// 스코어표 출력
+		
+		// 그후
+		// 1. 게임 자동종료
+		// 2. 게임 종료버튼 and 처음부터 시작하기 버튼
 
-
-		Print("End");
 	}
 }
 
@@ -501,68 +513,101 @@ void ABall::CheckBallLocation()
 		// 홀인
 		if (bCheckHoleCup)
 		{
+			UpdateScoreResultOnWidget.Broadcast();
+			
 			// 결과 위젯
-
-
+			FTimerHandle handle2;
+			GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
+				OnOffOnScoreResultOnWidget.Broadcast(true);
+				OnOffMovingPanelOnWidget.Broadcast(false);
+			}, 1, false);
 			
 			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 				MoveNextHole();
 				UseInTimer();
-			}, 1, false);
+			}, 3, false);
 		}
 		// 더블파 체크
 		else if (BallPlayerState->GetNowHoleScore() == BallPlayerState->GetDoublePar())
 		{
 			BallPlayerState->PlusScore();
+			UpdateScoreResultOnWidget.Broadcast();
 
 			// 결과 위젯
+			FTimerHandle handle2;
+			GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
+				OnOffOnScoreResultOnWidget.Broadcast(true);
+				OnOffMovingPanelOnWidget.Broadcast(false);
+			}, 1, false);
 
 			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 				MoveNextHole();
 				UseInTimer();
-			}, 1, false);
+			}, 3, false);
 		}
 		// 컨시드
 		else if (bCheckConcede)
 		{
 			BallPlayerState->PlusScore();
+			UpdateScoreResultOnWidget.Broadcast();
 
 			// 결과 위젯
+			FTimerHandle handle2;
+			GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
+				OnOffConcedeResultOnWidget.Broadcast(true);
+				OnOffOnScoreResultOnWidget.Broadcast(true);
+				OnOffMovingPanelOnWidget.Broadcast(false);
+			}, 1, false);
 
 			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 				MoveNextHole();
 				UseInTimer();
-			}, 1, false);
+			}, 3, false);
 		}
 		//OB일때
 		else if (GeographyState == EGeographyState::OB)
 		{
 			// OB 상태 해제
 			bCheckOB = false;
-
 			//벌타 추가
 			BallPlayerState->PlusScore();
 
 			// if 더블파일때
 			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->GetDoublePar())
 			{
+				BallPlayerState->PlusScore();
+				UpdateScoreResultOnWidget.Broadcast();
+
 				// 결과 위젯
+				FTimerHandle handle2;
+				GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
+					OnOffOnScoreResultOnWidget.Broadcast(true);
+					OnOffMovingPanelOnWidget.Broadcast(false);
+				}, 1, false);
 
 				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 					MoveNextHole();
 					UseInTimer();
-				}, 1, false);
+				}, 3, false);
 			}
 			// else 더블파 아닐때
 			else
 			{
+				FTimerHandle handle2;
+				GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
+					OnOffOBResultOnWidget.Broadcast(true);
+					OnOffMovingPanelOnWidget.Broadcast(false);
+				}, 1, false);
+
 				//이전지점으로 이동
 				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 					BallCameraSpringArm->CameraLagSpeed = 0.0f;
 					this->SetActorLocation(BallPlayerState->GetFormerLocation());
 					UseLineTrace();
+					ChangeClubFromDis();
+					ChangeClub();
 					UseInTimer();
-				}, 1, false);
+				}, 3, false);
 			}
 		}
 		// 그린일때
@@ -656,6 +701,10 @@ void ABall::UseInTimer()
 	SetPowerZeroOnWidget.Broadcast();
 	UpdateShotNumberthOnWidget.Broadcast();
 
+	OnOffOBResultOnWidget.Broadcast(false);
+	OnOffConcedeResultOnWidget.Broadcast(false);
+	OnOffOnScoreResultOnWidget.Broadcast(false);
+
 	OnOffMainPanelOnWidget.Broadcast(true);
 	OnOffMovingPanelOnWidget.Broadcast(false);
 
@@ -665,7 +714,7 @@ void ABall::UseInTimer()
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Print("Overlap");
+	//Print("Overlap");
 	if (OtherComp->GetArchetype()->GetName() == TEXT("Default__SplineMeshComponent"))
 	{
 	//	Print("Check OB");

@@ -41,15 +41,6 @@ void AMyPlayerState::SetDistanceRemaining()
 
 void AMyPlayerState::PlusScore()
 {
-	/*
-	// 더블파일때는 증가시키지 않음 -> 규칙 체크 필요 !
-	if (ScoreTable[CurrentHoleIndex] < iDoublePar)
-	{
-		ScoreTable[CurrentHoleIndex]++;
-		GetScoreOnWidget.Broadcast();
-	}
-	*/
-
 	NowHoleScore++;
 	GetScoreOnWidget.Broadcast();
 }
