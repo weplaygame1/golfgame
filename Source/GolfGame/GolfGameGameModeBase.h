@@ -23,6 +23,7 @@ public:
 	void InitScoreTable();
 	void InitMinimapCenterLocation();
 	void InitMinimapWidth();
+	void InitFlagIcon();
 
 	int32 GetScoreTable(int index) { return AllScoreTable[index]; }
 
@@ -51,11 +52,13 @@ public:
 	// 총 홀의 개수 ex)나는 3개만 구성할것이므로 3
 	int32 NumOfAllHole;
 
+	// 플래그 아이콘 번호
+	UPROPERTY(EditAnywhere)
+	TArray<int32> FlagIconIndex;
+
 	//미니맵 좌표전환에서 사용할 변수들
 	//캡처 카메라 중심 위치, 미니맵 중심 위치
-	UPROPERTY(EditAnywhere)
 	TArray<FVector> MinimapCenterLocation;
 	//캡처 카메라 너비 Width, 미니맵 너비
-	UPROPERTY(EditAnywhere)
 	TArray<int32> MinimapWidth;
 };

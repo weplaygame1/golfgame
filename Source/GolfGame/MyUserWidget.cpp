@@ -209,39 +209,39 @@ void UMyUserWidget::UpdateScoreResult()
 
 	if (Numberth == 1)
 	{
-		fstr = TEXT("Hole in One");
+		fstr = TEXT("HOLE IN ONE");
 	}
 	else if (inum == ParNum)
 	{
-		fstr = TEXT("Double Par");
+		fstr = TEXT("DOUBLE PAR");
 	}
 	else
 	{
 		switch (inum)
 		{
 		case -3:
-			fstr = TEXT("Albatross");
+			fstr = TEXT("ALBATROSS");
 			break;
 		case -2:
-			fstr = TEXT("Eagle");
+			fstr = TEXT("EAGLE");
 			break;
 		case -1:
-			fstr = TEXT("Birdie");
+			fstr = TEXT("BIRDIE");
 			break;
 		case 0:
-			fstr = TEXT("Par");
+			fstr = TEXT("PAR");
 			break;
 		case 1:
-			fstr = TEXT("Bogey");
+			fstr = TEXT("BOGEY");
 			break;
 		case 2:
-			fstr = TEXT("Double Bogey");
+			fstr = TEXT("DOUBLE BOGEY");
 			break;
 		case 3:
-			fstr = TEXT("Triple Bogey");
+			fstr = TEXT("TRIPLE BOGEY");
 			break;
 		case 4:
-			fstr = TEXT("Quardruple Bogey");
+			fstr = TEXT("QUARDRUPLE BOGEY");
 			break;
 		default:
 			break;

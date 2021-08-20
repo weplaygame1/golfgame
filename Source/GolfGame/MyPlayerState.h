@@ -37,14 +37,13 @@ public:
 public:
 	FVector GetFormerLocation() const { return FormerBallLocation; }
 
-	int32 GetNowHoleScore() const { return NowHoleScore; }
 	int32 GetCurrentHoleIndex() const { return CurrentHoleIndex; }
 	int32 GetDoublePar() const { return iDoublePar; }
 	int32 GetWholeDistance() const { return WholeDistacne; }
 	int32 GetAllScore() const { return AllScore; }
-
 	float GetDistanceRemaining() const { return Distance; }
 
+	int32 GetNowHoleScore() const { return NowHoleScore; }
 	int32 GetNumberth() const { return NowHoleScore; }
 public:
 	TWeakObjectPtr<class AGolfGameGameModeBase> CurrentGameMode;
@@ -58,26 +57,20 @@ public:
 	TArray<int32> ScoreTable;
 
 	// 더블파 체크 변수
-	UPROPERTY(EditAnywhere)
 	int32 iDoublePar;
 
 	// 현재 진행중인 홀 인덱스
-	UPROPERTY(EditAnywhere)
 	int32 CurrentHoleIndex; 
 
 	// 남은 거리
-	UPROPERTY(EditAnywhere)
 	float Distance;
 
 	// 처음부터의 총 거리
-	UPROPERTY(EditAnywhere)
 	int WholeDistacne;
 
 	// 이번 홀에서 친 횟수
-	UPROPERTY(EditAnywhere)
 	int32 NowHoleScore;
 
 	// 총 점수
-	UPROPERTY(EditAnywhere)
 	int32 AllScore;
 };

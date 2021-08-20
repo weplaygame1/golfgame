@@ -83,7 +83,7 @@ void ABall::BeginPlay()
 	BallPlayerState->GetWholeDistanceOnWidget.Broadcast();
 
 	// Set Default CameraLagSpeed
-	BallCameraSpringArm->CameraLagSpeed = 3.0F;
+	BallCameraSpringArm->CameraLagSpeed = .0F;
 	
 	// 미니맵 세팅
 	OnOffMainPanelOnWidget.Broadcast(true);
@@ -100,6 +100,8 @@ void ABall::BeginPlay()
 	UpdateBallIconOnWidget.Broadcast();
 	// 남은거리 갱신
 	BallPlayerState->SetDistanceRemaining();
+	// 볼 초기 위치
+	SetBallLoc();
 }
 
 // Called every frame
@@ -109,7 +111,6 @@ void ABall::Tick(float DeltaTime)
 
 	// TEST
 	//UseLineTrace();
-	numberth = BallPlayerState->GetNumberth();
 
 	switch (CurrentState)
 	{
@@ -256,7 +257,7 @@ void ABall::OnPressChangeClub()
 		// 티샷일때
 		// 드라이버부터 웨지까지
 		// 이때 지형속성을 TEE라고 보여줘야할까 ?
-		if (BallPlayerState->GetNowHoleScore() == 0)
+		if (BallPlayerState->GetNumberth() == 0)
 		{
 			if (index == (int32)StaticEnum<EGolfClub>()->NumEnums() - 2)
 			{
@@ -340,70 +341,14 @@ void ABall::UseLineTrace()
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.bReturnPhysicalMaterial = true;
 		CollisionParams.bTraceComplex = false;
-
-		//ECC_GameTraceChannel1 -> Custom trace channel
-		/*
-		bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
-		if (isHit)
-		{
-			fsttt=OutHit.GetActor()->GetName();
-			FName GeoState = OutHit.GetComponent()->GetMaterial(0)->GetFName();
-
-			GeographyState = (EGeographyState)StaticEnum<EGeographyState>()->GetValueByName(GeoState);
-			UpdateGeoStateOnWidget.Broadcast();
-
-			// 각 지형 속성에 맞는 설정 ex) 파워감소 등등
-			// ex) PlayerState.Surface = 0.1 -> 10% 파워 감소
-
-			// 부분은 계속 돌릴필요없이 공을 치기전에 계산해주면 될거같은데?
-			switch (GeographyState)
-			{
-			case EGeographyState::ROUGH:
-				//Print("ROUGH");
-
-				break;
-			case EGeographyState::FAIRWAY:
-				//Print("FAIRWAY");
-
-				break;
-			case EGeographyState::GREEN:
-				//Print("GREEN");
-
-				break;
-			case EGeographyState::BUNKER:
-				//Print("BUNKER");
-
-				break;
-			default:
-				//Print("DEFAULT");
-
-				//GetValueByName(FName name);
-				//만약 enum에 없는 이름이면 -1을 리턴시킴 -> 이걸 사용하는 방법도 가능
-
-
-
-				break;
-			}
-
-		}
-		else
-		{
-			// OB , HAZARD 일때?
-			// 이 녀석들은 공을 옮겨야함
-			// 추가로 타수를 줄여줌
-			//Print("OUT");
-
-			// 우선은 OB, HAZARD 공통적으로 그 전 위치로 보내줌
-		}
-		*/
-
+		
 		//DrawDebugLine(GetWorld(), Startpoint, Endpoint, FColor(255, 0, 0), false, -1, 0, 12.333);
 
-		// 랜드스케이프에 칠해진 surface physics 가져오는 방법
-		// EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
+		//ECC_GameTraceChannel1 -> Custom trace channel
 		bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
 		if (isHit)
 		{
+			// 랜드스케이프에 칠해진 surface physics 가져오는 방법
 			EPhysicalSurface epstemp = UGameplayStatics::GetSurfaceType(OutHit);
 
 			switch (epstemp)
@@ -455,7 +400,7 @@ void ABall::MoveNextHole()
 	{
 		// 카메라가 따라가는 현상을 없애기 위해 속도 무한대로 설정
 		BallCameraSpringArm->CameraLagSpeed = 0.0f;
-		this->SetActorLocation(BallPlayerState->GetFormerLocation());
+		SetBallLoc();
 
 		// 추가적으로 카메라의 방향을 정해줘야함
 		// 현재는 마지막에 쳤던 방향을 보고있음
@@ -484,7 +429,7 @@ void ABall::ChargingPower()
 	//PrintWithFloat("", PowerPercent);
 	if (PowerIncrease)
 	{
-		PowerPercent += 0.5f;
+		PowerPercent += 1.f;
 
 		if(PowerPercent>=100.0f)
 		{
@@ -493,7 +438,7 @@ void ABall::ChargingPower()
 	}
 	else
 	{
-		PowerPercent -= 0.5f;
+		PowerPercent -= 1.f;
 
 		if (PowerPercent <= 0.0f)
 		{
@@ -528,7 +473,7 @@ void ABall::CheckBallLocation()
 			}, 3, false);
 		}
 		// 더블파 체크
-		else if (BallPlayerState->GetNowHoleScore() == BallPlayerState->GetDoublePar())
+		else if (BallPlayerState->GetNumberth() == BallPlayerState->GetDoublePar())
 		{
 			BallPlayerState->PlusScore();
 			UpdateScoreResultOnWidget.Broadcast();
@@ -573,7 +518,7 @@ void ABall::CheckBallLocation()
 			BallPlayerState->PlusScore();
 
 			// if 더블파일때
-			if (BallPlayerState->GetNowHoleScore() == BallPlayerState->GetDoublePar())
+			if (BallPlayerState->GetNumberth() == BallPlayerState->GetDoublePar())
 			{
 				BallPlayerState->PlusScore();
 				UpdateScoreResultOnWidget.Broadcast();
@@ -710,6 +655,20 @@ void ABall::UseInTimer()
 
 	CurrentState = EBallState::STOP;
 	bWaitTimer = true;
+}
+
+void ABall::SetBallLoc()
+{
+	FHitResult OutHit;
+	FVector Startpoint = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode())->GetSpawnLocation(BallPlayerState->GetCurrentHoleIndex()) + FVector(0, 0, 10000);
+	FVector Endpoint = Startpoint * FVector(1, 1, 0) + FVector(0, 0, -1000);
+	FCollisionQueryParams CollisionParams;
+
+	bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_GameTraceChannel1, CollisionParams);
+	if (isHit)
+	{
+		this->SetActorLocation(OutHit.Location);
+	}
 }
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

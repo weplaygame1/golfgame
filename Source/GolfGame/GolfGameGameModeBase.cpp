@@ -20,7 +20,7 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 
 	/* 게임 정보 초기화 */
 	// 코스 갯수
-	NumOfAllHole = 2;
+	NumOfAllHole = 3;
 	// 시작 위치
 	InitSpawnLocation();
 	// 홀컴 위치
@@ -50,14 +50,16 @@ void AGolfGameGameModeBase::InitSpawnLocation()
 {
 	// 시작 위치
 	AllSpawnLocation.Add(FVector(1500, 6700, 200));
-	AllSpawnLocation.Add(FVector(1000, 18000, 200));
+	AllSpawnLocation.Add(FVector(-15000, -11000, 200));
+	AllSpawnLocation.Add(FVector(-27000, 28000, 200));
 }
 
 void AGolfGameGameModeBase::InitHoleCupLocation()
 {
 	// 홀컵 위치
 	AllHoleCupLocation.Add(FVector(19000, 6300, 3));
-	AllHoleCupLocation.Add(FVector(8000, 23000, 3));
+	AllHoleCupLocation.Add(FVector(18500, -13000, 3));
+	AllHoleCupLocation.Add(FVector(23000, 23000, 3));
 }
 
 void AGolfGameGameModeBase::InitScoreTable()
@@ -65,6 +67,7 @@ void AGolfGameGameModeBase::InitScoreTable()
 	// Par 수
 	AllScoreTable.Add(3);
 	AllScoreTable.Add(4);
+	AllScoreTable.Add(5);
 }
 
 void AGolfGameGameModeBase::InitMinimapCenterLocation()
@@ -77,4 +80,12 @@ void AGolfGameGameModeBase::InitMinimapWidth()
 {
 	// 미니맵 너비
 	MinimapWidth.Add(25000);
+}
+
+void AGolfGameGameModeBase::InitFlagIcon()
+{
+	// 플래그 아이콘 번호
+	FlagIconIndex.Add(2);
+	FlagIconIndex.Add(1);
+	FlagIconIndex.Add(0);
 }

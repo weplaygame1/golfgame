@@ -150,6 +150,8 @@ public:
 
 	void UseInTimer();
 
+	void SetBallLoc();
+
 	float GetPower() { return PowerPercent / 100; }
 	float GetDrivingDis() { return DrivingDis; }
 	float GetMovingDis() { return MovingDis; }
