@@ -38,4 +38,5 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget->UpdateWholeDistance();
 	CurrentWidget->UpdateBallIcon();
 	CurrentWidget->UpdatePredictIcon();
+
 }

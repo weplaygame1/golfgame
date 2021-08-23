@@ -20,24 +20,28 @@ int32 ULineWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Allotted
 		Cast<AMyPlayerState>(GetOwningPlayerState()) != NULL &&
 		Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode()) != NULL)
 	{
+		/* 좌표 변환 */
+		int index = Cast<AMyPlayerState>(GetOwningPlayerState())->GetCurrentHoleIndex();
+		// 카메라 중앙 좌표
+		FVector Center = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode())->GetMinimapCenterLocation(index);
+		// 미니맵 너비
+		int32 Width = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode())->GetMinimapWidth(index);
+
 		FVector BallLocation = Cast<ABall>(GetOwningPlayerPawn())->GetActorLocation();
 		FVector2D BallLoc;
-		BallLoc.X = (BallLocation.Y + 6500) / 25000 * 500 ;
-
-		BallLoc.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500);
+		BallLoc.X = (BallLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+		BallLoc.Y = 500 - ((BallLocation.X - (Center.X - (Width / 2))) / Width * 500);
 
 		FVector PredictLocation = Cast<ABall>(GetOwningPlayerPawn())->GetPredictLocation();
 		FVector2D PreLoc;
-		PreLoc.X = (PredictLocation.Y + 6500) / 25000 * 500 ;
+		PreLoc.X = (PredictLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+		PreLoc.Y = 500 - ((PredictLocation.X - (Center.X - (Width / 2))) / Width * 500);
 
-		PreLoc.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500);
-
-		int index = Cast<AMyPlayerState>(GetOwningPlayerState())->GetCurrentHoleIndex();
-		FVector FlagLocation = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode())->GetHoleCupLocation(index);
+		int index1 = Cast<AMyPlayerState>(GetOwningPlayerState())->GetCurrentHoleIndex();
+		FVector FlagLocation = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode())->GetHoleCupLocation(index1);
 		FVector2D FlagLoc;
-		FlagLoc.X = (FlagLocation.Y + 6500) / 25000 * 500;
-
-		FlagLoc.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500);
+		FlagLoc.X = (FlagLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+		FlagLoc.Y = 500 - ((FlagLocation.X - (Center.X - (Width / 2))) / Width * 500);
 
 		UWidgetBlueprintLibrary::DrawLine(Context, BallLoc, PreLoc, FLinearColor::Yellow, false, 4);
 

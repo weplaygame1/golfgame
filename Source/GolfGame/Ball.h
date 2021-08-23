@@ -138,6 +138,7 @@ public:
 	void OnPressBallHit();
 	void OnRealseBallHit();
 	void OnPressChangeClub();
+	void OnPressCheat();
 	void MoveDirection(float AxisValue);
 	void CheckBallisMoiving();
 	void UseLineTrace();

@@ -176,8 +176,8 @@ void ATestSpline::build0()
 			staticcom->SetWorldScale3D(FVector(0.2, 0.2, 0.2));
 
 			FHitResult OutHit;
-			FVector Startpoint = spline->GetLocationAtDistanceAlongSpline(index * 2000, ESplineCoordinateSpace::World) + FVector(0, 0, 1000);
-			FVector Endpoint = Startpoint * FVector(1, 1, 0) + FVector(0, 0, -1000);
+			FVector Startpoint = spline->GetLocationAtDistanceAlongSpline(index * 2000, ESplineCoordinateSpace::World) + FVector(0, 0, 10000);
+			FVector Endpoint = Startpoint * FVector(1, 1, 0) + FVector(0, 0, -10000);
 			FCollisionQueryParams CollisionParams;
 			bool isHit = GetWorld()->LineTraceSingleByChannel(OutHit, Startpoint, Endpoint, ECC_Visibility, CollisionParams);
 			if (isHit)

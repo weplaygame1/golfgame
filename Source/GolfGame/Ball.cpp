@@ -143,11 +143,11 @@ void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	// ChangeClub : Press C
 	PlayerInputComponent->BindAction("ChangeClub", IE_Pressed, this, &ABall::OnPressChangeClub);
 
+	// Cheat : Press Ctrl + G
+	PlayerInputComponent->BindAction("Cheat", IE_Pressed, this, &ABall::OnPressCheat);
+
 	// Move Direction : Press A or D
 	PlayerInputComponent->BindAxis("MoveDirection", this, &ABall::MoveDirection);
-
-	
-
 	
 }
 
@@ -288,6 +288,29 @@ void ABall::MoveDirection(float AxisValue)
 		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
 		UpdatePredictIconOnWidget.Broadcast();
 	}
+}
+
+void ABall::OnPressCheat()
+{
+	// 다음홀로 넘어감
+	if (CurrentState == EBallState::STOP)
+	{
+		CurrentState = EBallState::READY;
+
+		BallPlayerState->PlusScore();
+		UpdateScoreResultOnWidget.Broadcast();
+
+		// 결과 위젯
+		OnOffOnScoreResultOnWidget.Broadcast(true);
+		OnOffMovingPanelOnWidget.Broadcast(false);
+
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+			MoveNextHole();
+			UseInTimer();
+		}, 2, false);
+	}
+
 }
 
 void ABall::CheckBallisMoiving()
@@ -597,7 +620,7 @@ void ABall::ChangeClub()
 		break;
 	case EGolfClub::WEDGE:
 		DrivingDis = 7000;
-		ArcValue = 0.4;
+		ArcValue = 0.5;
 		break;
 	case EGolfClub::PUTTER:
 		DrivingDis = 6000;

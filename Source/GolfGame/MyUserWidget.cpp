@@ -100,52 +100,65 @@ void UMyUserWidget::SetMinimapImage()
 {
 	// 미니맵 이미지 세팅
 	int index = CurrentPlayerState->GetCurrentHoleIndex();
-	FString Path = FString::Printf(TEXT("/Game/Blueprints/Widget/MinimapImage/MnimapIndex0.MnimapIndex%d"), index);
+	FString Path = FString::Printf(TEXT("/Game/Blueprints/Widget/MinimapImage/MnimapIndex%d.MnimapIndex%d"), index, index);
 	UTexture2D* Texture = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *Path));
 	Minimap->SetBrushFromTexture(Texture);
 
-	// 홀컵 이미지 세팅
+	// 플래그 아이콘 세팅
+	int index1 = CurrentGameMode->GetFlagIconIndex(index);
+	FString Path1 = FString::Printf(TEXT("/Game/Blueprints/Widget/MinimapImage/FlagIndex%d.FlagIndex%d"), index1, index1);
+	UTexture2D* Texture1 = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *Path1));
+	FlagIcon->SetBrushFromTexture(Texture1);
+	
 	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
 
-	FVector2D IconLocation;
-	IconLocation.X = (FlagLocation.Y + 6500) / 25000 * 500;
+	/* 좌표 변환 */
+	// 카메라 중앙 좌표
+	FVector Center = CurrentGameMode->GetMinimapCenterLocation(index);
+	// 미니맵 너비
+	int32 Width = CurrentGameMode->GetMinimapWidth(index);
 
-	IconLocation.Y = 500 - ((FlagLocation.X + 1500) / 25000 * 500);
+	FVector2D IconLocation;
+	IconLocation.X = (FlagLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+	IconLocation.Y = 500 - ((FlagLocation.X - (Center.X - (Width / 2))) / Width * 500);
 
 	FlagIcon->SetRenderTranslation(IconLocation);
-
-	// 플래그 아이콘 조건추가
-	// 좌표변환 식으로
 }
 
 void UMyUserWidget::UpdateBallIcon()
 {
 	FVector BallLocation = CurrentBallState->GetActorLocation();
 
-	FVector2D IconLocation;
-	IconLocation.X = (BallLocation.Y + 6500) / 25000 * 500;
+	/* 좌표 변환 */
+	int index = CurrentPlayerState->GetCurrentHoleIndex();
+	// 카메라 중앙 좌표
+	FVector Center = CurrentGameMode->GetMinimapCenterLocation(index);
+	// 미니맵 너비
+	int32 Width = CurrentGameMode->GetMinimapWidth(index);
 
-	IconLocation.Y = 500 - ((BallLocation.X + 1500) / 25000 * 500);
+	FVector2D IconLocation;
+	IconLocation.X = (BallLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+	IconLocation.Y = 500 - ((BallLocation.X - (Center.X - (Width / 2))) / Width * 500);
 
 	BallIcon->SetRenderTranslation(IconLocation);
-	
-	// 좌표변환 부분에서
-	// 1. 카메라 좌표
-	// 2. width
-	// 따로 저장해서 해당 변수들을 불러와 계산하는 식으로
 }
 
 void UMyUserWidget::UpdatePredictIcon()
 {
 	FVector PredictLocation = CurrentBallState->GetPredictLocation();
 
-	FVector2D IconLocation;
-	IconLocation.X = (PredictLocation.Y + 6500) / 25000 * 500;
+	/* 좌표 변환 */
+	int index = CurrentPlayerState->GetCurrentHoleIndex();
+	// 카메라 중앙 좌표
+	FVector Center = CurrentGameMode->GetMinimapCenterLocation(index);
+	// 미니맵 너비
+	int32 Width = CurrentGameMode->GetMinimapWidth(index);
 
-	IconLocation.Y = 500 - ((PredictLocation.X + 1500) / 25000 * 500);
+	FVector2D IconLocation;
+	IconLocation.X = (PredictLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+	IconLocation.Y = 500 - ((PredictLocation.X - (Center.X - (Width / 2))) / Width * 500);
 
 	PredictIcon->SetRenderTranslation(IconLocation);
-	
 }
 
 void UMyUserWidget::UpdateClubState()

@@ -31,6 +31,8 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 	InitMinimapCenterLocation();
 	// 미니맵 너비
 	InitMinimapWidth();
+	// 플래그 아이콘 인덱스
+	InitFlagIcon();
 }
 
 void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer) 
@@ -51,13 +53,13 @@ void AGolfGameGameModeBase::InitSpawnLocation()
 	// 시작 위치
 	AllSpawnLocation.Add(FVector(1500, 6700, 200));
 	AllSpawnLocation.Add(FVector(-15000, -11000, 200));
-	AllSpawnLocation.Add(FVector(-27000, 28000, 200));
+	AllSpawnLocation.Add(FVector(-22000, 30000, 200));
 }
 
 void AGolfGameGameModeBase::InitHoleCupLocation()
 {
 	// 홀컵 위치
-	AllHoleCupLocation.Add(FVector(19000, 6300, 3));
+	AllHoleCupLocation.Add(FVector(19070, 5900, 3));
 	AllHoleCupLocation.Add(FVector(18500, -13000, 3));
 	AllHoleCupLocation.Add(FVector(23000, 23000, 3));
 }
@@ -74,12 +76,16 @@ void AGolfGameGameModeBase::InitMinimapCenterLocation()
 {
 	// 미니맵 중심 위치
 	MinimapCenterLocation.Add(FVector(11000, 6000, 10000));
+	MinimapCenterLocation.Add(FVector(4000, -13000, 10000));
+	MinimapCenterLocation.Add(FVector(400, 30000, 10000));
 }
 
 void AGolfGameGameModeBase::InitMinimapWidth()
 {
 	// 미니맵 너비
 	MinimapWidth.Add(25000);
+	MinimapWidth.Add(50000);
+	MinimapWidth.Add(70000);
 }
 
 void AGolfGameGameModeBase::InitFlagIcon()

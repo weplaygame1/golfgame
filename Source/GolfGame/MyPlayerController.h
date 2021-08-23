@@ -19,7 +19,7 @@ public:
 	virtual void BeginPlay() override;
 public:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UMyUserWidget> PlayerWidget;
+	TSubclassOf<class UUserWidget> PlayerWidget;
 	UPROPERTY(EditAnywhere)
 	class UMyUserWidget* CurrentWidget;
 };

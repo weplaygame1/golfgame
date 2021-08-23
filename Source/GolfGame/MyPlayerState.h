@@ -29,20 +29,15 @@ public:
 	void SetInitSocreTable(TArray<int32> score);
 	void SetInitDoublePar(int32 num);
 	void SetDistanceRemaining();
-
 	void PlusScore();
-
 	bool NextHole();
-
 public:
 	FVector GetFormerLocation() const { return FormerBallLocation; }
-
 	int32 GetCurrentHoleIndex() const { return CurrentHoleIndex; }
 	int32 GetDoublePar() const { return iDoublePar; }
 	int32 GetWholeDistance() const { return WholeDistacne; }
 	int32 GetAllScore() const { return AllScore; }
 	float GetDistanceRemaining() const { return Distance; }
-
 	int32 GetNowHoleScore() const { return NowHoleScore; }
 	int32 GetNumberth() const { return NowHoleScore; }
 public:
@@ -52,8 +47,6 @@ public:
 	FVector FormerBallLocation;
 
 	// 플레이어의 점수 배열
-	//-> 스코어카드 UI를 만들때 gamemode를 가져오지 못하면 초기 점수표를 추가로 만들어야함
-	UPROPERTY(EditAnywhere)
 	TArray<int32> ScoreTable;
 
 	// 더블파 체크 변수
