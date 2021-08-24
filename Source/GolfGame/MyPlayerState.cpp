@@ -73,6 +73,5 @@ bool AMyPlayerState::NextHole()
 	else
 	{
 		return false;
-		
 	}
 }

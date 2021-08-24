@@ -82,12 +82,11 @@ void ABall::BeginPlay()
 	BallPlayerState->GetScoreOnWidget.Broadcast();
 	BallPlayerState->GetWholeDistanceOnWidget.Broadcast();
 
+	// Get Game mode
+	CurrentGameMode = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode());
+
 	// Set Default CameraLagSpeed
 	BallCameraSpringArm->CameraLagSpeed = .0F;
-	
-	// 미니맵 세팅
-	OnOffMainPanelOnWidget.Broadcast(true);
-	OnOffMovingPanelOnWidget.Broadcast(false);
 
 	// 값 초기화
 	CurrentState = EBallState::STOP;
@@ -108,9 +107,6 @@ void ABall::BeginPlay()
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// TEST
-	//UseLineTrace();
 
 	switch (CurrentState)
 	{
@@ -285,7 +281,16 @@ void ABall::MoveDirection(float AxisValue)
 	{
 		AddControllerYawInput(AxisValue);
 
-		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
+		BallHoleDis = FVector::Dist(this->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(BallPlayerState->GetCurrentHoleIndex()));
+		if (DrivingDis < BallHoleDis)
+		{
+			PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
+		}
+		else
+		{
+			PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * BallHoleDis;
+		}
+
 		UpdatePredictIconOnWidget.Broadcast();
 	}
 }
@@ -295,20 +300,25 @@ void ABall::OnPressCheat()
 	// 다음홀로 넘어감
 	if (CurrentState == EBallState::STOP)
 	{
-		CurrentState = EBallState::READY;
+		CurrentState = EBallState::PAUSE;
 
 		BallPlayerState->PlusScore();
 		UpdateScoreResultOnWidget.Broadcast();
+		UpdateScoreTableOnWidget.Broadcast();
 
 		// 결과 위젯
 		OnOffOnScoreResultOnWidget.Broadcast(true);
 		OnOffMovingPanelOnWidget.Broadcast(false);
 
+		FTimerHandle handle1; 
+		GetWorld()->GetTimerManager().SetTimer(handle1, [this]() {
+			MoveNextHole();
+		}, 2, false);
+
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
-			MoveNextHole();
 			UseInTimer();
-		}, 2, false);
+		}, 6, false);
 	}
 
 }
@@ -343,16 +353,15 @@ void ABall::UseLineTrace()
 	if (bCheckHoleCup)
 	{
 		GeographyState = EGeographyState::HOLECUP;
-
 	}
 	// 컨시드
 	else if (bCheckConcede)
 	{
 		GeographyState = EGeographyState::CONCEDE;
-
 	}
 	// OB 
-	else if (bCheckOB) {
+	else if (bCheckOB) 
+	{
 		GeographyState = EGeographyState::OB;
 	}
 	// 그 외에 지형속성
@@ -418,6 +427,10 @@ void ABall::MoveNextHole()
 	bCheckConcede = false;
 	bCheckOB = false;
 
+	OnOffOnScoreResultOnWidget.Broadcast(false);
+	OnOffMainPanelOnWidget.Broadcast(false);
+	OnOffOnScoreTableOnWidget.Broadcast(true);
+
 	// 다음홀이 있을때
 	if (BallPlayerState->NextHole())
 	{
@@ -425,25 +438,28 @@ void ABall::MoveNextHole()
 		BallCameraSpringArm->CameraLagSpeed = 0.0f;
 		SetBallLoc();
 
-		// 추가적으로 카메라의 방향을 정해줘야함
-		// 현재는 마지막에 쳤던 방향을 보고있음
-
+		// 추가적으로 카메라의 방향을 정해줘야함, 현재는 마지막에 쳤던 방향을 보고있음
 
 		UseLineTrace();
 		ClubState = EGolfClub::DRIVER;
 		ChangeClub();
-
-		// 여기에서 다음홀을 준비하기 위한 변수들 디폴트값으로 세팅
-
 	}
 	else
 	{
-		// 스코어표 출력
-		
-		// 그후
-		// 1. 게임 자동종료
-		// 2. 게임 종료버튼 and 처음부터 시작하기 버튼
+		// 게임 종료 버튼
+		CurrentState = EBallState::PAUSE;
 
+		// 종료버튼 출력
+		OnOffOnGameOverButtonOnWidget.Broadcast(true);
+
+		// 커서 아이콘 표시
+		AMyPlayerController* PC = Cast<AMyPlayerController>(GetController());
+		if (PC)
+		{
+			PC->bShowMouseCursor = true;
+			PC->bEnableClickEvents = true;
+			PC->bEnableMouseOverEvents = true;
+		}
 	}
 }
 
@@ -475,6 +491,7 @@ void ABall::CheckBallLocation()
 {
 	FTimerHandle handle;
 	
+	// 반복이 너무 많다. 적당히 묶으면 될것같은데, 설계오류
 	if (!bIsMoving && bWaitTimer) {
 		bWaitTimer = false;
 
@@ -482,7 +499,8 @@ void ABall::CheckBallLocation()
 		if (bCheckHoleCup)
 		{
 			UpdateScoreResultOnWidget.Broadcast();
-			
+			UpdateScoreTableOnWidget.Broadcast();
+
 			// 결과 위젯
 			FTimerHandle handle2;
 			GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
@@ -490,16 +508,21 @@ void ABall::CheckBallLocation()
 				OnOffMovingPanelOnWidget.Broadcast(false);
 			}, 1, false);
 			
-			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+			FTimerHandle handle1;
+			GetWorld()->GetTimerManager().SetTimer(handle1, [this]() {
 				MoveNextHole();
+			}, 2, false);
+
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 				UseInTimer();
-			}, 3, false);
+			}, 6, false);
 		}
 		// 더블파 체크
 		else if (BallPlayerState->GetNumberth() == BallPlayerState->GetDoublePar())
 		{
 			BallPlayerState->PlusScore();
 			UpdateScoreResultOnWidget.Broadcast();
+			UpdateScoreTableOnWidget.Broadcast();
 
 			// 결과 위젯
 			FTimerHandle handle2;
@@ -508,16 +531,21 @@ void ABall::CheckBallLocation()
 				OnOffMovingPanelOnWidget.Broadcast(false);
 			}, 1, false);
 
-			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+			FTimerHandle handle1;
+			GetWorld()->GetTimerManager().SetTimer(handle1, [this]() {
 				MoveNextHole();
+			}, 2, false);
+
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 				UseInTimer();
-			}, 3, false);
+			}, 6, false);
 		}
 		// 컨시드
 		else if (bCheckConcede)
 		{
 			BallPlayerState->PlusScore();
 			UpdateScoreResultOnWidget.Broadcast();
+			UpdateScoreTableOnWidget.Broadcast();
 
 			// 결과 위젯
 			FTimerHandle handle2;
@@ -527,10 +555,14 @@ void ABall::CheckBallLocation()
 				OnOffMovingPanelOnWidget.Broadcast(false);
 			}, 1, false);
 
-			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+			FTimerHandle handle1;
+			GetWorld()->GetTimerManager().SetTimer(handle1, [this]() {
 				MoveNextHole();
+			}, 2, false);
+
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 				UseInTimer();
-			}, 3, false);
+			}, 6, false);
 		}
 		//OB일때
 		else if (GeographyState == EGeographyState::OB)
@@ -545,18 +577,24 @@ void ABall::CheckBallLocation()
 			{
 				BallPlayerState->PlusScore();
 				UpdateScoreResultOnWidget.Broadcast();
+				UpdateScoreTableOnWidget.Broadcast();
 
 				// 결과 위젯
 				FTimerHandle handle2;
 				GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
+					UpdateScoreTableOnWidget.Broadcast();
 					OnOffOnScoreResultOnWidget.Broadcast(true);
 					OnOffMovingPanelOnWidget.Broadcast(false);
 				}, 1, false);
 
-				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				FTimerHandle handle1;
+				GetWorld()->GetTimerManager().SetTimer(handle1, [this]() {
 					MoveNextHole();
+				}, 2, false);
+
+				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 					UseInTimer();
-				}, 3, false);
+				}, 6, false);
 			}
 			// else 더블파 아닐때
 			else
@@ -571,7 +609,8 @@ void ABall::CheckBallLocation()
 				GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
 					BallCameraSpringArm->CameraLagSpeed = 0.0f;
 					this->SetActorLocation(BallPlayerState->GetFormerLocation());
-					UseLineTrace();
+
+					// 이부분 제대로 작동안되는거 같긴한데..
 					ChangeClubFromDis();
 					ChangeClub();
 					UseInTimer();
@@ -629,7 +668,17 @@ void ABall::ChangeClub()
 	default:
 		break;
 	}
-	PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
+	
+	BallHoleDis = FVector::Dist(this->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(BallPlayerState->GetCurrentHoleIndex()));
+	if (DrivingDis < BallHoleDis)
+	{
+		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
+	}
+	else
+	{
+		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * BallHoleDis;
+	}
+
 	UpdatePredictIconOnWidget.Broadcast();
 	UpdateClubStateOnWidget.Broadcast();
 }
@@ -664,26 +713,30 @@ void ABall::SetMovingDis()
 
 void ABall::UseInTimer()
 {
-	//타이머 람다 함수에 사용되는 함수 모음
-	UpdateBallIconOnWidget.Broadcast();
-	SetPowerZeroOnWidget.Broadcast();
-	UpdateShotNumberthOnWidget.Broadcast();
+	if (BallPlayerState->GetCurrentHoleIndex() < CurrentGameMode->GetNumOfAllHole())
+	{
+		//타이머 람다 함수에 사용되는 함수 모음
+		UpdateBallIconOnWidget.Broadcast();
+		SetPowerZeroOnWidget.Broadcast();
+		UpdateShotNumberthOnWidget.Broadcast();
 
-	OnOffOBResultOnWidget.Broadcast(false);
-	OnOffConcedeResultOnWidget.Broadcast(false);
-	OnOffOnScoreResultOnWidget.Broadcast(false);
+		OnOffOBResultOnWidget.Broadcast(false);
+		OnOffConcedeResultOnWidget.Broadcast(false);
+		OnOffOnScoreResultOnWidget.Broadcast(false);
+		OnOffOnScoreTableOnWidget.Broadcast(false);
+		OnOffMovingPanelOnWidget.Broadcast(false);
 
-	OnOffMainPanelOnWidget.Broadcast(true);
-	OnOffMovingPanelOnWidget.Broadcast(false);
+		OnOffMainPanelOnWidget.Broadcast(true);
 
-	CurrentState = EBallState::STOP;
-	bWaitTimer = true;
+		CurrentState = EBallState::STOP;
+		bWaitTimer = true;
+	}
 }
 
 void ABall::SetBallLoc()
 {
 	FHitResult OutHit;
-	FVector Startpoint = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode())->GetSpawnLocation(BallPlayerState->GetCurrentHoleIndex()) + FVector(0, 0, 10000);
+	FVector Startpoint = CurrentGameMode->GetSpawnLocation(BallPlayerState->GetCurrentHoleIndex()) + FVector(0, 0, 10000);
 	FVector Endpoint = Startpoint * FVector(1, 1, 0) + FVector(0, 0, -1000);
 	FCollisionQueryParams CollisionParams;
 

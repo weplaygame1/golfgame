@@ -4,6 +4,7 @@
 #include "LineWidget.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include "GolfGameGameModeBase.h"
 #include "MyPlayerState.h"
@@ -46,7 +47,31 @@ int32 ULineWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Allotted
 		UWidgetBlueprintLibrary::DrawLine(Context, BallLoc, PreLoc, FLinearColor::Yellow, false, 4);
 
 		//// 시작과 도착을 잘게 잘라서 적절하게 그려주면 점선됨
-		UWidgetBlueprintLibrary::DrawLine(Context, PreLoc, FlagLoc, FLinearColor::White, false, 4);
+		//UWidgetBlueprintLibrary::DrawLine(Context, PreLoc, FlagLoc, FLinearColor::White, false, 4);
+
+		// 방향 단위 벡터
+		FVector F1(PreLoc.X, PreLoc.Y, 0);
+		FVector F2(FlagLoc.X, FlagLoc.Y, 0);
+		FVector Dir = UKismetMathLibrary::GetDirectionUnitVector(F1, F2);
+		FVector2D Dir2D(Dir.X, Dir.Y);
+		
+		FVector2D S1 = PreLoc;
+		FVector2D S2 = PreLoc + Dir2D * 15;
+
+		float Dis = FVector2D::Distance(PreLoc, FlagLoc);
+		float ComDis = FVector2D::Distance(S1, S2);
+
+		while (ComDis < Dis)
+		{
+			UWidgetBlueprintLibrary::DrawLine(Context, S1, S2, FLinearColor::White, false, 4);
+
+			S1 = S2 + Dir2D * 10;
+			S2 = S1 + Dir2D * 15;
+
+			ComDis = FVector2D::Distance(PreLoc, S2);
+		}
+		UWidgetBlueprintLibrary::DrawLine(Context, S1, FlagLoc, FLinearColor::White, false, 4);
+
 	}
 	return LayerId;
 }

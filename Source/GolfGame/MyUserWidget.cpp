@@ -7,12 +7,23 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
+#include "Components/Button.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "GolfGameGameModeBase.h"
 #include "MyPlayerState.h"
 #include "Ball.h"
+
+bool UMyUserWidget::Initialize()
+{
+	Super::Initialize();
+
+	GameOver->OnClicked.AddDynamic(this, &UMyUserWidget::ClickGameOver);
+
+	return true;
+}
 
 void UMyUserWidget::SetCurrentGameMode(AGolfGameGameModeBase* mode)
 {
@@ -21,6 +32,7 @@ void UMyUserWidget::SetCurrentGameMode(AGolfGameGameModeBase* mode)
 
 void UMyUserWidget::SetCurrentBallState(ABall* ball) 
 {
+	// 멀티델리게이트 있으니까 일대일 매칭말고 기능별로 묶어서 델리게이트 수를 줄일수도 있겠지?
 	CurrentBallState = ball; 
 	ball->GetPowerGaugeOnWidget.AddUObject(this, &UMyUserWidget::UpdatePower);
 	ball->SetPowerZeroOnWidget.AddUObject(this, &UMyUserWidget::SetPowerZero);
@@ -31,12 +43,16 @@ void UMyUserWidget::SetCurrentBallState(ABall* ball)
 	ball->UpdateGeoStateOnWidget.AddUObject(this, &UMyUserWidget::UpdateGeoState);
 	ball->UpdateShotNumberthOnWidget.AddUObject(this, &UMyUserWidget::UpdateShotNumberth);
 	ball->UpdateScoreResultOnWidget.AddUObject(this, &UMyUserWidget::UpdateScoreResult);
-
+	ball->UpdateScoreTableOnWidget.AddUObject(this, &UMyUserWidget::UpdateScoreTable);
+	ball->UpdatePredictIconOnWidget.AddUObject(this, &UMyUserWidget::UpdatePreAndFlag);
+	
 	ball->OnOffMainPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMainPanel);
 	ball->OnOffMovingPanelOnWidget.AddUObject(this, &UMyUserWidget::OnOffMovingPanel);
 	ball->OnOffOBResultOnWidget.AddUObject(this, &UMyUserWidget::OnOffOBResult);
 	ball->OnOffConcedeResultOnWidget.AddUObject(this, &UMyUserWidget::OnOffConcedeResult);
 	ball->OnOffOnScoreResultOnWidget.AddUObject(this, &UMyUserWidget::OnOffScoreResult);
+	ball->OnOffOnScoreTableOnWidget.AddUObject(this, &UMyUserWidget::OnOffScoreTable);
+	ball->OnOffOnGameOverButtonOnWidget.AddUObject(this, &UMyUserWidget::OnOffGameOverButton);
 }
 
 void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
@@ -263,6 +279,98 @@ void UMyUserWidget::UpdateScoreResult()
 	Score_Result->SetText(FText::FromString(fstr));
 }
 
+void UMyUserWidget::UpdateScoreTable()
+{
+	int index = CurrentPlayerState->GetCurrentHoleIndex();
+
+	// PAR
+	int32 ParNum = CurrentGameMode->GetScoreTable(CurrentPlayerState->GetCurrentHoleIndex());
+	FString fstr0 = FString::Printf(TEXT("%d"), ParNum);
+	
+	// TOTAL PAR
+	iTotalPar += ParNum;
+	FString fstr1 = FString::Printf(TEXT("%d"), iTotalPar);
+
+	// SCORE
+	int32 Numberth = CurrentPlayerState->GetNumberth();
+	int32 inum = Numberth - ParNum;
+	FString fstr2 = FString::Printf(TEXT("%d"), inum);
+
+	// TOTAL SCORE
+	iTotalScore += inum;
+	FString fstr3 = FString::Printf(TEXT("%d"), iTotalScore);
+
+	// HOLE DISTANCE
+	int32 dis = CurrentPlayerState->GetWholeDistance();
+	FString fstr4 = FString::Printf(TEXT("%d"), dis);
+
+	// 우선 테스트로 3개까지만, 이부분 함수로 묶어도 될듯
+	switch (index)
+	{
+	case 0:
+		ScorePar0->SetText(FText::FromString(fstr0));
+		TotalPar->SetText(FText::FromString(fstr1));
+		Score0->SetText(FText::FromString(fstr2));
+		TotalScore->SetText(FText::FromString(fstr3));
+		ScoreDis0->SetText(FText::FromString(fstr4));
+		break;
+	case 1:
+		ScorePar1->SetText(FText::FromString(fstr0));
+		TotalPar->SetText(FText::FromString(fstr1));
+		Score1->SetText(FText::FromString(fstr2));
+		TotalScore->SetText(FText::FromString(fstr3));
+		ScoreDis1->SetText(FText::FromString(fstr4));
+		break;
+	case 2:
+		ScorePar2->SetText(FText::FromString(fstr0));
+		TotalPar->SetText(FText::FromString(fstr1));
+		Score2->SetText(FText::FromString(fstr2));
+		TotalScore->SetText(FText::FromString(fstr3));
+		ScoreDis2->SetText(FText::FromString(fstr4));
+		break;
+	default:
+		break;
+	}
+}
+
+void UMyUserWidget::UpdatePreAndFlag()
+{
+	FVector PredictLocation = CurrentBallState->GetPredictLocation();
+	FVector2D PredictLocation2D(PredictLocation.X, PredictLocation.Y);
+
+	int index = CurrentPlayerState->GetCurrentHoleIndex();
+	FVector FlagLocation = CurrentGameMode->GetHoleCupLocation(index);
+	FVector2D FlagLocation2D(FlagLocation.X, FlagLocation.Y);
+
+	float dis = FVector2D::Distance(PredictLocation2D, FlagLocation2D) / 100;
+
+	FString fstr = FString::Printf(TEXT("%.1fm"), dis);
+	PreAndFlag->SetText(FText::FromString(fstr));
+
+	//좌표변환
+	FVector Center = CurrentGameMode->GetMinimapCenterLocation(index);
+	int32 Width = CurrentGameMode->GetMinimapWidth(index);
+
+	FVector2D IconLocation1;
+	IconLocation1.X = (FlagLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+	IconLocation1.Y = 500 - ((FlagLocation.X - (Center.X - (Width / 2))) / Width * 500);
+
+	FVector2D IconLocation2;
+	IconLocation2.X = (PredictLocation.Y - (Center.Y - (Width / 2))) / Width * 500;
+	IconLocation2.Y = 500 - ((PredictLocation.X - (Center.X - (Width / 2))) / Width * 500);
+
+	FVector2D IconLocation3;
+	IconLocation3.X = (IconLocation1.X + IconLocation2.X) / 2;
+	IconLocation3.Y = (IconLocation1.Y + IconLocation2.Y) / 2;
+
+	PreAndFlag->SetRenderTranslation(IconLocation3);
+}
+
+void UMyUserWidget::ClickGameOver()
+{
+	UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit, true);
+}
+
 void UMyUserWidget::OnOffMainPanel(bool on)
 {
 	if (on)
@@ -320,5 +428,29 @@ void UMyUserWidget::OnOffScoreResult(bool on)
 	else
 	{
 		Score_Result->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMyUserWidget::OnOffScoreTable(bool on)
+{
+	if (on)
+	{
+		ScorePanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		ScorePanel->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMyUserWidget::OnOffGameOverButton(bool on)
+{
+	if (on)
+	{
+		GameOver->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		GameOver->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

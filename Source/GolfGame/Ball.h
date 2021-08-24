@@ -29,7 +29,8 @@ enum class EBallState : uint8
 	READY UMETA(DisplayName = "READY"),
 	CHARGING UMETA(DisplayName = "CHARGING"),
 	MOVING UMETA(DisplayName = "MOVING"),
-	CHECK UMETA(DisplayName = "CHECK")
+	CHECK UMETA(DisplayName = "CHECK"),
+	PAUSE UMETA(DisplayName = "PAUSE")
 };
 // 지형속성 ENUM CLASS
 UENUM()
@@ -62,12 +63,15 @@ public:
 	FUpdateBallStateDelegate UpdateGeoStateOnWidget;
 	FUpdateBallStateDelegate UpdateShotNumberthOnWidget;
 	FUpdateBallStateDelegate UpdateScoreResultOnWidget;
+	FUpdateBallStateDelegate UpdateScoreTableOnWidget;
 
 	FDele_Multi_OneParam OnOffMainPanelOnWidget;
 	FDele_Multi_OneParam OnOffMovingPanelOnWidget;
 	FDele_Multi_OneParam OnOffOBResultOnWidget;
 	FDele_Multi_OneParam OnOffConcedeResultOnWidget;
 	FDele_Multi_OneParam OnOffOnScoreResultOnWidget;
+	FDele_Multi_OneParam OnOffOnScoreTableOnWidget;
+	FDele_Multi_OneParam OnOffOnGameOverButtonOnWidget;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -98,7 +102,10 @@ public:
 	float ArcValue;
 
 	/* Player state */
-	class AMyPlayerState* BallPlayerState;
+	TWeakObjectPtr<class AMyPlayerState> BallPlayerState;
+
+	/* Game mode */
+	TWeakObjectPtr<class AGolfGameGameModeBase> CurrentGameMode;
 
 	bool bIsMoving;
 
@@ -116,23 +123,13 @@ public:
 	EGeographyState GeographyState;
 
 	float MovingDis;
-
 	FVector PredictLocation;
-	
-	UPROPERTY(EditAnywhere)
 	bool bCheckOB;
-
 	bool bWaitTimer;
-	//test
-	UPROPERTY(EditAnywhere)
-		FString fsttt;
-	
-	//랜드스케이프 테스트용
-	UPROPERTY(EditAnywhere)
-		int32 itestlen;
+	int32 numberth;
 
-	UPROPERTY(EditAnywhere)
-		int32 numberth;
+	// 공과 홀컵 사이 거리
+	float BallHoleDis;
 
 public:
 	void OnPressBallHit();

@@ -40,10 +40,10 @@ void AHoleCup::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Draw HoleCup
-	DrawCircle(GetWorld(), GetActorLocation(), FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 80, 100, false, -1, 0, 5);
+	//DrawCircle(GetWorld(), GetActorLocation(), FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 80, 100, false, -1, 0, 5);
 
 	// Draw Concede
-	DrawCircle(GetWorld(), GetActorLocation(),FVector(1, 0, 0), FVector(0, 1, 0),FColor::Blue, 300, 100, false, -1, 0, 5);
+	//DrawCircle(GetWorld(), GetActorLocation(),FVector(1, 0, 0), FVector(0, 1, 0),FColor::Blue, 300, 100, false, -1, 0, 5);
 	
 }
 

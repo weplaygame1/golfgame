@@ -34,6 +34,8 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget->OnOffOBResult(false);
 	CurrentWidget->OnOffConcedeResult(false);
 	CurrentWidget->OnOffScoreResult(false);
+	CurrentWidget->OnOffScoreTable(false);
+	CurrentWidget->OnOffGameOverButton(false);
 
 	CurrentWidget->UpdateWholeDistance();
 	CurrentWidget->UpdateBallIcon();
