@@ -25,6 +25,7 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget = CreateWidget<UMyUserWidget>(this, PlayerWidget);
 	CurrentWidget->AddToViewport();
 	
+	// 순서 or NULL 처리때문인지 위젯에서 무언갈 수정할때마다 가끔 NULL 오류발생
 	CurrentWidget->SetCurrentBallState(Cast<ABall>(GetPawn()));
 	CurrentWidget->SetCurrentPlayerState(Cast<AMyPlayerState>(PlayerState));
 	CurrentWidget->SetCurrentGameMode(GetWorld()->GetAuthGameMode<AGolfGameGameModeBase>());
@@ -40,5 +41,5 @@ void AMyPlayerController::BeginPlay()
 	CurrentWidget->UpdateWholeDistance();
 	CurrentWidget->UpdateBallIcon();
 	CurrentWidget->UpdatePredictIcon();
-
+	CurrentWidget->UpdateDistance();
 }

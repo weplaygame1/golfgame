@@ -43,7 +43,7 @@ void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer)
 	auto PS = Cast<AMyPlayerState>(NewPlayer->PlayerState);
 	PS->SetInitDoublePar((AllScoreTable[0] * 2) - 1);
 	PS->SetCurrentGameMode(this);
-	PS->WholeDistacne = FVector::Dist(AllSpawnLocation[0], AllHoleCupLocation[0]) / 100;
+	PS->WholeDistacne = FVector::Dist(AllSpawnLocation[0], AllHoleCupLocation[0]) / 100 + 0.5;
 
 
 }

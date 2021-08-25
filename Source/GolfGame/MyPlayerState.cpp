@@ -60,7 +60,7 @@ bool AMyPlayerState::NextHole()
 	{
 		FormerBallLocation = CurrentGameMode->GetSpawnLocation(CurrentHoleIndex);
 		iDoublePar = (CurrentGameMode->GetScoreTable(CurrentHoleIndex) * 2) - 1;
-		WholeDistacne = FVector::Dist(FormerBallLocation, CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex)) / 100;
+		WholeDistacne = FVector::Dist(FormerBallLocation, CurrentGameMode->GetHoleCupLocation(CurrentHoleIndex)) / 100 + 0.5;
 		
 		GetParOnWidget.Broadcast();
 		GetScoreOnWidget.Broadcast();

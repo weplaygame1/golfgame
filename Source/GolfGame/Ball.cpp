@@ -76,17 +76,25 @@ void ABall::BeginPlay()
 	bCheckOB = false;
 	bWaitTimer = true;
 
+	// Get Game mode
+	CurrentGameMode = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode());
+
 	// Get Player State
 	BallPlayerState = Cast<AMyPlayerState>(GetPlayerState());
 	BallPlayerState->GetParOnWidget.Broadcast();
 	BallPlayerState->GetScoreOnWidget.Broadcast();
 	BallPlayerState->GetWholeDistanceOnWidget.Broadcast();
-
-	// Get Game mode
-	CurrentGameMode = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode());
+	// 남은거리 갱신
+	BallPlayerState->SetDistanceRemaining();
 
 	// Set Default CameraLagSpeed
 	BallCameraSpringArm->CameraLagSpeed = .0F;
+
+	// 볼 아이콘 업데이트 델리게이트
+	UpdateBallIconOnWidget.Broadcast();
+	
+	// 볼 초기 위치
+	SetBallLoc();
 
 	// 값 초기화
 	CurrentState = EBallState::STOP;
@@ -94,13 +102,6 @@ void ABall::BeginPlay()
 	UpdateGeoStateOnWidget.Broadcast();
 	ClubState = EGolfClub::DRIVER;
 	ChangeClub();
-
-	// 볼 아이콘 업데이트 델리게이트
-	UpdateBallIconOnWidget.Broadcast();
-	// 남은거리 갱신
-	BallPlayerState->SetDistanceRemaining();
-	// 볼 초기 위치
-	SetBallLoc();
 }
 
 // Called every frame
@@ -174,7 +175,6 @@ void ABall::OnPressBallHit()
 		*/
 
 		// 차징된 파워를 가지고 여기에서 위의 파워식을 계산해야함 !
-
 		float fPercent = PowerPercent / 100;
 
 		// 지형에 따라 추가 감소 설정
@@ -182,16 +182,11 @@ void ABall::OnPressBallHit()
 		{
 		case EGeographyState::ROUGH:
 			// 85% ~ 95%
-			fPercent *= 0.9;
-			break;
-		case EGeographyState::FAIRWAY:
-			break;
-		case EGeographyState::GREEN:
+			fPercent *= FMath::RandRange(0.85f, 0.95f);
 			break;
 		case EGeographyState::BUNKER:
-			//55%  ~ 65% , 75% ~ 85%
-			//안쪽과 바깥쪽의 퍼센트가 다름
-			fPercent *= 0.6;
+			//75%  ~ 85%
+			fPercent *= FMath::RandRange(0.75f, 0.85f);
 			break;
 		default:
 			break;
@@ -200,7 +195,7 @@ void ABall::OnPressBallHit()
 		// PUTTER 일때는 단순 Addimpulse
 		if (ClubState == EGolfClub::PUTTER)
 		{
-			FVector outVelocity = BallCamera->GetForwardVector() * FVector(1, 1, 1) * 3000 * fPercent;
+			FVector outVelocity = BallCamera->GetForwardVector() * FVector(1, 1, 1) * DrivingDis * fPercent;
 			BallMesh->AddImpulse(outVelocity, NAME_None, true);
 		}
 		// 그외에는 SuggestProjectileVelocity_CustomArc 로 계산
@@ -301,7 +296,7 @@ void ABall::OnPressCheat()
 	if (CurrentState == EBallState::STOP)
 	{
 		CurrentState = EBallState::PAUSE;
-
+		
 		BallPlayerState->PlusScore();
 		UpdateScoreResultOnWidget.Broadcast();
 		UpdateScoreTableOnWidget.Broadcast();
@@ -309,6 +304,7 @@ void ABall::OnPressCheat()
 		// 결과 위젯
 		OnOffOnScoreResultOnWidget.Broadcast(true);
 		OnOffMovingPanelOnWidget.Broadcast(false);
+		OnOffMainPanelOnWidget.Broadcast(false);
 
 		FTimerHandle handle1; 
 		GetWorld()->GetTimerManager().SetTimer(handle1, [this]() {
@@ -438,6 +434,7 @@ void ABall::MoveNextHole()
 		BallCameraSpringArm->CameraLagSpeed = 0.0f;
 		SetBallLoc();
 
+		BallPlayerState->SetDistanceRemaining();
 		// 추가적으로 카메라의 방향을 정해줘야함, 현재는 마지막에 쳤던 방향을 보고있음
 
 		UseLineTrace();
@@ -610,7 +607,8 @@ void ABall::CheckBallLocation()
 					BallCameraSpringArm->CameraLagSpeed = 0.0f;
 					this->SetActorLocation(BallPlayerState->GetFormerLocation());
 
-					// 이부분 제대로 작동안되는거 같긴한데..
+					// 이전지점으로 돌아간 이후 남은거리를 다시 계산해 줘야함 why? 현재는 움직일때만 계산해주고 있기 때문
+					BallPlayerState->SetDistanceRemaining();
 					ChangeClubFromDis();
 					ChangeClub();
 					UseInTimer();
@@ -662,7 +660,7 @@ void ABall::ChangeClub()
 		ArcValue = 0.5;
 		break;
 	case EGolfClub::PUTTER:
-		DrivingDis = 6000;
+		DrivingDis = 2000;
 		ArcValue = 1;
 		break;
 	default:

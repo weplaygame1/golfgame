@@ -179,8 +179,62 @@ void UMyUserWidget::UpdatePredictIcon()
 
 void UMyUserWidget::UpdateClubState()
 {
+	// 클럽 이름
 	FText txt = (FText)StaticEnum<EGolfClub>()->GetDisplayNameTextByIndex((int32)CurrentBallState->GetClubState());
 	ClubState->SetText(txt);
+
+	// 클럽 사진
+	FString Path;
+	switch (CurrentBallState->GetClubState())
+	{
+	case EGolfClub::DRIVER:
+		Path = TEXT("/Game/Blueprints/Widget/ClubImage/DRIVER.DRIVER");
+		break;
+	case EGolfClub::WOOD:
+		Path = TEXT("/Game/Blueprints/Widget/ClubImage/WOOD.WOOD");
+		break;
+	case EGolfClub::IRON:
+		Path = TEXT("/Game/Blueprints/Widget/ClubImage/IRON.IRON");
+		break;
+	case EGolfClub::WEDGE:
+		Path = TEXT("/Game/Blueprints/Widget/ClubImage/WEDGE.WEDGE");
+		break;
+	case EGolfClub::PUTTER:
+		Path = TEXT("/Game/Blueprints/Widget/ClubImage/PUTTER");
+		break;
+	default:
+		break;
+	}
+
+	UTexture2D* Texture = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, *Path));
+	ClubImage->SetBrushFromTexture(Texture);
+
+	// 게이지 바 아래 m 표시
+	// 현재 클럽의 최대 비거리
+	int32 dis = CurrentBallState->GetDrivingDis() / 100;
+	FString MaxDisStr = FString::Printf(TEXT("%dm"), dis);
+	FString MidDisStr = FString::Printf(TEXT("%dm"), dis/2);
+	
+	MaxDis->SetText(FText::FromString(MaxDisStr));
+	MidDis->SetText(FText::FromString(MidDisStr));
+
+	// 게이지 바 위에 예상 파워 아이콘 위치 구현
+	// 현재 남은 거리
+	int32 RemainDis = CurrentPlayerState->GetDistanceRemaining();
+	FVector2D IconLocation;
+	IconLocation.Y = 0;
+
+	// 남은 거리가 더 높을경우 그냥 맨 끝에 위치
+	if (dis < RemainDis)
+	{
+		IconLocation.X = 790;
+	}
+	// 더 짧을 경우 해당 게이지 바 위에 위치
+	else
+	{
+		IconLocation.X = (RemainDis * 790 / dis);
+	}
+	PredictPower->SetRenderTranslation(IconLocation);
 }
 
 void UMyUserWidget::UpdateMovingInformation()
@@ -199,6 +253,21 @@ void UMyUserWidget::UpdateGeoState()
 	FText txt = StaticEnum<EGeographyState>()->GetDisplayNameTextByIndex((int32)CurrentBallState->GetGeographyState());
 	GeoState_0->SetText(txt);
 	GeoState_1->SetText(txt);
+	GeoState_2->SetText(txt);
+
+	FString fstr;
+	switch (CurrentBallState->GetGeographyState())
+	{
+	case EGeographyState::ROUGH:
+		fstr = TEXT("  85% ~ 95%");
+		break;
+	case EGeographyState::BUNKER:
+		fstr = TEXT("  75% ~ 85%");
+		break;
+	default:
+		break;
+	}
+	RandRange->SetText(FText::FromString(fstr));
 }
 
 void UMyUserWidget::UpdateShotNumberth()
@@ -335,6 +404,8 @@ void UMyUserWidget::UpdateScoreTable()
 
 void UMyUserWidget::UpdatePreAndFlag()
 {
+	// 도착 예상 지점과 플래그 사이의 거리
+	// 흰색 점선 거리 출력
 	FVector PredictLocation = CurrentBallState->GetPredictLocation();
 	FVector2D PredictLocation2D(PredictLocation.X, PredictLocation.Y);
 
