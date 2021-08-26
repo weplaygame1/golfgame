@@ -130,7 +130,6 @@ public:
 
 	// 공과 홀컵 사이 거리
 	float BallHoleDis;
-
 public:
 	void OnPressBallHit();
 	void OnRealseBallHit();
@@ -145,10 +144,9 @@ public:
 	void ChangeClub();
 	void SetMovingDis();
 	void ChangeClubFromDis();
-
 	void UseInTimer();
-
 	void SetBallLoc();
+	void SetPredictLocation();
 
 	float GetPower() { return PowerPercent / 100; }
 	float GetDrivingDis() { return DrivingDis; }

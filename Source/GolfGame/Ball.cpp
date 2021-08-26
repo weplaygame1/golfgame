@@ -56,7 +56,6 @@ ABall::ABall()
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
-	
 
 
 }
@@ -143,9 +142,10 @@ void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	// Cheat : Press Ctrl + G
 	PlayerInputComponent->BindAction("Cheat", IE_Pressed, this, &ABall::OnPressCheat);
 
-	// Move Direction : Press A or D
+	// Move Direction : Press A or D 
 	PlayerInputComponent->BindAxis("MoveDirection", this, &ABall::MoveDirection);
-	
+	// Move Direction : Press ← or →
+	PlayerInputComponent->BindAxis("MoveDirection2", this, &ABall::MoveDirection);
 }
 
 void ABall::OnPressBallHit()
@@ -224,6 +224,8 @@ void ABall::OnPressBallHit()
 		UpdateShotNumberthOnWidget.Broadcast();
 
 		bCheckOnce = false;
+		bWaitTimer = true;
+
 		CurrentState = EBallState::MOVING;
 	}
 }
@@ -275,18 +277,7 @@ void ABall::MoveDirection(float AxisValue)
 	if (AxisValue != 0 && CurrentState == EBallState::STOP)
 	{
 		AddControllerYawInput(AxisValue);
-
-		BallHoleDis = FVector::Dist(this->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(BallPlayerState->GetCurrentHoleIndex()));
-		if (DrivingDis < BallHoleDis)
-		{
-			PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
-		}
-		else
-		{
-			PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * BallHoleDis;
-		}
-
-		UpdatePredictIconOnWidget.Broadcast();
+		SetPredictLocation();
 	}
 }
 
@@ -435,7 +426,6 @@ void ABall::MoveNextHole()
 		SetBallLoc();
 
 		BallPlayerState->SetDistanceRemaining();
-		// 추가적으로 카메라의 방향을 정해줘야함, 현재는 마지막에 쳤던 방향을 보고있음
 
 		UseLineTrace();
 		ClubState = EGolfClub::DRIVER;
@@ -445,10 +435,8 @@ void ABall::MoveNextHole()
 	{
 		// 게임 종료 버튼
 		CurrentState = EBallState::PAUSE;
-
 		// 종료버튼 출력
 		OnOffOnGameOverButtonOnWidget.Broadcast(true);
-
 		// 커서 아이콘 표시
 		AMyPlayerController* PC = Cast<AMyPlayerController>(GetController());
 		if (PC)
@@ -491,7 +479,6 @@ void ABall::CheckBallLocation()
 	// 반복이 너무 많다. 적당히 묶으면 될것같은데, 설계오류
 	if (!bIsMoving && bWaitTimer) {
 		bWaitTimer = false;
-
 		// 홀인
 		if (bCheckHoleCup)
 		{
@@ -612,6 +599,7 @@ void ABall::CheckBallLocation()
 					ChangeClubFromDis();
 					ChangeClub();
 					UseInTimer();
+					UseLineTrace();
 				}, 3, false);
 			}
 		}
@@ -622,14 +610,12 @@ void ABall::CheckBallLocation()
 				ChangeClub();
 				UseInTimer();
 			}, 1, false);
-			
-			// 그린 전용 미니맵? 생각해보기
 		}
 		// 그린이 아닐때
 		else
 		{
-			// 남은거리에 따라 클럽 지정해줌.
 			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				// 남은거리에 따라 클럽 지정해줌.
 				ChangeClubFromDis();
 				ChangeClub();
 				UseInTimer();
@@ -666,18 +652,7 @@ void ABall::ChangeClub()
 	default:
 		break;
 	}
-	
-	BallHoleDis = FVector::Dist(this->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(BallPlayerState->GetCurrentHoleIndex()));
-	if (DrivingDis < BallHoleDis)
-	{
-		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
-	}
-	else
-	{
-		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * BallHoleDis;
-	}
-
-	UpdatePredictIconOnWidget.Broadcast();
+	SetPredictLocation();
 	UpdateClubStateOnWidget.Broadcast();
 }
 
@@ -704,7 +679,6 @@ void ABall::SetMovingDis()
 {
 	//공을 쳤을때 움직인 거리(위젯에서 비거리로 보여줄 변수 업데이트)
 	MovingDis = FVector::Dist(BallPlayerState->GetFormerLocation(),this->GetActorLocation()) / 100;
-
 	// 위젯에서 비거리를 업데이트 해주는 델리게이트
 	UpdateMovingInfoOnWidget.Broadcast();
 }
@@ -713,6 +687,22 @@ void ABall::UseInTimer()
 {
 	if (BallPlayerState->GetCurrentHoleIndex() < CurrentGameMode->GetNumOfAllHole())
 	{
+		FVector BallLoc = this->GetActorLocation();
+		FVector HoleLoc = CurrentGameMode->GetHoleCupLocation(BallPlayerState->GetCurrentHoleIndex());
+		FVector F1(BallLoc.X, BallLoc.Y, 0);
+		FVector F2(HoleLoc.X, HoleLoc.Y, 0);
+		//이게 방향벡터
+		FVector Dir = UKismetMathLibrary::GetDirectionUnitVector(F1, F2);
+		FRotator HoleRot = Dir.Rotation();
+		// 카메라의 방향 바꿔줌, 홀컵을 향해서
+		GetController()->SetControlRotation(FRotator(0, HoleRot.GetComponentForAxis(EAxis::Z) , 0));
+
+		// 타이머를 사용안하면 업데이트가 안됨.
+		FTimerHandle handle2;
+		GetWorld()->GetTimerManager().SetTimer(handle2, [this]() {
+			SetPredictLocation();
+		}, 0.001, false);
+
 		//타이머 람다 함수에 사용되는 함수 모음
 		UpdateBallIconOnWidget.Broadcast();
 		SetPowerZeroOnWidget.Broadcast();
@@ -723,11 +713,8 @@ void ABall::UseInTimer()
 		OnOffOnScoreResultOnWidget.Broadcast(false);
 		OnOffOnScoreTableOnWidget.Broadcast(false);
 		OnOffMovingPanelOnWidget.Broadcast(false);
-
 		OnOffMainPanelOnWidget.Broadcast(true);
-
 		CurrentState = EBallState::STOP;
-		bWaitTimer = true;
 	}
 }
 
@@ -743,6 +730,21 @@ void ABall::SetBallLoc()
 	{
 		this->SetActorLocation(OutHit.Location);
 	}
+}
+
+void ABall::SetPredictLocation()
+{
+	BallHoleDis = FVector::Dist(this->GetActorLocation(), CurrentGameMode->GetHoleCupLocation(BallPlayerState->GetCurrentHoleIndex()));
+	if (DrivingDis < BallHoleDis)
+	{
+		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * DrivingDis;
+	}
+	else
+	{
+		PredictLocation = this->GetActorLocation() + BallCamera->GetForwardVector() * BallHoleDis;
+	}
+
+	UpdatePredictIconOnWidget.Broadcast();
 }
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

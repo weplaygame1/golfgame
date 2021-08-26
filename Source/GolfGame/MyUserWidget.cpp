@@ -63,7 +63,6 @@ void UMyUserWidget::SetCurrentPlayerState(AMyPlayerState* state)
 	state->GetScoreOnWidget.AddUObject(this, &UMyUserWidget::UpdateScore);
 	state->GetWholeDistanceOnWidget.AddUObject(this,&UMyUserWidget::UpdateWholeDistance);
 	state->GetMinimapOnWidget.AddUObject(this, &UMyUserWidget::SetMinimapImage);
-
 }
 
 void UMyUserWidget::UpdatePower()

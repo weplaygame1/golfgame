@@ -170,7 +170,7 @@ void ATestSpline::build0()
 			staticcom = NewObject<UStaticMeshComponent>(this, FName(*str1));
 			staticcom->RegisterComponent();
 			this->AddInstanceComponent(staticcom);
-
+			
 			staticcom->SetStaticMesh(staticmesh);
 			staticcom->SetReceivesDecals(false);
 			staticcom->SetWorldScale3D(FVector(0.2, 0.2, 0.2));
