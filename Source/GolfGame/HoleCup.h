@@ -15,21 +15,17 @@ class GOLFGAME_API AHoleCup : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AHoleCup();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 public:
-
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* HoleCup;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* Concede;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* Flag;
 };

@@ -51,8 +51,8 @@ bool AMyPlayerState::NextHole()
 	ScoreTable.Add(NowHoleScore);
 	// 총 스코어 갱신
 	AllScore += (NowHoleScore - CurrentGameMode->GetScoreTable(CurrentHoleIndex));
-	NowHoleScore = 0;
 
+	NowHoleScore = 0;
 	CurrentHoleIndex++;
 
 	// 다음 홀로 진행

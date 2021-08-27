@@ -56,8 +56,6 @@ ABall::ABall()
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
-
-
 }
 
 // Called when the game starts or when spawned
@@ -74,6 +72,9 @@ void ABall::BeginPlay()
 	bCheckOnce = true;
 	bCheckOB = false;
 	bWaitTimer = true;
+
+	bOnEffect = false;
+	bOffEffect = false;
 
 	// Get Game mode
 	CurrentGameMode = Cast<AGolfGameGameModeBase>(GetWorld()->GetAuthGameMode());
@@ -101,13 +102,14 @@ void ABall::BeginPlay()
 	UpdateGeoStateOnWidget.Broadcast();
 	ClubState = EGolfClub::DRIVER;
 	ChangeClub();
+
 }
 
 // Called every frame
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	switch (CurrentState)
 	{
 	case EBallState::STOP:
@@ -158,23 +160,14 @@ void ABall::OnPressBallHit()
 
 	if (CurrentState == EBallState::CHARGING)
 	{
-		// ball hit : power = PowerPercent
+		// 나이아가라 이펙트 On
+		bOnEffect = true;
+		
 		BallCameraSpringArm->CameraLagSpeed = 3.0F;
 		BallPlayerState->SetFormerLocation(this->GetActorLocation());
 		BallPlayerState->PlusScore();
 		
-		// 공 치는 부분 -> 함수하나 만들고 클럽 종류에따라 각도와 힘 계산
-		/*
-		FVector fvtemp = BallCamera->GetForwardVector()*FVector(1.0f, 1.0f, 1.0f);
-		fvtemp.Z = 1;
-		fvtemp = fvtemp * 100 * 10;
-		FVector av = fvtemp.GetSafeNormal();
-		FVector bv = av.ToOrientationQuat().GetRightVector();
-		BallMesh->AddAngularImpulseInDegrees(bv * 10000, NAME_None, true);
-		BallMesh->AddImpulse(fvtemp, NAME_None, true);
-		*/
-
-		// 차징된 파워를 가지고 여기에서 위의 파워식을 계산해야함 !
+		// 차징된 파워
 		float fPercent = PowerPercent / 100;
 
 		// 지형에 따라 추가 감소 설정
@@ -249,7 +242,6 @@ void ABall::OnPressChangeClub()
 
 		// 티샷일때
 		// 드라이버부터 웨지까지
-		// 이때 지형속성을 TEE라고 보여줘야할까 ?
 		if (BallPlayerState->GetNumberth() == 0)
 		{
 			if (index == (int32)StaticEnum<EGolfClub>()->NumEnums() - 2)
@@ -265,9 +257,7 @@ void ABall::OnPressChangeClub()
 				index = 1;
 			}
 		}
-
 		ClubState = (EGolfClub)StaticEnum<EGolfClub>()->GetValueByIndex(index);
-
 		ChangeClub();
 	}
 }
@@ -307,7 +297,6 @@ void ABall::OnPressCheat()
 			UseInTimer();
 		}, 6, false);
 	}
-
 }
 
 void ABall::CheckBallisMoiving()
@@ -385,6 +374,7 @@ void ABall::UseLineTrace()
 				GeographyState = EGeographyState::BUNKER;
 				break;
 			default:
+				// 데칼위에 있을때
 				// 데칼의 메테리얼 이름으로 확인
 				FString DecalMat = Cast<ATestSpline>(OutHit.GetActor())->GetMaterialName();
 				if (DecalMat == "Decal_FAIRWAY")
@@ -403,13 +393,12 @@ void ABall::UseLineTrace()
 			}
 		}
 	}
-
 	UpdateGeoStateOnWidget.Broadcast();
 }
 
 void ABall::MoveNextHole()
 {
-	// 기본 설정
+	// 변수 초기화
 	bCheckHoleCup = false;
 	bCheckConcede = false;
 	bCheckOB = false;
@@ -431,6 +420,7 @@ void ABall::MoveNextHole()
 		ClubState = EGolfClub::DRIVER;
 		ChangeClub();
 	}
+	// 게임이 끝났을때
 	else
 	{
 		// 게임 종료 버튼
@@ -450,7 +440,6 @@ void ABall::MoveNextHole()
 
 void ABall::ChargingPower()
 {
-	//PrintWithFloat("", PowerPercent);
 	if (PowerIncrease)
 	{
 		PowerPercent += 1.f;
@@ -626,7 +615,7 @@ void ABall::CheckBallLocation()
 
 void ABall::ChangeClub()
 {
-	// 각도 수정 필요 0 ~ 1 , 값이 높을수록 공의 각도 낮아짐
+	// ArcValue : 0 ~ 1 , 값이 높을수록 공의 각도 낮아짐
 	switch (ClubState)
 	{
 	case EGolfClub::DRIVER:
@@ -691,7 +680,7 @@ void ABall::UseInTimer()
 		FVector HoleLoc = CurrentGameMode->GetHoleCupLocation(BallPlayerState->GetCurrentHoleIndex());
 		FVector F1(BallLoc.X, BallLoc.Y, 0);
 		FVector F2(HoleLoc.X, HoleLoc.Y, 0);
-		//이게 방향벡터
+		// 방향벡터
 		FVector Dir = UKismetMathLibrary::GetDirectionUnitVector(F1, F2);
 		FRotator HoleRot = Dir.Rotation();
 		// 카메라의 방향 바꿔줌, 홀컵을 향해서
@@ -715,6 +704,9 @@ void ABall::UseInTimer()
 		OnOffMovingPanelOnWidget.Broadcast(false);
 		OnOffMainPanelOnWidget.Broadcast(true);
 		CurrentState = EBallState::STOP;
+
+		// 나이아가라 이펙트 Off
+		bOffEffect = true;
 	}
 }
 
@@ -749,10 +741,8 @@ void ABall::SetPredictLocation()
 
 void ABall::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//Print("Overlap");
 	if (OtherComp->GetArchetype()->GetName() == TEXT("Default__SplineMeshComponent"))
 	{
-	//	Print("Check OB");
 		bCheckOB = !bCheckOB;
 	}
 	else if (OtherComp->GetName() == TEXT("CONCEDE"))

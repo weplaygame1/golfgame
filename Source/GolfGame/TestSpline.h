@@ -34,7 +34,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UStaticMesh* splinemesh;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	class USplineComponent* spline;
 	UPROPERTY()
 	class UDecalComponent* decal;
@@ -44,7 +44,6 @@ public:
 	class UStaticMeshComponent* staticcom;
 	UPROPERTY()
 	class USplineMeshComponent* splinecom;
-
 	
 	UPROPERTY()
 	TArray<class UDecalComponent*> decalArr;
@@ -63,7 +62,6 @@ public:
 	float decalSize_Z;
 	UPROPERTY(EditAnywhere)
 	int32 SOrder;
-
 
 	UPROPERTY(EditAnywhere)
 	bool bCreateDecal;

@@ -49,7 +49,6 @@ UCLASS()
 class GOLFGAME_API ABall : public APawn
 {
 	GENERATED_BODY()
-
 public:
 	// Sets default values for this pawn's properties
 	ABall();
@@ -75,11 +74,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
@@ -89,11 +86,11 @@ public:
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 public:
 	/* 생성자 */
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* BallMesh;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* BallCameraSpringArm;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* BallCamera;
 
 	/* Club State */
@@ -118,7 +115,7 @@ public:
 
 	float PowerPercent = 0;
 	bool PowerIncrease = true;
-
+	
 	EBallState CurrentState;
 	EGeographyState GeographyState;
 
@@ -130,6 +127,12 @@ public:
 
 	// 공과 홀컵 사이 거리
 	float BallHoleDis;
+
+	// 블루프린트, 나이아가라 set visibility 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bOnEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bOffEffect;
 public:
 	void OnPressBallHit();
 	void OnRealseBallHit();

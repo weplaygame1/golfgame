@@ -54,105 +54,105 @@ public:
 	TWeakObjectPtr<class AGolfGameGameModeBase> CurrentGameMode;
 
 	/* 메인 패널 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UCanvasPanel* MainPanel;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* WholeDistance;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* DistanceRemaining;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ShowPar;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* NowScore;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* GeoState_1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ShotNumberth;
 
 	/* 결과 패널 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* OB_Result;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* Concede_Result;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* Score_Result;
 
 	// 게이지바
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UProgressBar* Power;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* MidDis;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* MaxDis;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* PredictPower;
 
 	// 클럽, 지형속성 표시
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* ClubImage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* GeoState_2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ClubState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* RandRange;
 
 	// 미니맵
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* Minimap;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* BallIcon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* FlagIcon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* PredictIcon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* PreAndFlag;
 	
 	/* 무빙 패널 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UCanvasPanel* MovingPanel;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* MovingDis;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* RemainingDis; 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* GeoState_0;
 	
 	/* 스코어 표 패널*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UCanvasPanel* ScorePanel;
-	//하나하나 변수로 구현하는게 아니라 리스트처럼 할 수 있을텐데 잘 모르겠음.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	//하나하나 변수로 구현하는게 아니라, 리스트처럼 할 수 있을텐데 잘 모르겠음.
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ScorePar0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ScorePar1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ScorePar2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* TotalPar;
 	
 	int32 iTotalPar = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* Score0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* Score1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* Score2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* TotalScore;
 
 	int32 iTotalScore = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ScoreDis0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ScoreDis1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* ScoreDis2;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UButton* GameOver;
 };

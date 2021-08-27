@@ -18,7 +18,7 @@ AGolfGameGameModeBase::AGolfGameGameModeBase()
 		DefaultPawnClass = Ball_BP.Class;
 	}
 
-	/* 게임 정보 초기화 */
+	/* 게임 정보 초기화 → 코드에서 설정하는게 아니라 데이터 테이블로 바꿀 수 있음 */
 	// 코스 갯수
 	NumOfAllHole = 3;
 	// 시작 위치
@@ -44,8 +44,6 @@ void AGolfGameGameModeBase::PostLogin(APlayerController* NewPlayer)
 	PS->SetInitDoublePar((AllScoreTable[0] * 2) - 1);
 	PS->SetCurrentGameMode(this);
 	PS->WholeDistacne = FVector::Dist(AllSpawnLocation[0], AllHoleCupLocation[0]) / 100 + 0.5;
-
-
 }
 
 void AGolfGameGameModeBase::InitSpawnLocation()

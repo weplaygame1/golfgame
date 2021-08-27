@@ -223,12 +223,12 @@ void UMyUserWidget::UpdateClubState()
 	FVector2D IconLocation;
 	IconLocation.Y = 0;
 
-	// 남은 거리가 더 높을경우 그냥 맨 끝에 위치
+	// 남은 거리가 더 높을경우 맨 끝에 위치
 	if (dis < RemainDis)
 	{
 		IconLocation.X = 790;
 	}
-	// 더 짧을 경우 해당 게이지 바 위에 위치
+	// 짧을 경우 해당 게이지 바 위에 위치
 	else
 	{
 		IconLocation.X = (RemainDis * 790 / dis);
