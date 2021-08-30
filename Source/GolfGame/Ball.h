@@ -4,11 +4,26 @@
 
 #include "GolfGame.h"
 
+#include "Engine/DataTable.h"
+
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FUpdateBallStateDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FDele_Multi_OneParam, bool);
+
+// Data Table Struct
+USTRUCT(BlueprintType)
+struct FClubDataTable : public FTableRowBase
+{
+	GENERATED_BODY()
+public:
+	FClubDataTable() {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DrivingDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Angle;
+};
 
 // 골프 클럽 ENUM CLASS
 UENUM()
@@ -92,6 +107,10 @@ public:
 	class USpringArmComponent* BallCameraSpringArm;
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* BallCamera;
+
+	/* Club Data Table */
+	UPROPERTY()
+	class UDataTable* ClubTable;
 
 	/* Club State */
 	EGolfClub ClubState;

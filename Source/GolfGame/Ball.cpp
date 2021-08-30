@@ -1,6 +1,4 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Ball.h"
 
 #include "Components/StaticMeshComponent.h"
@@ -56,6 +54,14 @@ ABall::ABall()
 	// Create Camera
 	BallCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BALLCAMERA"));
 	BallCamera->SetupAttachment(BallCameraSpringArm, USpringArmComponent::SocketName);
+
+	// Create Club Data Table
+	static ConstructorHelpers::FObjectFinder<UDataTable> DataTable(TEXT("/Game/DataTable/ClubDataTable.ClubDataTable"));
+	if (DataTable.Succeeded())
+	{
+		ClubTable = DataTable.Object;
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -615,6 +621,12 @@ void ABall::CheckBallLocation()
 
 void ABall::ChangeClub()
 {
+	// Use DataTable
+	FText txt = StaticEnum<EGolfClub>()->GetDisplayNameTextByIndex((int32)ClubState);
+	DrivingDis = ClubTable->FindRow<FClubDataTable>(FName(*txt.ToString()), TEXT(""))->DrivingDistance;
+	ArcValue = ClubTable->FindRow<FClubDataTable>(FName(*txt.ToString()), TEXT(""))->Angle;
+
+	/*
 	// ArcValue : 0 ~ 1 , 값이 높을수록 공의 각도 낮아짐
 	switch (ClubState)
 	{
@@ -641,6 +653,7 @@ void ABall::ChangeClub()
 	default:
 		break;
 	}
+	*/
 	SetPredictLocation();
 	UpdateClubStateOnWidget.Broadcast();
 }
