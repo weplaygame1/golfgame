@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SplineActor.h"
 
@@ -54,9 +54,7 @@ void ASplineActor::MakePointGrid()
 	float SphereRadius;
 	UKismetSystemLibrary::GetComponentBounds(spline, Origin, BoxExtent, SphereRadius);
 
-	tempOrigin = Origin;
-
-	// ¹üÀ§°¡ ºÎÁ·ÇØ¼­ +1 ´ë½Å *2·Î ¼öÁ¤
+	// ë²”ìœ„ê°€ ë¶€ì¡±í•´ì„œ +1 ëŒ€ì‹  *2ë¡œ ìˆ˜ì •
 	//NumX = UKismetMathLibrary::FCeil((BoxExtent.X / TriangleSize) + 1);
 	int32 NumX = UKismetMathLibrary::FCeil(BoxExtent.X / TriangleSize * 2);
 	int32 NumY = UKismetMathLibrary::FCeil((BoxExtent.Y / (TriangleSize / 2) * UKismetMathLibrary::DegTan(60)));
@@ -69,7 +67,7 @@ void ASplineActor::MakePointGrid()
 		{
 			FVector CurrentLoc;
 
-			//ºí·çÇÁ¸°Æ®¿Í ÀûÇôÀÖ´Â °ø½ÄÀÌ ´Ù¸§
+			//ë¸”ë£¨í”„ë¦°íŠ¸ì™€ ì í˜€ìˆëŠ” ê³µì‹ì´ ë‹¤ë¦„
 			//CurrentLoc.X = Origin.X + (TriangleSize / 2 * indexX) + (FMath::Abs(indexY + NumY) % 2 );
 			//CurrentLoc.Y = Origin.Y + ((TriangleSize / 2) * (UKismetMathLibrary::DegTan(60)) * indexY);
 
@@ -119,12 +117,12 @@ void ASplineActor::BuildMeshFromOutline()
 
 	for (int index = GridX + 1; index <= GridPoints.Num() - 2; index++)
 	{
-		// ÀûÈù °ø½Ä°ú ºí·çÇÁ¸°Æ®ÀÇ ½ÄÀÌ ¾à°£ ´Ù¸£Áö¸¸ »ï°¢Çü Å©±â°¡ Àû´çÈ÷ ÀÛÀ¸¸é Â÷ÀÌ¾øÀ½
+		// ì íŒ ê³µì‹ê³¼ ë¸”ë£¨í”„ë¦°íŠ¸ì˜ ì‹ì´ ì•½ê°„ ë‹¤ë¥´ì§€ë§Œ ì‚¼ê°í˜• í¬ê¸°ê°€ ì ë‹¹íˆ ì‘ìœ¼ë©´ ì°¨ì´ì—†ìŒ
 
-		// ¿ª»ï°¢Çü
-		// °ø½Ä
+		// ì—­ì‚¼ê°í˜•
+		// ê³µì‹
 		//int32 point1 = (((index / (GridX + 1) % 2)* (-1)) + 1) + index;
-		// ºí·çÇÁ¸°Æ®
+		// ë¸”ë£¨í”„ë¦°íŠ¸
 		int32 point1 = ((((index / (GridX + 1)) % 2) * (-1)) + 1) + index;
 
 		int32 point2 = ((index - (GridX + 1)) - (-1));
@@ -133,22 +131,22 @@ void ASplineActor::BuildMeshFromOutline()
 
 		if (GridPoints[point1] != -1 && GridPoints[point2] != -1 && GridPoints[point3] != -1 && point4 != 3)
 		{
-			// °ø½Ä
+			// ê³µì‹
 			//TrianglesL.Add((((index / (GridX + 1) % 2)* (-1)) + 1) + index);
-			// ºí·çÇÁ¸°Æ®
+			// ë¸”ë£¨í”„ë¦°íŠ¸
 			TrianglesL.Add(((((index / (GridX + 1)) % 2) * (-1)) + 1) + index);
 
 			TrianglesL.Add(((index - (GridX + 1)) - (-1)));
 			TrianglesL.Add((index - (GridX + 1)));
 		}
 
-		// »ï°¢Çü
+		// ì‚¼ê°í˜•
 		point1 = index;
 		point2 = index + 1;
 
-		// °ø½Ä
+		// ê³µì‹
 		//point3 = index - ((GridX + 1) - ((index / (GridX + 1))) % 2);
-		// ºí·çÇÁ¸°Æ®
+		// ë¸”ë£¨í”„ë¦°íŠ¸
 		point3 = index - ((GridX + 1) - ((index / (GridX + 1)) % 2));
 
 		point4 = GridPoints[point1] + GridPoints[point2] + GridPoints[point3];
@@ -158,9 +156,9 @@ void ASplineActor::BuildMeshFromOutline()
 			TrianglesL.Add(index);
 			TrianglesL.Add(index + 1);
 
-			// °ø½Ä
+			// ê³µì‹
 			//TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1))) % 2));
-			// ºí·çÇÁ¸°Æ®
+			// ë¸”ë£¨í”„ë¦°íŠ¸
 			TrianglesL.Add(index - ((GridX + 1) - ((index / (GridX + 1)) % 2)));
 		}
 	}
@@ -221,7 +219,7 @@ void ASplineActor::NormalizePointGridforUV()
 
 void ASplineActor::checktest()
 {
-	// °øÀÇ À§Ä¡
+	// ê³µì˜ ìœ„ì¹˜
 	FVector CurrentLoc = FVector(994, 1000, 0);
 
 	FVector CurrentEdgeLoc = spline->FindLocationClosestToWorldLocation(CurrentLoc, ESplineCoordinateSpace::World);
@@ -233,6 +231,5 @@ void ASplineActor::checktest()
 	float fdot = UKismetMathLibrary::Dot_VectorVector(FVtemp1, FVtemp3);
 
 	bool bin = fdot >= 0.0f;
-	// bin ÀÌ trueÀÌ¸é ½ºÇÃ¶óÀÎ ¾È¿¡ ÀÖ´Ù.
+	// bin ì´ trueì´ë©´ ìŠ¤í”Œë¼ì¸ ì•ˆì— ìˆë‹¤.
 }
-

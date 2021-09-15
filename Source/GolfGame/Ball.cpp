@@ -61,7 +61,6 @@ ABall::ABall()
 	{
 		ClubTable = DataTable.Object;
 	}
-
 }
 
 // Called when the game starts or when spawned
@@ -108,7 +107,6 @@ void ABall::BeginPlay()
 	UpdateGeoStateOnWidget.Broadcast();
 	ClubState = EGolfClub::DRIVER;
 	ChangeClub();
-
 }
 
 // Called every frame
@@ -203,18 +201,7 @@ void ABall::OnPressBallHit()
 			FVector startLoc = this->GetActorLocation();// 발사 지점
 			FVector targetLoc = this->GetActorLocation() + (BallCamera->GetForwardVector() * (DrivingDis * fPercent));// 타겟 지점.
 			FVector outVelocity = FVector::ZeroVector;// 결과 Velocity
-			if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))
-			{
-				/* 예상 포물선 DRAW LINE
-				FPredictProjectilePathParams predictParams(-1, startLoc, outVelocity, 5.0f);   // 20: tracing 보여질 프로젝타일 크기, 15: 시물레이션되는 Max 시간(초)
-				predictParams.DrawDebugTime = 5.0f;     //디버그 라인 보여지는 시간 (초)
-				predictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;  // DrawDebugTime 을 지정하면 EDrawDebugTrace::Type::ForDuration 필요.
-				predictParams.OverrideGravityZ = 0;
-
-				FPredictProjectilePathResult result;
-				UGameplayStatics::PredictProjectilePath(this, predictParams, result);
-				*/
-			}
+			if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, outVelocity, startLoc, targetLoc, GetWorld()->GetGravityZ(), ArcValue))	{}
 			BallMesh->AddImpulse(outVelocity, NAME_None, true);
 		}
 
@@ -626,34 +613,6 @@ void ABall::ChangeClub()
 	DrivingDis = ClubTable->FindRow<FClubDataTable>(FName(*txt.ToString()), TEXT(""))->DrivingDistance;
 	ArcValue = ClubTable->FindRow<FClubDataTable>(FName(*txt.ToString()), TEXT(""))->Angle;
 
-	/*
-	// ArcValue : 0 ~ 1 , 값이 높을수록 공의 각도 낮아짐
-	switch (ClubState)
-	{
-	case EGolfClub::DRIVER:
-		DrivingDis = 15000;
-		ArcValue = 0.6;
-		break;
-	case EGolfClub::WOOD:
-		DrivingDis = 13000;
-		ArcValue = 0.6;
-		break;
-	case EGolfClub::IRON:
-		DrivingDis = 10000;
-		ArcValue = 0.6;
-		break;
-	case EGolfClub::WEDGE:
-		DrivingDis = 7000;
-		ArcValue = 0.5;
-		break;
-	case EGolfClub::PUTTER:
-		DrivingDis = 2000;
-		ArcValue = 1;
-		break;
-	default:
-		break;
-	}
-	*/
 	SetPredictLocation();
 	UpdateClubStateOnWidget.Broadcast();
 }

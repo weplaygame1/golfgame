@@ -46,9 +46,6 @@ int32 ULineWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Allotted
 
 		UWidgetBlueprintLibrary::DrawLine(Context, BallLoc, PreLoc, FLinearColor::Yellow, false, 4);
 
-		// 시작과 도착을 잘게 잘라서 적절하게 그려주면 점선됨
-		//UWidgetBlueprintLibrary::DrawLine(Context, PreLoc, FlagLoc, FLinearColor::White, false, 4);
-
 		/* 점선 그리기 */
 		FVector F1(PreLoc.X, PreLoc.Y, 0);
 		FVector F2(FlagLoc.X, FlagLoc.Y, 0);

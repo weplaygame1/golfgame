@@ -13,7 +13,7 @@
 AHoleCup::AHoleCup()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	HoleCup = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HOLECUP"));
 	Concede = CreateDefaultSubobject<USphereComponent>(TEXT("CONCEDE"));
@@ -29,21 +29,10 @@ AHoleCup::AHoleCup()
 void AHoleCup::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 컨시드의 반지름을 다시 정해줘야함
-	
 }
 
 // Called every frame
 void AHoleCup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// Draw HoleCup
-	//DrawCircle(GetWorld(), GetActorLocation(), FVector(1, 0, 0), FVector(0, 1, 0), FColor::Red, 80, 100, false, -1, 0, 5);
-
-	// Draw Concede
-	//DrawCircle(GetWorld(), GetActorLocation(),FVector(1, 0, 0), FVector(0, 1, 0),FColor::Blue, 300, 100, false, -1, 0, 5);
-	
 }
-

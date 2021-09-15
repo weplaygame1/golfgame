@@ -11,7 +11,6 @@ UCLASS()
 class GOLFGAME_API ASplineActor : public AActor
 {
 	GENERATED_BODY()
-	
 public:	
 	// Sets default values for this actor's properties
 	ASplineActor();
@@ -21,7 +20,6 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void MakePointGrid();
@@ -56,8 +54,4 @@ public:
 	TArray<FVector2D> UV;
 	float Scale;
 	FVector OriginScaled;
-
-	UPROPERTY(EditAnywhere)
-		FVector tempOrigin;
-
 };

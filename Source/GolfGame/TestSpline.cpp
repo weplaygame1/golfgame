@@ -36,8 +36,6 @@ ATestSpline::ATestSpline()
 	bCreateSplineMesh = false;
 
 	inum = 100;
-
-	
 }
 
 void ATestSpline::OnConstruction(const FTransform& Transform)
@@ -58,8 +56,6 @@ void ATestSpline::BeginPlay()
 void ATestSpline::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	
 }
 
 void ATestSpline::build0()

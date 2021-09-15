@@ -13,7 +13,6 @@ UCLASS()
 class GOLFGAME_API AMyPlayerState : public APlayerState
 {
 	GENERATED_BODY()
-
 public:
 	AMyPlayerState();
 
@@ -24,7 +23,7 @@ public:
 	FUpdatePlayerStateDelegate GetMinimapOnWidget;
 public:
 	void SetCurrentGameMode(class AGolfGameGameModeBase* mode);
-
+	
 	void SetFormerLocation(FVector location);
 	void SetInitSocreTable(TArray<int32> score);
 	void SetInitDoublePar(int32 num);
@@ -45,25 +44,18 @@ public:
 
 	// 공을 치기전 위치
 	FVector FormerBallLocation;
-
 	// 플레이어의 점수 배열
 	TArray<int32> ScoreTable;
-
 	// 더블파 체크 변수
 	int32 iDoublePar;
-
 	// 현재 진행중인 홀 인덱스
 	int32 CurrentHoleIndex; 
-
 	// 남은 거리
 	float Distance;
-
 	// 처음부터의 총 거리
 	int WholeDistacne;
-
 	// 이번 홀에서 친 횟수
 	int32 NowHoleScore;
-
 	// 총 점수
 	int32 AllScore;
 };
